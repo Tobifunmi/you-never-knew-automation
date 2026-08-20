@@ -38,8 +38,9 @@ jobs:
           VIDEOS_JSON: ${{ secrets.VIDEOS_JSON }}
           TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
         run: |
-          if [ -n "$TOPICS_JSON" ]; then echo "$TOPICS_JSON" > topics.json; fi
-          if [ -n "$VIDEOS_JSON" ]; then echo "$VIDEOS_JSON" > videos.json; fi
+          mkdir -p database
+          if [ ! -f database/topics.json ] && [ -n "$TOPICS_JSON" ]; then echo "$TOPICS_JSON" > database/topics.json; fi
+          if [ ! -f database/videos.json ] && [ -n "$VIDEOS_JSON" ]; then echo "$VIDEOS_JSON" > database/videos.json; fi
           if [ -n "$TOKEN_JSON" ]; then echo "$TOKEN_JSON" > token.json; fi
 
       - name: Execute Autonomous Video Pipeline
@@ -57,6 +58,6 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add topics.json videos.json || true
+          git add database/topics.json database/videos.json || true
           git commit -m "chore: update topics and videos state [skip ci]" || true
           git push || true
