@@ -23,6 +23,12 @@ VIBE_MAP = {
     "default": "cinematic+ambient",
 }
 
+# A track shorter than this sounds choppy/obviously looped even with a
+# crossfade-free hard loop, so we never accept anything below this floor.
+# A track AT OR ABOVE this floor but shorter than the narration is fine —
+# mix_background_music() loops it to fill the remaining length.
+MIN_LOOPABLE_DURATION = 15.0
+
 
 def get_vibe_tags(topic: str) -> str:
     """Select appropriate music tags based on topic keywords."""
@@ -40,8 +46,19 @@ def fetch_and_download_background_track(
     client_id: str | None = None,
 ) -> str:
     """
-    Queries Jamendo API for a background track longer than min_duration, 
-    matching topic vibe tags, and downloads it locally.
+    Queries Jamendo API for a background track matching topic vibe tags and
+    downloads it locally.
+
+    Preference order:
+      1. A track >= min_duration (full narration length) — no looping needed.
+      2. If none exists, the LONGEST available track >= MIN_LOOPABLE_DURATION,
+         which mix_background_music() will loop to fill the narration length.
+      3. Same two tiers again on a broader "cinematic" tag fallback if the
+         topic-specific tags returned nothing usable.
+
+    Only raises MusicError if nothing at or above MIN_LOOPABLE_DURATION turns
+    up in either tag search — i.e. genuinely no usable track exists, not just
+    "nothing long enough to avoid looping."
     """
     client_id = client_id or os.getenv("JAMENDO_CLIENT_ID")
     if not client_id:
@@ -49,8 +66,7 @@ def fetch_and_download_background_track(
 
     tags = get_vibe_tags(topic)
     url = "https://api.jamendo.com/v3.0/tracks/"
-    
-    # Request high-popularity tracks that permit audio downloading
+
     params = {
         "client_id": client_id,
         "format": "json",
@@ -62,50 +78,54 @@ def fetch_and_download_background_track(
         "limit": 20,
     }
 
-    try:
-        response = requests.get(url, params=params, timeout=15)
-        response.raise_for_status()
-        data = response.json()
-    except Exception as e:
-        raise MusicError(f"Jamendo API query failed: {e}")
-
-    results = data.get("results", [])
-    
-    # Filter candidates by required duration (must be >= min_duration)
-    valid_tracks = [t for t in results if float(t.get("duration", 0)) >= min_duration]
-
-    if not valid_tracks:
-        # Fall back to a broader search without strict tag matching if none found
-        params["tags"] = "cinematic"
+    def _query(query_params: dict) -> list:
         try:
-            fallback_res = requests.get(url, params=params, timeout=15)
-            fallback_data = fallback_res.json()
-            valid_tracks = [
-                t for t in fallback_data.get("results", [])
-                if float(t.get("duration", 0)) >= min_duration
-            ]
+            response = requests.get(url, params=query_params, timeout=15)
+            response.raise_for_status()
+            return response.json().get("results", [])
         except Exception as e:
-            raise MusicError(f"Jamendo fallback query failed: {e}")
+            raise MusicError(f"Jamendo API query failed: {e}")
 
-    if not valid_tracks:
-        raise MusicError(f"No valid tracks found on Jamendo longer than {min_duration} seconds.")
+    def _select(results: list) -> dict | None:
+        # Tier 1: full-length, no loop needed.
+        full_length = [t for t in results if float(t.get("duration", 0)) >= min_duration]
+        if full_length:
+            return random.choice(full_length)
 
-    # Select a track randomly from candidate pool to ensure variety
-    selected_track = random.choice(valid_tracks)
+        # Tier 2: shorter but loopable — take the longest for the fewest loop seams.
+        loopable = [t for t in results if float(t.get("duration", 0)) >= MIN_LOOPABLE_DURATION]
+        if loopable:
+            return max(loopable, key=lambda t: float(t.get("duration", 0)))
+
+        return None
+
+    results = _query(params)
+    selected_track = _select(results)
+
+    if not selected_track:
+        # Broader fallback tag search
+        fallback_params = dict(params, tags="cinematic")
+        fallback_results = _query(fallback_params)
+        selected_track = _select(fallback_results)
+
+    if not selected_track:
+        raise MusicError(
+            f"No Jamendo track >= {MIN_LOOPABLE_DURATION}s found for tags "
+            f"'{tags}' or fallback 'cinematic' — nothing usable even with looping."
+        )
+
     download_url = selected_track.get("audiodownload") or selected_track.get("audio")
-
     if not download_url:
         raise MusicError(f"Selected track {selected_track.get('id')} lacks a valid audio stream URL.")
 
-    # Download track file
     try:
         audio_res = requests.get(download_url, timeout=30)
         audio_res.raise_for_status()
-        
+
         output_file = Path(output_path)
         output_file.parent.mkdir(parents=True, exist_ok=True)
         output_file.write_bytes(audio_res.content)
-        
+
         return str(output_file)
     except Exception as e:
         raise MusicError(f"Failed to download background music file: {e}")
@@ -120,16 +140,15 @@ def mix_background_music(
     fade_duration: float = 2.0,
 ) -> str:
     """
-    Uses FFmpeg to mix background music into the video stream.
-    Lowers music volume (default 12%), applies audio fade-out at the video end,
-    and cuts audio cleanly to match narration length.
+    Uses FFmpeg to mix background music into the video stream. The music
+    input is looped indefinitely (-stream_loop -1) so a track shorter than
+    the narration still fills the whole video; -shortest / duration=first
+    in the mix then cuts everything cleanly to narration length, and the
+    fade-out is timed off narration_duration so it always lands correctly
+    regardless of how many loop iterations happened.
     """
     fade_start = max(0.0, narration_duration - fade_duration)
-    
-    # FFmpeg complex filter:
-    # 1. Scale background music volume to music_volume (12%)
-    # 2. Apply audio fade-out at the end
-    # 3. Mix narration (audio stream 0) and music (audio stream 1) together
+
     filter_complex = (
         f"[1:a]volume={music_volume},afade=t=out:st={fade_start:.2f}:d={fade_duration}[bg];"
         f"[0:a][bg]amix=inputs=2:duration=first:dropout_transition=2[a]"
@@ -139,6 +158,7 @@ def mix_background_music(
         "ffmpeg",
         "-y",
         "-i", video_path,
+        "-stream_loop", "-1",
         "-i", music_path,
         "-filter_complex", filter_complex,
         "-map", "0:v",
