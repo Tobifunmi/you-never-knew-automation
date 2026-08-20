@@ -39,7 +39,7 @@ from google.genai import types
 from . import topic_engine
 
 
-MODEL_NAME = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+MODEL_NAME = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
 
 _client: Optional["genai.Client"] = None
 
