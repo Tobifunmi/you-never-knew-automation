@@ -62,6 +62,17 @@
       "narration_duration_seconds": 102.66,
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_178_taj_mahal/narration.mp3",
       "related_video_id": null
+    },
+    {
+      "fact_number": 179,
+      "topic": "The Dead Sea",
+      "state": "playlist_added",
+      "youtube_id": "8HqK0BNfKKQ",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 179: 5 Facts You Didn't Know About The Dead Sea",
+      "narration_duration_seconds": 95.66,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_179_the_dead_sea/narration.mp3",
+      "related_video_id": null
     }
   ],
   "next_fact_number": 173
