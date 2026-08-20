@@ -193,7 +193,7 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
         print(f"== Stage H/I: Uploading to YouTube (privacy={privacy_status}) ==")
 
         publisher = YouTubePublisher()
-        publisher.authenticate(interactive=True)
+        publisher.authenticate(interactive=not production)
 
         video_id = publisher.upload_video(
             file_path=final_path,
