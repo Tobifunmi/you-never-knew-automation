@@ -64,26 +64,27 @@ def _singularize(word: str) -> str:
 
 def _wordnet_category(topic: str) -> str | None:
     """
-    Free, offline fallback for when the keyword dict misses. Looks up the
-    first significant word in the topic and checks its WordNet hypernym
-    chain against known category concepts. No API calls, no cost.
+    Free, offline fallback for when the keyword dict misses. Checks the
+    first several WordNet noun senses of the topic's first word (not just
+    the single most-common sense, since that's sometimes the wrong one —
+    e.g. "volcano"'s top sense is an unrelated 'vent' meaning) and returns
+    the first one whose hypernym chain matches a known category. No API
+    calls, no cost. Rare ambiguous words (e.g. "chess") can still resolve
+    to an unrelated sense; this is an accepted limitation.
     """
     first_word_raw = topic.strip().split()[0].lower()
     first_word = _singularize(first_word_raw)
 
-    synsets = wn.synsets(first_word, pos=wn.NOUN)
-    if not synsets:
-        synsets = wn.synsets(first_word_raw, pos=wn.NOUN)
+    synsets = wn.synsets(first_word, pos=wn.NOUN) or wn.synsets(first_word_raw, pos=wn.NOUN)
     if not synsets:
         return None
 
-    synset = synsets[0]  # most common sense
-    hypernym_names = {s.name() for path in synset.hypernym_paths() for s in path}
-    hypernym_names.add(synset.name())
-
-    for concept, category in HYPERNYM_CATEGORY_MAP:
-        if concept in hypernym_names:
-            return category
+    for synset in synsets[:5]:
+        hypernym_names = {s.name() for path in synset.hypernym_paths() for s in path}
+        hypernym_names.add(synset.name())
+        for concept, category in HYPERNYM_CATEGORY_MAP:
+            if concept in hypernym_names:
+                return category
 
     return None
 
