@@ -49,18 +49,31 @@ HYPERNYM_CATEGORY_MAP = [
     ("machine.n.01", "Science & Technology Facts"),
 ]
 
+def _singularize(word: str) -> str:
+    """Lightweight English depluralizer — handles common suffix patterns
+    better than a blind rstrip('s')."""
+    word = word.lower()
+    if word.endswith("ies") and len(word) > 4:
+        return word[:-3] + "y"
+    if word.endswith(("oes", "xes", "ses", "ches", "shes")) and len(word) > 4:
+        return word[:-2]
+    if word.endswith("s") and not word.endswith("ss") and len(word) > 3:
+        return word[:-1]
+    return word
+
+
 def _wordnet_category(topic: str) -> str | None:
     """
     Free, offline fallback for when the keyword dict misses. Looks up the
     first significant word in the topic and checks its WordNet hypernym
     chain against known category concepts. No API calls, no cost.
     """
-    first_word = topic.strip().split()[0].lower().rstrip("s")  # naive singularize
+    first_word_raw = topic.strip().split()[0].lower()
+    first_word = _singularize(first_word_raw)
 
     synsets = wn.synsets(first_word, pos=wn.NOUN)
     if not synsets:
-        # try the original (unsingularized) word too, e.g. "Bees" vs "Bee"
-        synsets = wn.synsets(topic.strip().split()[0].lower(), pos=wn.NOUN)
+        synsets = wn.synsets(first_word_raw, pos=wn.NOUN)
     if not synsets:
         return None
 
