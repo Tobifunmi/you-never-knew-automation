@@ -9,6 +9,7 @@ from engines import topic_engine
 from engines import numbering
 from engines import gemini
 from engines import music
+from engines import notifications
 from engines.script_engine import parse_script, ScriptParseError
 from engines.elevenlabs import generate_narration, NarrationError
 from engines.captions import (
@@ -95,69 +96,91 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
     """
     config = load_config()
 
-    # --- Stage A/B: topic + fact number + script ingestion ---
-    print("== Stage A/B: Ingesting script and reserving topic ==")
-
-    if script_path:
-        print(f"Manual mode: Loading script from {script_path}")
-        raw_text = Path(script_path).read_text(encoding="utf-8")
-        script = parse_script(raw_text, fact_number=None)
-        topic = script["topic"]
-
-        if topic_engine.is_duplicate(topic):
-            raise SystemExit(f"ABORTED: topic '{topic}' is already completed or reserved.")
-    else:
-        print("Autonomous mode: Requesting unique topic and script from Gemini...")
-        topic = gemini.get_unique_topic()
-        script = gemini.generate_script(topic)
-
-    fact_number = numbering.get_next_fact_number()
-    script["fact_number"] = fact_number
-
-    # Attach fact numbers (1-5) to facts list for rendering/timeline consistency
-    for idx, fact_obj in enumerate(script["facts"], start=1):
-        fact_obj["fact_number"] = idx
-
-    topic_engine.reserve_topic(topic)
-    print(f"Fact {fact_number}: {topic} (topic reserved)")
-
-    work_dir = ROOT / "work" / f"Fact_{fact_number}_{slugify(topic)}"
-    work_dir.mkdir(parents=True, exist_ok=True)
+    # Tracked throughout so a failure email can say exactly where things
+    # broke. fact_number/topic/topic_reserved start unset since a failure
+    # can happen before any of them exist (e.g. Gemini itself failing in
+    # autonomous mode) — the except block below only releases a topic
+    # reservation that actually happened.
+    current_stage = "Stage A/B: Ingesting script and reserving topic"
+    fact_number = None
+    topic = None
+    topic_reserved = False
 
     try:
+        # --- Stage A/B: topic + fact number + script ingestion ---
+        print(f"== {current_stage} ==")
+
+        if script_path:
+            print(f"Manual mode: Loading script from {script_path}")
+            raw_text = Path(script_path).read_text(encoding="utf-8")
+            script = parse_script(raw_text, fact_number=None)
+            topic = script["topic"]
+
+            if topic_engine.is_duplicate(topic):
+                raise SystemExit(f"ABORTED: topic '{topic}' is already completed or reserved.")
+        else:
+            print("Autonomous mode: Requesting unique topic and script from Gemini...")
+            topic = gemini.get_unique_topic()
+            script = gemini.generate_script(topic)
+
+        fact_number = numbering.get_next_fact_number()
+        script["fact_number"] = fact_number
+
+        # Attach fact numbers (1-5) to facts list for rendering/timeline consistency
+        for idx, fact_obj in enumerate(script["facts"], start=1):
+            fact_obj["fact_number"] = idx
+
+        topic_engine.reserve_topic(topic)
+        topic_reserved = True
+        print(f"Fact {fact_number}: {topic} (topic reserved)")
+
+        work_dir = ROOT / "work" / f"Fact_{fact_number}_{slugify(topic)}"
+        work_dir.mkdir(parents=True, exist_ok=True)
+
         # --- Stage C: narration ---
-        print("== Stage C: Generating narration (ElevenLabs) ==")
+        current_stage = "Stage C: Generating narration (ElevenLabs)"
+        print(f"== {current_stage} ==")
         narration = generate_narration(script, str(work_dir / "narration.mp3"))
         print(f"Narration: {narration['duration_seconds']}s, {narration['character_count']} chars")
 
         # --- Word timestamps + timeline ---
-        print("== Transcribing narration for word timestamps (Whisper) ==")
+        current_stage = "Transcribing narration for word timestamps (Whisper)"
+        print(f"== {current_stage} ==")
         words = generate_word_timestamps(narration["path"])
         save_captions_json(words, str(work_dir / "captions.json"))
 
-        print("== Building segment timeline ==")
+        current_stage = "Building segment timeline"
+        print(f"== {current_stage} ==")
         timeline = build_segment_timeline(script, words)
 
         # --- Stage D: footage ---
-        print("== Stage D: Downloading footage (Pexels) ==")
+        current_stage = "Stage D: Downloading footage (Pixabay/Pexels)"
+        print(f"== {current_stage} ==")
         footage_result = download_footage_for_script(script, str(work_dir / "footage"))
         print(f"Footage: {footage_result['success_count']}/{footage_result['total_facts']} downloaded")
         if footage_result["failures"]:
-            raise SystemExit(f"ABORTED: footage failures: {footage_result['failures']}")
+            # Was `raise SystemExit(...)` — SystemExit isn't an Exception
+            # subclass, so it skipped the except block entirely: no topic
+            # release, no failure email. FootageError is already the
+            # established error type for this stage everywhere else.
+            raise FootageError(f"Footage failures: {footage_result['failures']}")
 
         # --- Stage E: caption file ---
-        print("== Stage E: Generating caption file (ASS) ==")
+        current_stage = "Stage E: Generating caption file (ASS)"
+        print(f"== {current_stage} ==")
         ass_path = generate_ass_captions(words, str(work_dir / "captions.ass"))
 
-# --- Stage F: render & background music ---
-        print("== Stage F: Rendering ==")
+        # --- Stage F: render & background music ---
+        current_stage = "Stage F: Rendering"
+        print(f"== {current_stage} ==")
         normalized = normalize_all_segments(timeline, str(work_dir / "footage"), str(work_dir / "normalized"))
         combined_path = concatenate_segments(
             normalized, narration["path"], str(work_dir / "combined_no_captions.mp4")
         )
 
         # Download background music based on topic and duration
-        print("== Fetching background music (Jamendo) ==")
+        current_stage = "Fetching background music (Jamendo)"
+        print(f"== {current_stage} ==")
         music_track_path = music.fetch_and_download_background_track(
             topic=topic,
             min_duration=narration["duration_seconds"],
@@ -165,7 +188,8 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
         )
 
         # Mix narration + music
-        print("== Mixing background music with narration ==")
+        current_stage = "Mixing background music with narration"
+        print(f"== {current_stage} ==")
         mixed_video_path = music.mix_background_music(
             video_path=combined_path,
             music_path=music_track_path,
@@ -174,11 +198,14 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
         )
 
         # Burn captions onto the mixed audio/video file
+        current_stage = "Burning in captions"
+        print(f"== {current_stage} ==")
         final_path = burn_in_captions(mixed_video_path, ass_path, str(work_dir / "final_output.mp4"))
         print(f"Rendered: {final_path}")
 
         # --- Stage G: metadata ---
-        print("== Stage G: Generating metadata ==")
+        current_stage = "Stage G: Generating metadata"
+        print(f"== {current_stage} ==")
         metadata = make_metadata(
             fact_number=fact_number,
             topic=topic,
@@ -188,9 +215,10 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
         print(f"Title: {metadata['title']}")
         print(f"Category: {metadata['category']}")
 
-        # --- Stage H/I: playlist + upload ---
+        # --- Stage H: upload ---
         privacy_status = "public" if production else "unlisted"
-        print(f"== Stage H/I: Uploading to YouTube (privacy={privacy_status}) ==")
+        current_stage = f"Stage H: Uploading to YouTube (privacy={privacy_status})"
+        print(f"== {current_stage} ==")
 
         publisher = YouTubePublisher()
         publisher.authenticate(interactive=not production)
@@ -205,36 +233,91 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
         )
         print(f"Uploaded: https://www.youtube.com/watch?v={video_id}")
 
-        playlist_id = publisher.find_or_create_playlist(
-            metadata["category"],
-            auto_create=config["youtube"].get("auto_create_playlists", True),
-        )
-        if playlist_id:
-            publisher.add_to_playlist(playlist_id, video_id)
-            print(f"Added to playlist: {metadata['category']}")
-
-        # --- Record + complete topic ---
+        # --- Record + complete topic — done IMMEDIATELY after upload,
+        # BEFORE playlist logic. This ordering is deliberate and load-
+        # bearing: it's the actual fix for the Fact 174 near-data-loss
+        # bug (playlist step failed on a real upload, and because the
+        # record hadn't been saved yet, the video existed live on
+        # YouTube with zero trace of it in the database). A previous
+        # version of this file had drifted back to playlist-before-record;
+        # this restores the documented, correct order.
+        current_stage = "Recording video state + completing topic"
+        print(f"== {current_stage} ==")
         numbering.record_video_state(
             fact_number=fact_number,
             topic=topic,
             state="published" if production else "uploaded",
             youtube_id=video_id,
-            playlist_id=playlist_id,
+            playlist_id=None,  # filled in below if the playlist step succeeds
             title=metadata["title"],
             narration_duration_seconds=narration["duration_seconds"],
             narration_path=narration["path"],
-            related_video_id=None,  # reserved for Stage J (Playwright), not yet automated
+            related_video_id=None,  # reserved for future Related Video work, not yet automated
         )
         topic_engine.complete_topic(topic)
+        print(f"Recorded Fact {fact_number} and completed topic (video is safe regardless of what happens next).")
+
+        # --- Stage I: playlist — isolated on purpose. A failure here
+        # (e.g. the same playlistNotFound eventual-consistency delay that
+        # caused Fact 174) is real and worth knowing about, so it still
+        # sends a failure email, but it must NEVER release the topic or
+        # otherwise touch the already-saved upload record above.
+        current_stage = "Stage I: Adding to playlist"
+        print(f"== {current_stage} ==")
+        try:
+            playlist_id = publisher.find_or_create_playlist(
+                metadata["category"],
+                auto_create=config["youtube"].get("auto_create_playlists", True),
+            )
+            if playlist_id:
+                publisher.add_to_playlist(playlist_id, video_id)
+                numbering.record_video_state(
+                    fact_number=fact_number,
+                    topic=topic,
+                    state="playlist_added",
+                    youtube_id=video_id,
+                    playlist_id=playlist_id,
+                    title=metadata["title"],
+                    narration_duration_seconds=narration["duration_seconds"],
+                    narration_path=narration["path"],
+                    related_video_id=None,
+                )
+                print(f"Added to playlist: {metadata['category']}")
+        except Exception as playlist_error:
+            notifications.send_failure_email(
+                stage="Stage I: Adding to playlist (non-fatal — video already uploaded and recorded)",
+                error=playlist_error,
+                fact_number=fact_number,
+                topic=topic,
+                production=production,
+            )
+            print(
+                f"WARNING: playlist step failed, but the video is already uploaded and "
+                f"recorded in the database, so this is NOT treated as a pipeline failure: {playlist_error}"
+            )
 
         print(f"== DONE: Fact {fact_number} complete ==")
         return video_id
 
-    except (NarrationError, FootageError, RenderError, ScriptParseError, gemini.GeminiError, music.MusicError) as e:
-        # Release the topic reservation so it can be retried later, since the
-        # pipeline failed before anything was actually published.
-        topic_engine.release_topic(topic)
-        print(f"PIPELINE FAILED at fact {fact_number}, topic released for retry: {e}")
+    except Exception as e:
+        # Broadened from a specific exception tuple to catch anything,
+        # including things like HttpError from the YouTube API that
+        # weren't in the original tuple — see the accompanying message
+        # for why that gap mattered. Only releases the topic if it was
+        # actually reserved (a failure before reserve_topic() has nothing
+        # to release).
+        notifications.send_failure_email(
+            stage=current_stage,
+            error=e,
+            fact_number=fact_number,
+            topic=topic,
+            production=production,
+        )
+        if topic_reserved:
+            topic_engine.release_topic(topic)
+            print(f"PIPELINE FAILED at fact {fact_number}, topic released for retry: {e}")
+        else:
+            print(f"PIPELINE FAILED before topic reservation: {e}")
         raise
 
 
