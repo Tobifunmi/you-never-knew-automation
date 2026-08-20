@@ -1,0 +1,24 @@
+# Secrets
+credentials.json
+token.json
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Generated media
+output/
+downloads/
+work/
+*.mp3
+*.wav
+*.mp4
+*.mov
+*.webm
+
+# OS
+.DS_Store
+Thumbs.db

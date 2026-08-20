@@ -1,0 +1,48 @@
+Script: 5 Facts You Didn't Know About Pangolins
+Hook:
+
+"Meet the world's only scaly mammal—an armored, ant-eating creature so unique it doesn't look like it belongs on this planet! Let's uncover 5 facts you didn't know about pangolins."
+
+Fact 1:
+
+Narration:
+"Pangolins are covered in tough overlapping scales made of keratin, the same material found in human fingernails and rhino horns."
+
+InVideo Prompt:
+"Show a close-up of a pangolin's scaly armor glistening in sunlight, captioned: 'Nature's Living Armor.'"
+
+Fact 2:
+
+Narration:
+"When threatened, a pangolin curls into a tight, impenetrable ball, protecting its soft underside from predators like lions and hyenas."
+
+InVideo Prompt:
+"Show a pangolin curling defensively into a ball as a predator circles nearby, captioned: 'The Unbreakable Ball.'"
+
+Fact 3:
+
+Narration:
+"Pangolins have no teeth at all. Instead, they use an extremely long, sticky tongue that can extend further than their entire body length to slurp up ants and termites."
+
+InVideo Prompt:
+"Show a pangolin's long sticky tongue reaching deep into a termite mound, captioned: 'A Tongue Longer Than Its Body.'"
+
+Fact 4:
+
+Narration:
+"A single pangolin can eat up to 20,000 ants and termites in one day, making it one of nature's most effective pest controllers."
+
+InVideo Prompt:
+"Show a pangolin digging into a termite mound in a dry savanna landscape, captioned: 'Nature's Pest Control.'"
+
+Fact 5:
+
+Narration:
+"Pangolins are the most trafficked mammal in the world, and conservationists are working hard to protect them from extinction."
+
+InVideo Prompt:
+"Show a pangolin walking through tall grass at dusk, captioned: 'A Species Worth Saving.'"
+
+Ending:
+
+"Pangolins may be mysterious and rarely seen, but their armor, appetite, and incredible tongue make them one of the animal kingdom's true oddities! Subscribe to You Never Knew for more amazing facts, and tell us in the comments below: Which pangolin fact surprised you the most?"

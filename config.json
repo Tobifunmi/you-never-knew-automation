@@ -1,0 +1,14 @@
+{
+  "channel_name": "You Never Knew",
+  "starting_fact_number": 172,
+  "title_template": "Fact {fact_number}: 5 Facts You Didn't Know About {topic}",
+  "youtube": {
+    "privacy_status": "unlisted",
+    "category_id": "27",
+    "default_playlist": "",
+    "auto_create_playlists": true
+  },
+  "description": {
+    "template": "{intro}\\n\\nIn this video, discover 5 fascinating facts about {topic} that will completely change the way you look at {topic_lower} forever!\\n\\nSubscribe to You Never Knew for more incredible facts, and share in the comments: Which {topic} fact amazed you the most?\\n\\n{hashtags}"
+  }
+}

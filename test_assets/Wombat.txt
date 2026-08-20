@@ -1,0 +1,48 @@
+Script: 5 Facts You Didn’t Know About Wombats
+Hook:
+
+“Imagine an animal that digs enormous underground tunnels, can run surprisingly fast, and has poop shaped like cubes! Meet the wombat—a strange Australian animal with some truly unbelievable secrets.”
+
+Fact 1:
+
+Narration:
+“Wombats are the only known animals that naturally produce cube-shaped poop. Scientists believe the unusual shape helps their droppings stay in place when they use them to mark territory.”
+
+InVideo Prompt:
+“Show a cute wombat walking through an Australian woodland, then transition to an educational close-up of small cube-shaped droppings on a rock, captioned: ‘The Cube-Poop Mystery.’”
+
+Fact 2:
+
+Narration:
+“Wombats are powerful diggers and can create extensive underground burrow systems. Their strong claws and compact bodies help them excavate shelters where they can escape heat and predators.”
+
+InVideo Prompt:
+“Show a wombat rapidly digging into dry Australian soil, transitioning into a cutaway view of an extensive underground burrow network, captioned: ‘Underground Architects.’”
+
+Fact 3:
+
+Narration:
+“A wombat’s rear end is surprisingly tough. Its pelvis and thickened skin form a powerful defensive shield, allowing it to protect itself from predators by retreating into a burrow.”
+
+InVideo Prompt:
+“Show a wombat entering a narrow burrow while a predator approaches outside, then highlight the wombat’s reinforced rear with a stylized anatomical illustration, captioned: ‘Built-In Armor.’”
+
+Fact 4:
+
+Narration:
+“Despite their stocky appearance, wombats can run at around 40 kilometers per hour for short bursts—fast enough to surprise almost anyone who sees one.”
+
+InVideo Prompt:
+“Show a wombat suddenly sprinting across an Australian grassland in dramatic slow motion, with speed lines and a subtle speed indicator, captioned: ‘Faster Than They Look!’”
+
+Fact 5:
+
+Narration:
+“Wombats have teeth that never stop growing. Constantly chewing tough grasses and other vegetation helps wear their teeth down and keeps them at a usable length.”
+
+InVideo Prompt:
+“Show a wombat chewing tough grass, followed by a clean educational animation illustrating continuously growing front teeth being naturally worn down, captioned: ‘Never-Ending Teeth.’”
+
+Ending:
+
+“Wombats may look like ordinary furry animals, but their cube-shaped poop, underground engineering, armored backs, and incredible teeth make them truly extraordinary! Subscribe to You Never Knew for more amazing facts, and tell us in the comments below: Which wombat fact surprised you the most?”
