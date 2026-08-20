@@ -51,6 +51,17 @@
       "title": "Fact 177: 5 Facts You Didn't Know About Skyscrapers",
       "narration_duration_seconds": 124.16,
       "related_video_id": null
+    },
+    {
+      "fact_number": 178,
+      "topic": "Taj Mahal",
+      "state": "published",
+      "youtube_id": "sic-XF_03_o",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 178: 5 Facts You Didn't Know About Taj Mahal",
+      "narration_duration_seconds": 102.66,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_178_taj_mahal/narration.mp3",
+      "related_video_id": null
     }
   ],
   "next_fact_number": 173
