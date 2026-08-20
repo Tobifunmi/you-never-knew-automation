@@ -2,8 +2,8 @@ name: Daily Autonomous Video Generation
 
 on:
   # Schedule is disabled for now. Uncomment when ready for daily auto-runs:
-  # schedule:
-  #   - cron: '0 12 * * *'
+    #schedule:
+  #- cron: '0 10 * * 1,4'
   
   # Manual trigger button in GitHub Actions UI
   workflow_dispatch:
