@@ -4,3 +4,4 @@ google-auth-oauthlib
 python-dotenv
 google-genai
 faster-whisper
+nltk

@@ -32,6 +32,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Download WordNet Corpus
+        run: |
+          python -c "import nltk; nltk.download('wordnet'); nltk.download('omw-1.4')"
+
       - name: Restore Persistent State Files
         env:
           TOPICS_JSON: ${{ secrets.TOPICS_JSON }}

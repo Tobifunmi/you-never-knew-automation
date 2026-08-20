@@ -1,6 +1,9 @@
 from __future__ import annotations
+from nltk.corpus import wordnet as wn
 
 import re
+import nltk
+
 
 CATEGORY_KEYWORDS = {
     "Nature Facts": [
@@ -27,21 +30,67 @@ CATEGORY_KEYWORDS = {
         "button", "paperclip", "soap", "sunglasses",
     ],
 }
-
 DEFAULT_CATEGORY = "Amazing Facts"
+
+# Maps broad WordNet hypernym concepts to your playlist categories.
+# Checked in order; first match wins.
+HYPERNYM_CATEGORY_MAP = [
+    ("celestial_body.n.01", "Space Facts"),
+    ("star.n.01", "Space Facts"),
+    ("planet.n.01", "Space Facts"),
+    ("animal.n.01", "Nature Facts"),
+    ("plant.n.02", "Nature Facts"),
+    ("geological_formation.n.01", "Nature Facts"),
+    ("natural_phenomenon.n.01", "Nature Facts"),
+    ("body_of_water.n.01", "Nature Facts"),
+    ("structure.n.01", "Architecture & Structures Facts"),
+    ("building.n.01", "Architecture & Structures Facts"),
+    ("instrumentality.n.03", "Everyday Objects Facts"),
+    ("machine.n.01", "Science & Technology Facts"),
+]
+
+def _wordnet_category(topic: str) -> str | None:
+    """
+    Free, offline fallback for when the keyword dict misses. Looks up the
+    first significant word in the topic and checks its WordNet hypernym
+    chain against known category concepts. No API calls, no cost.
+    """
+    first_word = topic.strip().split()[0].lower().rstrip("s")  # naive singularize
+
+    synsets = wn.synsets(first_word, pos=wn.NOUN)
+    if not synsets:
+        # try the original (unsingularized) word too, e.g. "Bees" vs "Bee"
+        synsets = wn.synsets(topic.strip().split()[0].lower(), pos=wn.NOUN)
+    if not synsets:
+        return None
+
+    synset = synsets[0]  # most common sense
+    hypernym_names = {s.name() for path in synset.hypernym_paths() for s in path}
+    hypernym_names.add(synset.name())
+
+    for concept, category in HYPERNYM_CATEGORY_MAP:
+        if concept in hypernym_names:
+            return category
+
+    return None
 
 
 def guess_category(topic: str) -> str:
     """
-    TEMPORARY stopgap keyword-based category guesser. Crude but functional;
-    should eventually be replaced by an AI classification call, per the
-    project's principle that categorization is a creative decision, not
-    a deterministic one. Also used by Stage H for playlist matching.
+    First tries a fast hand-maintained keyword match (cheap, no dependency
+    needed). Falls back to a free offline WordNet lookup for topics the
+    keyword list doesn't recognize, before finally giving up to the
+    default catch-all category. No AI calls anywhere in this function.
     """
     topic_lower = topic.lower()
     for category, keywords in CATEGORY_KEYWORDS.items():
         if any(kw in topic_lower for kw in keywords):
             return category
+
+    wordnet_result = _wordnet_category(topic)
+    if wordnet_result:
+        return wordnet_result
+
     return DEFAULT_CATEGORY
 
 
