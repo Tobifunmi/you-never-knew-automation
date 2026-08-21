@@ -181,18 +181,19 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
         # Download background music based on topic and duration
         current_stage = "Fetching background music (Jamendo)"
         print(f"== {current_stage} ==")
-        music_track_path = music.fetch_and_download_background_track(
+        music_result = music.fetch_and_download_background_track(
             topic=topic,
             min_duration=narration["duration_seconds"],
             output_path=str(work_dir / "background_music.mp3"),
         )
+        print(f"Music: {music_result['track_name']} ({music_result['track_id']})")
 
         # Mix narration + music
         current_stage = "Mixing background music with narration"
         print(f"== {current_stage} ==")
         mixed_video_path = music.mix_background_music(
             video_path=combined_path,
-            music_path=music_track_path,
+            music_path=music_result["path"],
             output_path=str(work_dir / "combined_with_music.mp4"),
             narration_duration=narration["duration_seconds"],
         )
@@ -253,6 +254,8 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
             narration_duration_seconds=narration["duration_seconds"],
             narration_path=narration["path"],
             related_video_id=None,  # reserved for future Related Video work, not yet automated
+            music_track_id=music_result["track_id"],
+            music_track_name=music_result["track_name"],
         )
         topic_engine.complete_topic(topic)
         print(f"Recorded Fact {fact_number} and completed topic (video is safe regardless of what happens next).")
@@ -281,6 +284,8 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
                     narration_duration_seconds=narration["duration_seconds"],
                     narration_path=narration["path"],
                     related_video_id=None,
+                    music_track_id=music_result["track_id"],
+                    music_track_name=music_result["track_name"],
                 )
                 print(f"Added to playlist: {metadata['category']}")
         except Exception as playlist_error:

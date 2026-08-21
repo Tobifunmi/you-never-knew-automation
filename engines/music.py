@@ -92,7 +92,7 @@ def fetch_and_download_background_track(
     min_duration: float,
     output_path: str,
     client_id: str | None = None,
-) -> str:
+) -> dict:
     """
     Queries Jamendo API for a background track matching topic vibe tags and
     downloads it locally.
@@ -137,7 +137,11 @@ def fetch_and_download_background_track(
 
     def _select(results: list) -> dict | None:
         blocklist = _load_blocklist()
+        before_count = len(results)
         results = [t for t in results if f"jamendo:{t.get('id')}" not in blocklist]
+        removed = before_count - len(results)
+        if removed:
+            print(f"music: blocklist removed {removed} candidate track(s) from consideration.")
 
         # Tier 1: full-length, no loop needed.
         full_length = [t for t in results if float(t.get("duration", 0)) >= min_duration]
@@ -178,7 +182,12 @@ def fetch_and_download_background_track(
         output_file.parent.mkdir(parents=True, exist_ok=True)
         output_file.write_bytes(audio_res.content)
 
-        return str(output_file)
+        return {
+            "path": str(output_file),
+            "track_id": f"jamendo:{selected_track.get('id')}",
+            "track_name": selected_track.get("name"),
+            "track_url": selected_track.get("shareurl"),
+        }
     except Exception as e:
         raise MusicError(f"Failed to download background music file: {e}")
 
