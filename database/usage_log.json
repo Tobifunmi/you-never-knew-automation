@@ -1,0 +1,37 @@
+{
+  "gemini": {
+    "count": 3,
+    "since": "2026-08-21",
+    "last_call": "2026-08-21 09:24 UTC"
+  },
+  "jamendo": {
+    "count": 1,
+    "since": "2026-08-21",
+    "last_call": "2026-08-21 09:27 UTC"
+  },
+  "youtube_upload": {
+    "count": 1,
+    "since": "2026-08-21",
+    "last_call": "2026-08-21 09:29 UTC"
+  },
+  "youtube_playlist_list": {
+    "count": 1,
+    "since": "2026-08-21",
+    "last_call": "2026-08-21 09:30 UTC"
+  },
+  "youtube_playlist_create": {
+    "count": 1,
+    "since": "2026-08-21",
+    "last_call": "2026-08-21 09:30 UTC"
+  },
+  "youtube_playlist_item_list": {
+    "count": 1,
+    "since": "2026-08-21",
+    "last_call": "2026-08-21 09:30 UTC"
+  },
+  "youtube_playlist_item_insert": {
+    "count": 1,
+    "since": "2026-08-21",
+    "last_call": "2026-08-21 09:30 UTC"
+  }
+}

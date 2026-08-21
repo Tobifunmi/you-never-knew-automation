@@ -84,6 +84,17 @@
       "narration_duration_seconds": 117.39,
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_180_the_statue_of_liberty/narration.mp3",
       "related_video_id": null
+    },
+    {
+      "fact_number": 181,
+      "topic": "Typewriters",
+      "state": "playlist_added",
+      "youtube_id": "rRAnMHpgBgc",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 181: 5 Facts You Didn't Know About Typewriters",
+      "narration_duration_seconds": 128.5,
+      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_181_typewriters\\narration.mp3",
+      "related_video_id": null
     }
   ],
   "next_fact_number": 173
