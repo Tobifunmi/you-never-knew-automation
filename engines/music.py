@@ -253,3 +253,5 @@ def mix_background_music(
         return output_path
     except Exception as e:
         raise MusicError(f"Error executing FFmpeg audio mix: {e}")
+
+#python blocklist_track.py 1095114 "reason here" - Use this command to add a track to the blocklist if it causes issues (e.g., YouTube Content ID claim).
