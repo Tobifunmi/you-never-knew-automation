@@ -6,6 +6,8 @@ import subprocess
 from pathlib import Path
 import requests
 
+from . import usage_tracker
+
 
 class MusicError(Exception):
     """Custom exception raised when background audio retrieval or mixing fails."""
@@ -79,6 +81,7 @@ def fetch_and_download_background_track(
     }
 
     def _query(query_params: dict) -> list:
+        usage_tracker.log_call("jamendo")
         try:
             response = requests.get(url, params=query_params, timeout=15)
             response.raise_for_status()

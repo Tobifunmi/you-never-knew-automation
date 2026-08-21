@@ -13,6 +13,8 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 
+from . import usage_tracker
+
 SCOPES = ["https://www.googleapis.com/auth/youtube"]
 
 YOUTUBE_API_SERVICE_NAME = "youtube"
@@ -114,6 +116,8 @@ class YouTubePublisher:
             media_body=media,
         )
 
+        usage_tracker.log_call("youtube_upload")  # videos.insert: ~1600 quota units
+
         response = None
         while response is None:
             _, response = request.next_chunk()
@@ -132,6 +136,7 @@ class YouTubePublisher:
         )
 
         while request is not None:
+            usage_tracker.log_call("youtube_playlist_list")  # playlists.list: 1 quota unit
             response = request.execute()
             playlists.extend(response.get("items", []))
             request = self.youtube.playlists().list_next(request, response)
@@ -160,6 +165,8 @@ class YouTubePublisher:
             },
         ).execute()
 
+        usage_tracker.log_call("youtube_playlist_create")  # playlists.insert: 50 quota units
+
         return response["id"]
 
     def playlist_contains_video(self, playlist_id: str, video_id: str) -> bool:
@@ -172,6 +179,8 @@ class YouTubePublisher:
             videoId=video_id,
             maxResults=1,
         ).execute()
+
+        usage_tracker.log_call("youtube_playlist_item_list")  # playlistItems.list: 1 quota unit
 
         return bool(response.get("items"))
 
@@ -197,6 +206,7 @@ class YouTubePublisher:
                         }
                     },
                 ).execute()
+                usage_tracker.log_call("youtube_playlist_item_insert")  # playlistItems.insert: 50 quota units
                 return
             except HttpError as e:
                 if "playlistNotFound" in str(e) and attempt < max_retries - 1:

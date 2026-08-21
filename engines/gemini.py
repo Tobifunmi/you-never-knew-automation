@@ -37,6 +37,7 @@ from google import genai
 from google.genai import types
 
 from . import topic_engine
+from . import usage_tracker
 
 
 MODEL_NAME = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
@@ -101,6 +102,7 @@ def _call_gemini(
     last_error = None
     for attempt in range(1, max_retries + 1):
         try:
+            usage_tracker.log_call("gemini")
             response = client.models.generate_content(
                 model=MODEL_NAME,
                 contents=prompt,

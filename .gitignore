@@ -22,3 +22,6 @@ work/
 # OS
 .DS_Store
 Thumbs.db
+
+usage_dashboard.html
+database/usage_log.json
