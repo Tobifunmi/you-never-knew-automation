@@ -106,6 +106,19 @@
       "narration_duration_seconds": 118.51,
       "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_182_salar_de_uyuni\\narration.mp3",
       "related_video_id": null
+    },
+    {
+      "fact_number": 183,
+      "topic": "Giant's Causeway",
+      "state": "playlist_added",
+      "youtube_id": "0PXHPz-I_ro",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 183: 5 Facts You Didn't Know About Giant's Causeway",
+      "narration_duration_seconds": 138.81,
+      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_183_giants_causeway\\narration.mp3",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095114",
+      "music_track_name": "Best Route to a Dream"
     }
   ],
   "next_fact_number": 173

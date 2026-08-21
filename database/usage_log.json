@@ -1,23 +1,23 @@
 {
   "gemini": {
-    "count": 5,
+    "count": 9,
     "since": "2026-08-21",
-    "last_call": "2026-08-21 10:48 UTC"
+    "last_call": "2026-08-21 21:37 UTC"
   },
   "jamendo": {
-    "count": 2,
+    "count": 5,
     "since": "2026-08-21",
-    "last_call": "2026-08-21 10:54 UTC"
+    "last_call": "2026-08-21 21:40 UTC"
   },
   "youtube_upload": {
-    "count": 2,
+    "count": 3,
     "since": "2026-08-21",
-    "last_call": "2026-08-21 10:57 UTC"
+    "last_call": "2026-08-21 21:42 UTC"
   },
   "youtube_playlist_list": {
-    "count": 2,
+    "count": 3,
     "since": "2026-08-21",
-    "last_call": "2026-08-21 10:59 UTC"
+    "last_call": "2026-08-21 21:43 UTC"
   },
   "youtube_playlist_create": {
     "count": 1,
@@ -25,13 +25,13 @@
     "last_call": "2026-08-21 09:30 UTC"
   },
   "youtube_playlist_item_list": {
-    "count": 2,
+    "count": 3,
     "since": "2026-08-21",
-    "last_call": "2026-08-21 10:59 UTC"
+    "last_call": "2026-08-21 21:43 UTC"
   },
   "youtube_playlist_item_insert": {
-    "count": 2,
+    "count": 3,
     "since": "2026-08-21",
-    "last_call": "2026-08-21 10:59 UTC"
+    "last_call": "2026-08-21 21:43 UTC"
   }
 }

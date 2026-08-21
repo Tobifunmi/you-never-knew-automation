@@ -131,9 +131,25 @@ def fetch_and_download_background_track(
         try:
             response = requests.get(url, params=query_params, timeout=15)
             response.raise_for_status()
-            return response.json().get("results", [])
+            data = response.json()
         except Exception as e:
             raise MusicError(f"Jamendo API query failed: {e}")
+
+        # Jamendo wraps every response in its own "headers" object reporting
+        # whether the call actually succeeded — a 200 HTTP status doesn't
+        # mean the query itself worked (quota exhausted, bad params, etc.
+        # all come back as HTTP 200 with an empty "results" list otherwise
+        # indistinguishable from "genuinely no matching tracks"). Surface
+        # this explicitly instead of silently falling through to a generic
+        # "no track found" error that hides the real cause.
+        api_status = data.get("headers", {})
+        if api_status.get("status") == "failed":
+            raise MusicError(
+                f"Jamendo API reported failure (code {api_status.get('code')}): "
+                f"{api_status.get('error_message', 'no error message provided')}"
+            )
+
+        return data.get("results", [])
 
     def _select(results: list) -> dict | None:
         blocklist = _load_blocklist()
