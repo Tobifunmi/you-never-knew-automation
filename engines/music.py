@@ -4,6 +4,7 @@ import os
 import random
 import subprocess
 from pathlib import Path
+import json
 import requests
 
 from . import usage_tracker
@@ -30,6 +31,51 @@ VIBE_MAP = {
 # A track AT OR ABOVE this floor but shorter than the narration is fine —
 # mix_background_music() loops it to fill the remaining length.
 MIN_LOOPABLE_DURATION = 15.0
+
+MUSIC_BLOCKLIST_PATH = Path("database/music_blocklist.json")
+
+
+def _load_blocklist() -> set:
+    """
+    Returns the set of namespaced track IDs (e.g. "jamendo:123456") that
+    have caused real problems before (e.g. a YouTube Content ID claim) and
+    must never be selected again. Missing/unreadable file just means an
+    empty blocklist — this should never crash a pipeline run.
+    """
+    if not MUSIC_BLOCKLIST_PATH.exists():
+        return set()
+    try:
+        data = json.loads(MUSIC_BLOCKLIST_PATH.read_text(encoding="utf-8"))
+        return set(data.get("blocked_track_ids", []))
+    except Exception as e:
+        print(f"music: failed to read blocklist ({e}), proceeding with an empty one.")
+        return set()
+
+
+def add_to_blocklist(track_id: str, reason: str = "") -> None:
+    """
+    Adds a track ID (namespaced, e.g. "jamendo:123456") to the persistent
+    blocklist so it's never selected again. Safe to call multiple times
+    with the same ID. Used by blocklist_track.py for manual additions
+    (e.g. after discovering a YouTube Content ID claim) and available for
+    the pipeline itself to call if a claim is ever detected automatically
+    in the future.
+    """
+    MUSIC_BLOCKLIST_PATH.parent.mkdir(parents=True, exist_ok=True)
+    if MUSIC_BLOCKLIST_PATH.exists():
+        try:
+            data = json.loads(MUSIC_BLOCKLIST_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            data = {"blocked_track_ids": [], "reasons": {}}
+    else:
+        data = {"blocked_track_ids": [], "reasons": {}}
+
+    if track_id not in data["blocked_track_ids"]:
+        data["blocked_track_ids"].append(track_id)
+    if reason:
+        data.setdefault("reasons", {})[track_id] = reason
+
+    MUSIC_BLOCKLIST_PATH.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
 def get_vibe_tags(topic: str) -> str:
@@ -90,6 +136,9 @@ def fetch_and_download_background_track(
             raise MusicError(f"Jamendo API query failed: {e}")
 
     def _select(results: list) -> dict | None:
+        blocklist = _load_blocklist()
+        results = [t for t in results if f"jamendo:{t.get('id')}" not in blocklist]
+
         # Tier 1: full-length, no loop needed.
         full_length = [t for t in results if float(t.get("duration", 0)) >= min_duration]
         if full_length:
