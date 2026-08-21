@@ -73,6 +73,17 @@
       "narration_duration_seconds": 95.66,
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_179_the_dead_sea/narration.mp3",
       "related_video_id": null
+    },
+    {
+      "fact_number": 180,
+      "topic": "The Statue of Liberty",
+      "state": "playlist_added",
+      "youtube_id": "XstlKDZSbi4",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 180: 5 Facts You Didn't Know About The Statue of Liberty",
+      "narration_duration_seconds": 117.39,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_180_the_statue_of_liberty/narration.mp3",
+      "related_video_id": null
     }
   ],
   "next_fact_number": 173
