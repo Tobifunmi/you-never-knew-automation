@@ -10,6 +10,8 @@ This started as a manual-input starter project (see "Original plan" below)
 but has since grown well past that — most stages listed there are done.
 This README reflects the real current state, not the original roadmap.
 
+Monitor Credit Usage Here - https://you-never-knew.netlify.app/
+
 ## Current status at a glance
 
 | Stage | Status |
