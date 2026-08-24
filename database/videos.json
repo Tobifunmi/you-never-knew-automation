@@ -119,6 +119,19 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095114",
       "music_track_name": "Best Route to a Dream"
+    },
+    {
+      "fact_number": 184,
+      "topic": "Submarines",
+      "state": "playlist_added",
+      "youtube_id": "HkMftd9AY3Y",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 184: 5 Facts You Didn't Know About Submarines",
+      "narration_duration_seconds": 128.91,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_184_submarines/narration.mp3",
+      "related_video_id": null,
+      "music_track_id": "jamendo:843407",
+      "music_track_name": "the end of the innocence"
     }
   ],
   "next_fact_number": 173
