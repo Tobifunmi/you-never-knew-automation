@@ -147,6 +147,21 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1073214",
       "music_track_name": "Dj Rostej - Forgotten Melody"
+    },
+    {
+      "fact_number": 186,
+      "topic": "Machu Picchu",
+      "state": "playlist_added",
+      "youtube_id": "5G_1rl0l3CY",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 186: 5 Facts You Didn't Know About Machu Picchu",
+      "category": "Amazing Facts",
+      "published_at": "2026-08-25T23:23:01.697008+00:00",
+      "narration_duration_seconds": 121.53,
+      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_186_machu_picchu\\narration.mp3",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1073219",
+      "music_track_name": "Dj Rostej - Secret Sorrow"
     }
   ],
   "next_fact_number": 173

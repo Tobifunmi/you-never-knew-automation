@@ -1,26 +1,26 @@
 {
   "gemini": {
-    "count": 14,
+    "count": 16,
     "since": "2026-08-21",
-    "last_call": "2026-08-25 21:57 UTC",
+    "last_call": "2026-08-25 23:13 UTC",
     "videos": []
   },
   "jamendo": {
-    "count": 7,
+    "count": 8,
     "since": "2026-08-21",
-    "last_call": "2026-08-25 22:00 UTC",
+    "last_call": "2026-08-25 23:17 UTC",
     "videos": []
   },
   "youtube_upload": {
-    "count": 5,
+    "count": 6,
     "since": "2026-08-21",
-    "last_call": "2026-08-25 22:02 UTC",
+    "last_call": "2026-08-25 23:20 UTC",
     "videos": []
   },
   "youtube_playlist_list": {
-    "count": 5,
+    "count": 6,
     "since": "2026-08-21",
-    "last_call": "2026-08-25 22:03 UTC",
+    "last_call": "2026-08-25 23:23 UTC",
     "videos": []
   },
   "youtube_playlist_create": {
@@ -29,39 +29,42 @@
     "last_call": "2026-08-21 09:30 UTC"
   },
   "youtube_playlist_item_list": {
-    "count": 5,
+    "count": 6,
     "since": "2026-08-21",
-    "last_call": "2026-08-25 22:03 UTC",
+    "last_call": "2026-08-25 23:23 UTC",
     "videos": []
   },
   "youtube_playlist_item_insert": {
-    "count": 5,
+    "count": 6,
     "since": "2026-08-21",
-    "last_call": "2026-08-25 22:03 UTC",
+    "last_call": "2026-08-25 23:23 UTC",
     "videos": []
   },
   "elevenlabs": {
-    "count": 1,
+    "count": 2,
     "since": "2026-08-25",
     "videos": [
-      185
+      185,
+      186
     ],
-    "last_call": "2026-08-25 21:58 UTC"
+    "last_call": "2026-08-25 23:14 UTC"
   },
   "pixabay": {
+    "count": 17,
+    "since": "2026-08-25",
+    "videos": [
+      185,
+      186
+    ],
+    "last_call": "2026-08-25 23:15 UTC"
+  },
+  "pexels": {
     "count": 9,
     "since": "2026-08-25",
     "videos": [
-      185
+      185,
+      186
     ],
-    "last_call": "2026-08-25 21:58 UTC"
-  },
-  "pexels": {
-    "count": 4,
-    "since": "2026-08-25",
-    "videos": [
-      185
-    ],
-    "last_call": "2026-08-25 21:58 UTC"
+    "last_call": "2026-08-25 23:15 UTC"
   }
 }
