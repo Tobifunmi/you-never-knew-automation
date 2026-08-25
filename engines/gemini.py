@@ -147,21 +147,23 @@ Return ONLY the topic name itself. No numbering, no quotation marks, no
 markdown, no explanation, no extra commentary."""
 
 
-def _build_topic_prompt(exclude_topics: List[str]) -> str:
+def _build_topic_prompt(exclude_topics: List[str], performance_context: str = "") -> str:
     exclusion_text = "\n".join(f"- {t}" for t in exclude_topics) if exclude_topics else "(none yet)"
+    context_block = f"\n{performance_context}\n" if performance_context else ""
     return (
         "Previously used or reserved topics on this channel (do NOT repeat "
         "these, and avoid trivial rewordings or narrow variations of them):\n\n"
-        f"{exclusion_text}\n\n"
+        f"{exclusion_text}\n"
+        f"{context_block}\n"
         "Propose one new topic for a \"5 Facts You Didn't Know About [Topic]\" "
         "video. Respond with ONLY the topic name, e.g.: Bioluminescent Jellyfish"
     )
 
 
-def generate_candidate_topic(exclude_topics: List[str]) -> str:
+def generate_candidate_topic(exclude_topics: List[str], performance_context: str = "") -> str:
     """Ask Gemini for a single candidate topic. Does NOT check uniqueness itself."""
     raw = _call_gemini(
-        _build_topic_prompt(exclude_topics),
+        _build_topic_prompt(exclude_topics, performance_context),
         system_instruction=TOPIC_SYSTEM_INSTRUCTION,
         json_mode=False,
     )
@@ -173,13 +175,18 @@ def generate_candidate_topic(exclude_topics: List[str]) -> str:
     return candidate.strip()
 
 
-def get_unique_topic(max_attempts: int = 5) -> str:
+def get_unique_topic(max_attempts: int = 5, performance_context: str = "") -> str:
     """
     Two-layer topic protection:
       Layer 1 (prompt-level): Gemini is shown the exclusion list and told
         not to propose those topics or trivial variations of them.
       Layer 2 (Python-level): every candidate is independently verified
         with topic_engine.is_duplicate(), which is the final authority.
+
+    performance_context, when given (see engines/analytics.py
+    build_performance_context()), is appended to the prompt as a soft
+    nudge toward categories that have retained viewers well recently —
+    it never overrides the exclusion/variety rules above.
 
     Retries with a growing exclusion list if Gemini proposes a duplicate.
     Does NOT reserve the topic — call topic_engine.reserve_topic() after
@@ -188,7 +195,7 @@ def get_unique_topic(max_attempts: int = 5) -> str:
     exclude = topic_engine.get_all_used_topics()
 
     for attempt in range(1, max_attempts + 1):
-        candidate = generate_candidate_topic(exclude)
+        candidate = generate_candidate_topic(exclude, performance_context)
         if not candidate:
             continue
         if topic_engine.is_duplicate(candidate):

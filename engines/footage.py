@@ -4,6 +4,8 @@ import requests
 from pathlib import Path
 from dotenv import load_dotenv
 
+from . import usage_tracker
+
 load_dotenv()
 
 PEXELS_API_KEY = os.getenv("PEXELS_API_KEY")
@@ -94,7 +96,7 @@ def _pick_best_pexels_file(video_files: list) -> dict | None:
     return min(video_files, key=score)
 
 
-def search_pexels(query: str, per_page: int = 5) -> list:
+def search_pexels(query: str, per_page: int = 5, fact_number: int | None = None) -> list:
     if not PEXELS_API_KEY:
         return []
 
@@ -102,14 +104,17 @@ def search_pexels(query: str, per_page: int = 5) -> list:
     params = {"query": query, "orientation": "portrait", "per_page": per_page}
 
     response = requests.get(PEXELS_SEARCH_URL, headers=headers, params=params, timeout=30)
+    usage_tracker.log_call("pexels", fact_number=fact_number)
     if response.status_code != 200:
         raise FootageError(f"Pexels API error {response.status_code}: {response.text[:300]}")
 
     return response.json().get("videos", [])
 
 
-def _download_from_pexels(query: str, exclude_ids: set, out_path: Path, relevance_terms: set = None) -> dict | None:
-    videos = search_pexels(query)
+def _download_from_pexels(
+    query: str, exclude_ids: set, out_path: Path, relevance_terms: set = None, fact_number: int | None = None
+) -> dict | None:
+    videos = search_pexels(query, fact_number=fact_number)
 
     for video in videos:
         namespaced_id = f"pexels:{video.get('id')}"
@@ -150,7 +155,7 @@ def _is_likely_ai_generated(hit: dict) -> bool:
     return any(marker in tags for marker in AI_TAG_MARKERS)
 
 
-def search_pixabay(query: str, per_page: int = 5) -> list:
+def search_pixabay(query: str, per_page: int = 5, fact_number: int | None = None) -> list:
     if not PIXABAY_API_KEY:
         return []
 
@@ -162,6 +167,7 @@ def search_pixabay(query: str, per_page: int = 5) -> list:
     }
 
     response = requests.get(PIXABAY_SEARCH_URL, params=params, timeout=30)
+    usage_tracker.log_call("pixabay", fact_number=fact_number)
     if response.status_code != 200:
         raise FootageError(f"Pixabay API error {response.status_code}: {response.text[:300]}")
 
@@ -182,8 +188,10 @@ def _pick_best_pixabay_rendition(hit: dict) -> dict | None:
     return None
 
 
-def _download_from_pixabay(query: str, exclude_ids: set, out_path: Path, relevance_terms: set = None) -> dict | None:
-    hits = search_pixabay(query)
+def _download_from_pixabay(
+    query: str, exclude_ids: set, out_path: Path, relevance_terms: set = None, fact_number: int | None = None
+) -> dict | None:
+    hits = search_pixabay(query, fact_number=fact_number)
 
     for hit in hits:
         namespaced_id = f"pixabay:{hit.get('id')}"
@@ -224,6 +232,7 @@ def download_footage_for_prompt(
     output_path: str,
     exclude_ids: set = None,
     topic_fallback_query: str = None,
+    video_id: int | None = None,
 ) -> dict:
     """
     Cascade download strategy with clean keywords and layered fallbacks:
@@ -232,6 +241,10 @@ def download_footage_for_prompt(
       3. Pixabay with broad topic fallback query (no strict relevance check)
       4. Pexels with broad topic fallback query (no strict relevance check)
       5. Generic fallback ("nature landscape") to guarantee run completion
+
+    video_id (the pipeline's fact_number for the WHOLE video, not the
+    within-video fact index) is passed through to usage_tracker so
+    ElevenLabs/Pexels/Pixabay calls can be correlated back to a video.
     """
     exclude_ids = exclude_ids or set()
     query = extract_search_query(visual_prompt)
@@ -241,31 +254,39 @@ def download_footage_for_prompt(
     relevance_terms = _relevance_terms(topic_fallback_query) if topic_fallback_query else None
 
     # Step 1: Specific query on Pixabay
-    result = _download_from_pixabay(query, exclude_ids, output_path, relevance_terms)
+    result = _download_from_pixabay(query, exclude_ids, output_path, relevance_terms, fact_number=video_id)
     if result:
         return result
 
     # Step 2: Specific query on Pexels
-    result = _download_from_pexels(query, exclude_ids, output_path, relevance_terms)
+    result = _download_from_pexels(query, exclude_ids, output_path, relevance_terms, fact_number=video_id)
     if result:
         return result
 
     # Step 3 & 4: Fallback to topic query (dropping strict relevance check)
     if topic_fallback_query:
-        result = _download_from_pixabay(topic_fallback_query, exclude_ids, output_path, relevance_terms=None)
+        result = _download_from_pixabay(
+            topic_fallback_query, exclude_ids, output_path, relevance_terms=None, fact_number=video_id
+        )
         if result:
             return result
 
-        result = _download_from_pexels(topic_fallback_query, exclude_ids, output_path, relevance_terms=None)
+        result = _download_from_pexels(
+            topic_fallback_query, exclude_ids, output_path, relevance_terms=None, fact_number=video_id
+        )
         if result:
             return result
 
     # Step 5: Absolute fallback to generic scenery
     for generic_query in ("nature landscape", "scenery"):
-        result = _download_from_pexels(generic_query, exclude_ids, output_path, relevance_terms=None)
+        result = _download_from_pexels(
+            generic_query, exclude_ids, output_path, relevance_terms=None, fact_number=video_id
+        )
         if result:
             return result
-        result = _download_from_pixabay(generic_query, exclude_ids, output_path, relevance_terms=None)
+        result = _download_from_pixabay(
+            generic_query, exclude_ids, output_path, relevance_terms=None, fact_number=video_id
+        )
         if result:
             return result
 
@@ -285,6 +306,7 @@ def download_footage_for_script(script: dict, output_dir: str, max_retries: int 
     used_video_ids = set()
 
     topic_fallback_query = extract_topic_query(script["topic"])
+    video_id = script.get("fact_number")  # the whole-video identifier, for usage tracking
 
     for fact in script["facts"]:
         fact_num = fact["number"]
@@ -299,6 +321,7 @@ def download_footage_for_script(script: dict, output_dir: str, max_retries: int 
                     str(out_path),
                     exclude_ids=used_video_ids,
                     topic_fallback_query=topic_fallback_query,
+                    video_id=video_id,
                 )
                 result["fact_number"] = fact_num
                 results.append(result)

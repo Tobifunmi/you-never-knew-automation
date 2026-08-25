@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 
 from engines import topic_engine
@@ -10,6 +11,7 @@ from engines import numbering
 from engines import gemini
 from engines import music
 from engines import notifications
+from engines import analytics
 from engines.script_engine import parse_script, ScriptParseError
 from engines.elevenlabs import generate_narration, NarrationError
 from engines.captions import (
@@ -107,7 +109,24 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
     topic_reserved = False
 
     try:
+        # --- Analytics: pull 48h+ performance for any video that's
+        # crossed that mark and doesn't have it yet, BEFORE topic
+        # selection, so the topic prompt can lean on it. Authenticating
+        # the publisher this early (rather than at Stage H, as before)
+        # is deliberate — analytics needs the same OAuth session, and
+        # reusing one instance avoids a second interactive prompt later.
+        # Never fatal: analytics.update_performance_log() swallows its
+        # own errors, so a broken/missing yt-analytics scope degrades to
+        # "no context this run", not a pipeline failure.
+        current_stage = "Stage A0: Updating 48h+ video performance log"
+        print(f"== {current_stage} ==")
+        publisher = YouTubePublisher()
+        publisher.authenticate(interactive=not production)
+        analytics.update_performance_log(publisher)
+        performance_context = analytics.build_performance_context()
+
         # --- Stage A/B: topic + fact number + script ingestion ---
+        current_stage = "Stage A/B: Ingesting script and reserving topic"
         print(f"== {current_stage} ==")
 
         if script_path:
@@ -120,7 +139,7 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
                 raise SystemExit(f"ABORTED: topic '{topic}' is already completed or reserved.")
         else:
             print("Autonomous mode: Requesting unique topic and script from Gemini...")
-            topic = gemini.get_unique_topic()
+            topic = gemini.get_unique_topic(performance_context=performance_context)
             script = gemini.generate_script(topic)
 
         fact_number = numbering.get_next_fact_number()
@@ -221,8 +240,9 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
         current_stage = f"Stage H: Uploading to YouTube (privacy={privacy_status})"
         print(f"== {current_stage} ==")
 
-        publisher = YouTubePublisher()
-        publisher.authenticate(interactive=not production)
+        # `publisher` was already created and authenticated at the top of
+        # this run (Stage A0, for analytics) — reused here rather than
+        # opening a second OAuth session.
 
         video_id = publisher.upload_video(
             file_path=final_path,
@@ -232,6 +252,7 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
             category_id=config["youtube"].get("category_id", "27"),
             privacy_status=privacy_status,
         )
+        published_at = datetime.now(timezone.utc).isoformat()
         print(f"Uploaded: https://www.youtube.com/watch?v={video_id}")
 
         # --- Record + complete topic — done IMMEDIATELY after upload,
@@ -251,6 +272,8 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
             youtube_id=video_id,
             playlist_id=None,  # filled in below if the playlist step succeeds
             title=metadata["title"],
+            category=metadata["category"],
+            published_at=published_at,
             narration_duration_seconds=narration["duration_seconds"],
             narration_path=narration["path"],
             related_video_id=None,  # reserved for future Related Video work, not yet automated
@@ -281,6 +304,8 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
                     youtube_id=video_id,
                     playlist_id=playlist_id,
                     title=metadata["title"],
+                    category=metadata["category"],
+                    published_at=published_at,
                     narration_duration_seconds=narration["duration_seconds"],
                     narration_path=narration["path"],
                     related_video_id=None,

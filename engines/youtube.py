@@ -15,7 +15,10 @@ from googleapiclient.http import MediaFileUpload
 
 from . import usage_tracker
 
-SCOPES = ["https://www.googleapis.com/auth/youtube"]
+SCOPES = [
+    "https://www.googleapis.com/auth/youtube",
+    "https://www.googleapis.com/auth/yt-analytics.readonly",
+]
 
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
@@ -30,8 +33,17 @@ class YouTubePublisher:
         self.credentials_path = Path(credentials_path)
         self.token_path = Path(token_path)
         self.youtube = None
+        self.credentials: Optional[Credentials] = None  # exposed so engines/analytics.py can reuse this OAuth session
 
     def authenticate(self, interactive: bool = True):
+        """
+        NOTE: SCOPES now includes yt-analytics.readonly (added for
+        engines/analytics.py's 48h performance tracking) on top of the
+        original upload scope. A token.json/YOUTUBE_TOKEN_JSON minted
+        before that addition only has the old scope and will need ONE
+        fresh interactive re-auth (`python main.py auth`) to pick up the
+        new one — Google doesn't silently widen an existing token's scope.
+        """
         creds: Optional[Credentials] = None
 
         # GitHub Actions can provide the already-authorized token as JSON.
@@ -77,6 +89,7 @@ class YouTubePublisher:
             YOUTUBE_API_VERSION,
             credentials=creds,
         )
+        self.credentials = creds
         return self.youtube
 
     def upload_video(

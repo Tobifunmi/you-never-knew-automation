@@ -5,6 +5,8 @@ import requests
 from pathlib import Path
 from dotenv import load_dotenv
 
+from . import usage_tracker
+
 load_dotenv()
 
 API_KEY = os.getenv("ELEVENLABS_API_KEY")
@@ -53,6 +55,11 @@ def generate_narration(script: dict, output_path: str) -> dict:
     }
 
     response = requests.post(url, headers=headers, json=payload, timeout=120)
+
+    # Logged regardless of outcome below (a failed call still spends the
+    # request against ElevenLabs' side); fact_number ties this call to the
+    # video it was for so the dashboard can show calls-per-video.
+    usage_tracker.log_call("elevenlabs", fact_number=script.get("fact_number"))
 
     if response.status_code != 200:
         raise NarrationError(

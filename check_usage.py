@@ -42,6 +42,7 @@ generate the counts itself.
 
 import json
 import os
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -56,6 +57,30 @@ except ImportError:
 USAGE_LOG_PATH = Path("database/usage_log.json")
 
 
+def _self_tracked_note(service_key: str) -> str | None:
+    """
+    For services with a LIVE quota check (ElevenLabs, Pexels, Pixabay),
+    this adds the self-tracked call/video correlation as a supplementary
+    note — e.g. "48 calls across 12 videos (~4.0/video)" — so a video
+    that burned way more credits than normal is easy to spot even though
+    the live % alone can't tell you that.
+    """
+    if not USAGE_LOG_PATH.exists():
+        return None
+    try:
+        log = json.loads(USAGE_LOG_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    entry = log.get(service_key)
+    if not entry or not entry.get("count"):
+        return None
+    count = entry["count"]
+    video_count = len(entry.get("videos", []))
+    if video_count:
+        return f"{count} calls across {video_count} video(s) (~{count / video_count:.1f}/video)"
+    return f"{count} calls logged (no video linkage yet)"
+
+
 def _fmt_unix(ts) -> str:
     if not ts:
         return "unknown"
@@ -64,8 +89,9 @@ def _fmt_unix(ts) -> str:
 
 def check_elevenlabs() -> dict:
     api_key = os.environ.get("ELEVENLABS_API_KEY")
+    dashboard_url = "https://elevenlabs.io/app/usage"
     if not api_key:
-        return {"service": "ElevenLabs", "status": "no API key set", "live": False}
+        return {"service": "ElevenLabs", "status": "no API key set", "live": False, "dashboard_url": dashboard_url}
 
     try:
         resp = requests.get(
@@ -86,15 +112,18 @@ def check_elevenlabs() -> dict:
             "pct": round(pct, 1),
             "resets": _fmt_unix(data.get("next_character_count_reset_unix")),
             "tier": data.get("tier"),
+            "note": _self_tracked_note("elevenlabs"),
+            "dashboard_url": dashboard_url,
         }
     except Exception as e:
-        return {"service": "ElevenLabs", "status": f"error: {e}", "live": False}
+        return {"service": "ElevenLabs", "status": f"error: {e}", "live": False, "dashboard_url": dashboard_url}
 
 
 def check_pexels() -> dict:
     api_key = os.environ.get("PEXELS_API_KEY")
+    dashboard_url = "https://www.pexels.com/api/"
     if not api_key:
-        return {"service": "Pexels", "status": "no API key set", "live": False}
+        return {"service": "Pexels", "status": "no API key set", "live": False, "dashboard_url": dashboard_url}
 
     try:
         resp = requests.get(
@@ -108,7 +137,12 @@ def check_pexels() -> dict:
         remaining = resp.headers.get("X-Ratelimit-Remaining")
         reset = resp.headers.get("X-Ratelimit-Reset")
         if limit is None or remaining is None:
-            return {"service": "Pexels", "status": "call succeeded but no rate-limit headers returned", "live": False}
+            return {
+                "service": "Pexels",
+                "status": "call succeeded but no rate-limit headers returned",
+                "live": False,
+                "dashboard_url": dashboard_url,
+            }
         used = int(limit) - int(remaining)
         pct = (used / int(limit) * 100) if int(limit) else 0
         return {
@@ -118,15 +152,18 @@ def check_pexels() -> dict:
             "limit": int(limit),
             "pct": round(pct, 1),
             "resets": _fmt_unix(reset),
+            "note": _self_tracked_note("pexels"),
+            "dashboard_url": dashboard_url,
         }
     except Exception as e:
-        return {"service": "Pexels", "status": f"error: {e}", "live": False}
+        return {"service": "Pexels", "status": f"error: {e}", "live": False, "dashboard_url": dashboard_url}
 
 
 def check_pixabay() -> dict:
     api_key = os.environ.get("PIXABAY_API_KEY")
+    dashboard_url = "https://pixabay.com/api/docs/"
     if not api_key:
-        return {"service": "Pixabay", "status": "no API key set", "live": False}
+        return {"service": "Pixabay", "status": "no API key set", "live": False, "dashboard_url": dashboard_url}
 
     try:
         resp = requests.get(
@@ -145,16 +182,19 @@ def check_pixabay() -> dict:
                 "status": "call succeeded (key is valid) but no rate-limit headers found — "
                           "check response headers manually if you need exact numbers",
                 "live": False,
+                "note": _self_tracked_note("pixabay"),
+                "dashboard_url": dashboard_url,
             }
         return {
             "service": "Pixabay",
             "live": True,
             "used": int(limit) - int(remaining),
             "limit": int(limit),
-            "note": "rolling 60s window, not a monthly balance",
+            "note": _self_tracked_note("pixabay") or "rolling 60s window, not a monthly balance",
+            "dashboard_url": dashboard_url,
         }
     except Exception as e:
-        return {"service": "Pixabay", "status": f"error: {e}", "live": False}
+        return {"service": "Pixabay", "status": f"error: {e}", "live": False, "dashboard_url": dashboard_url}
 
 
 def check_youtube_estimated_quota() -> dict:
@@ -213,6 +253,7 @@ def check_youtube_estimated_quota() -> dict:
             f"({'; '.join(breakdown)}). Default daily budget is 10,000 units — "
             f"this is cumulative, not today's usage. Authoritative source: {dashboard_url}"
         ),
+        "dashboard_url": dashboard_url,
     }
 
 
@@ -224,6 +265,7 @@ def check_self_tracked(service_key: str, display_name: str, dashboard_url: str) 
             "live": False,
             "status": f"no live endpoint available — self-tracking not yet wired in. "
                       f"Check manually: {dashboard_url}",
+            "dashboard_url": dashboard_url,
         }
     try:
         log = json.loads(USAGE_LOG_PATH.read_text(encoding="utf-8"))
@@ -234,12 +276,14 @@ def check_self_tracked(service_key: str, display_name: str, dashboard_url: str) 
             "live": False,
             "status": f"self-tracked: {count} calls logged locally since {since}. "
                       f"For real quota: {dashboard_url}",
+            "dashboard_url": dashboard_url,
         }
     except Exception:
         return {
             "service": display_name,
             "live": False,
             "status": f"could not read local usage log. Check manually: {dashboard_url}",
+            "dashboard_url": dashboard_url,
         }
 
 
@@ -260,11 +304,26 @@ def print_console_report(results: list):
     print("\n" + "=" * 60)
 
 
+def _linkify(text: str) -> str:
+    """Turns bare http(s) URLs inside a status/note string into real <a> tags."""
+    if not text:
+        return text
+    return re.sub(
+        r"(https?://[^\s<]+)",
+        r'<a href="\1" target="_blank" rel="noopener">\1</a>',
+        text,
+    )
+
+
 def write_html_dashboard(results: list, output_path: str = "usage_dashboard.html"):
     generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
     rows = ""
     for r in results:
+        link_html = (
+            f'<p class="meta"><a href="{r["dashboard_url"]}" target="_blank" rel="noopener">View full dashboard →</a></p>'
+            if r.get("dashboard_url") else ""
+        )
         if r.get("live"):
             pct = r.get("pct", 0)
             bar_color = "#2ecc71" if pct < 70 else ("#f39c12" if pct < 90 else "#e74c3c")
@@ -274,13 +333,15 @@ def write_html_dashboard(results: list, output_path: str = "usage_dashboard.html
               <div class="bar-bg"><div class="bar-fill" style="width:{min(pct,100)}%;background:{bar_color};"></div></div>
               <p>{r['used']:,} / {r['limit']:,} used ({pct}%)</p>
               {"<p class='meta'>Resets: " + r['resets'] + "</p>" if r.get('resets') else ""}
-              {"<p class='meta'>" + r['note'] + "</p>" if r.get('note') else ""}
+              {"<p class='meta'>" + _linkify(r['note']) + "</p>" if r.get('note') else ""}
+              {link_html}
             </div>"""
         else:
             rows += f"""
             <div class="card unavailable">
               <h3>{r['service']}</h3>
-              <p class="meta">{r.get('status', 'unavailable')}</p>
+              <p class="meta">{_linkify(r.get('status', 'unavailable'))}</p>
+              {link_html}
             </div>"""
 
     html = f"""<!DOCTYPE html>
@@ -299,6 +360,7 @@ def write_html_dashboard(results: list, output_path: str = "usage_dashboard.html
   .bar-bg {{ background: #2a2d35; border-radius: 6px; height: 10px; overflow: hidden; }}
   .bar-fill {{ height: 100%; }}
   .meta {{ color: #999; font-size: 0.85em; }}
+  .meta a {{ color: #6ab0f3; }}
 </style>
 </head>
 <body>
