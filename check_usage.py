@@ -214,7 +214,8 @@ def check_youtube_estimated_quota() -> dict:
         return {
             "service": "YouTube Data API",
             "live": False,
-            "status": f"no live endpoint available — self-tracking not yet wired in. Check manually: {dashboard_url}",
+            "status": "no live endpoint available — self-tracking not yet wired in.",
+            "dashboard_url": dashboard_url,
         }
 
     # (log key, display name, cost in quota units)
@@ -229,7 +230,7 @@ def check_youtube_estimated_quota() -> dict:
     try:
         log = json.loads(USAGE_LOG_PATH.read_text(encoding="utf-8"))
     except Exception:
-        return {"service": "YouTube Data API", "live": False, "status": f"could not read local usage log. Check manually: {dashboard_url}"}
+        return {"service": "YouTube Data API", "live": False, "status": "could not read local usage log.", "dashboard_url": dashboard_url}
 
     breakdown = []
     total_units = 0
@@ -243,7 +244,7 @@ def check_youtube_estimated_quota() -> dict:
             breakdown.append(f"{count} {label} (~{units:,} units)")
 
     if total_calls == 0:
-        return {"service": "YouTube Data API", "live": False, "status": f"no calls logged yet. Check manually: {dashboard_url}"}
+        return {"service": "YouTube Data API", "live": False, "status": "no calls logged yet.", "dashboard_url": dashboard_url}
 
     return {
         "service": "YouTube Data API",
@@ -251,7 +252,7 @@ def check_youtube_estimated_quota() -> dict:
         "status": (
             f"self-tracked, ALL-TIME estimate: ~{total_units:,} quota units "
             f"({'; '.join(breakdown)}). Default daily budget is 10,000 units — "
-            f"this is cumulative, not today's usage. Authoritative source: {dashboard_url}"
+            f"this is cumulative, not today's usage."
         ),
         "dashboard_url": dashboard_url,
     }
@@ -263,8 +264,7 @@ def check_self_tracked(service_key: str, display_name: str, dashboard_url: str) 
         return {
             "service": display_name,
             "live": False,
-            "status": f"no live endpoint available — self-tracking not yet wired in. "
-                      f"Check manually: {dashboard_url}",
+            "status": "no live endpoint available — self-tracking not yet wired in.",
             "dashboard_url": dashboard_url,
         }
     try:
@@ -274,15 +274,14 @@ def check_self_tracked(service_key: str, display_name: str, dashboard_url: str) 
         return {
             "service": display_name,
             "live": False,
-            "status": f"self-tracked: {count} calls logged locally since {since}. "
-                      f"For real quota: {dashboard_url}",
+            "status": f"self-tracked: {count} calls logged locally since {since}.",
             "dashboard_url": dashboard_url,
         }
     except Exception:
         return {
             "service": display_name,
             "live": False,
-            "status": f"could not read local usage log. Check manually: {dashboard_url}",
+            "status": "could not read local usage log.",
             "dashboard_url": dashboard_url,
         }
 
@@ -354,7 +353,7 @@ def write_html_dashboard(results: list, output_path: str = "usage_dashboard.html
   h1 {{ font-size: 1.4em; }}
   .timestamp {{ color: #888; margin-bottom: 30px; }}
   .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }}
-  .card {{ background: #1a1d24; border-radius: 10px; padding: 18px; }}
+  .card {{ background: #1a1d24; border-radius: 10px; padding: 18px; overflow-wrap: break-word; word-break: break-word; }}
   .card.unavailable {{ opacity: 0.6; }}
   .card h3 {{ margin: 0 0 10px 0; }}
   .bar-bg {{ background: #2a2d35; border-radius: 6px; height: 10px; overflow: hidden; }}
