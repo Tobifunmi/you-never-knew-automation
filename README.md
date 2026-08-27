@@ -17,7 +17,7 @@ Monitor Credit Usage Here - https://you-never-knew.netlify.app/
 | Stage | Status |
 |---|---|
 | YouTube publisher (OAuth, upload, playlists, DB recording) | ✅ Done |
-| Narration (ElevenLabs) | ✅ Done |
+| Narration (Kokoro-82M, local/offline, no API key or char cap) | ✅ Done — swapped from ElevenLabs this session |
 | Footage (Pixabay → Pexels waterfall, relevance-checked, variety-enforced) | ✅ Done |
 | Captions (local Whisper, burned-in ASS) | ✅ Done |
 | Render (FFmpeg, 1080×1920) | ✅ Done |
@@ -90,13 +90,24 @@ unattended — check the workflow file directly rather than assuming.
 ## Requirements
 
 - Windows 10/11, PowerShell
-- Python 3.11+, venv at `.venv`
+- Python 3.11+ (3.9–3.12 required specifically for Kokoro), venv at `.venv`
 - ffmpeg (gyan.dev full build), on PATH
+- **`espeak-ng` SYSTEM package** (not pip-installable) for Kokoro
+  narration — Windows: download the `.msi` from
+  [espeak-ng releases](https://github.com/espeak-ng/espeak-ng/releases)
+  and run it; Linux/CI: `apt-get install espeak-ng` (already added to
+  `daily-video.yml`)
 - A Google Cloud project with **YouTube Data API v3** and **YouTube
   Analytics API** both enabled, OAuth 2.0 Desktop App credentials with
   the scopes in `engines/youtube.py::SCOPES` (upload + `yt-analytics.readonly`)
-- API keys: `ELEVENLABS_API_KEY` + `ELEVENLABS_VOICE_ID`, `PEXELS_API_KEY`,
-  `PIXABAY_API_KEY`, `JAMENDO_CLIENT_ID`, `GEMINI_API_KEY`
+- API keys: `PEXELS_API_KEY`, `PIXABAY_API_KEY`, `JAMENDO_CLIENT_ID`,
+  `GEMINI_API_KEY` (`ELEVENLABS_API_KEY`/`ELEVENLABS_VOICE_ID` no longer
+  required — kept as GitHub Secrets harmlessly, but unused since the
+  Kokoro swap)
+- First run of `engines/kokoro.py` downloads ~327MB of model weights
+  from Hugging Face — needs a working internet connection the first
+  time only; cached afterward at `~/.cache/huggingface` (CI caches this
+  directory across runs)
 - `nltk` WordNet corpus (`nltk.download('wordnet')`,
   `nltk.download('omw-1.4')`) — used for free offline playlist
   categorization
@@ -178,7 +189,14 @@ you-never-knew-automation/
 │   ├── analytics.py           — 48h+ YouTube Analytics capture per video,
 │   │                             builds the retention-by-category digest
 │   │                             fed into gemini.py's topic prompt
-│   ├── elevenlabs.py          — narration (TTS)
+│   ├── kokoro.py               — narration (TTS), local/offline via
+│   │                             Kokoro-82M, no API key or char limit;
+│   │                             requires the espeak-ng SYSTEM package
+│   │                             (see Requirements below)
+│   ├── elevenlabs.py          — narration (TTS), PREVIOUS engine, no
+│   │                             longer imported by main.py, kept as an
+│   │                             easy rollback path (swap one import +
+│   │                             one filename in main.py to revert)
 │   ├── captions.py            — Whisper word timestamps, ASS caption files
 │   ├── timeline.py            — maps script segments to audio time ranges
 │   ├── footage.py             — Pixabay → Pexels waterfall w/ relevance +
@@ -219,10 +237,13 @@ you-never-knew-automation/
   failing loudly. This only bites when a topic has genuinely thin stock
   footage coverage (e.g. Wombats originally) — worth spot-checking the
   footage source report on niche topics.
-- **Jamendo and ElevenLabs free-tier terms are non-commercial-use only.**
-  This is fine while the channel isn't monetized/in YPP, but MUST be
-  revisited (Jamendo license filtering, ElevenLabs plan tier) the moment
-  monetization status changes — not forgotten, deliberately deferred.
+- **Jamendo's free-tier terms are non-commercial-use only.** This is
+  fine while the channel isn't monetized/in YPP, but MUST be revisited
+  (Jamendo license filtering) the moment monetization status changes —
+  not forgotten, deliberately deferred. Narration is no longer part of
+  this concern: Kokoro's weights are Apache-2.0, commercial-use-safe
+  regardless of monetization status — this was the actual motivation
+  for the ElevenLabs swap, not just its 10,000-char/month free-tier cap.
 - **`engines/gemini.py` validates scripts independently** rather than
   reusing `script_engine.parse_script()` — both define the same script
   dict shape but as separate code paths. If that shape ever changes,

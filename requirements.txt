@@ -5,3 +5,6 @@ python-dotenv
 google-genai
 faster-whisper
 nltk
+kokoro>=0.9.4
+soundfile
+numpy

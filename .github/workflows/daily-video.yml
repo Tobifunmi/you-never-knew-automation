@@ -21,15 +21,25 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: Install System Dependencies (FFmpeg)
+      - name: Install System Dependencies (FFmpeg, espeak-ng)
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          sudo apt-get install -y ffmpeg espeak-ng
 
       - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Cache Kokoro model weights
+        # Kokoro downloads ~327MB from Hugging Face on first use each
+        # run; without caching, that download repeats every single
+        # scheduled run forever. Keyed on requirements.txt so a version
+        # bump there naturally invalidates a stale cache.
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: kokoro-hf-cache-${{ hashFiles('requirements.txt') }}
 
       - name: Download WordNet Corpus
         run: |
@@ -49,8 +59,6 @@ jobs:
       - name: Execute Autonomous Video Pipeline
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
-          ELEVENLABS_VOICE_ID: ${{ secrets.ELEVENLABS_VOICE_ID }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
           JAMENDO_CLIENT_ID: ${{ secrets.JAMENDO_CLIENT_ID }}

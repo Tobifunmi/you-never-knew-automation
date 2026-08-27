@@ -13,7 +13,7 @@ from engines import music
 from engines import notifications
 from engines import analytics
 from engines.script_engine import parse_script, ScriptParseError
-from engines.elevenlabs import generate_narration, NarrationError
+from engines.kokoro import generate_narration, NarrationError
 from engines.captions import (
     generate_word_timestamps,
     save_captions_json,
@@ -159,7 +159,7 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
         # --- Stage C: narration ---
         current_stage = "Stage C: Generating narration (ElevenLabs)"
         print(f"== {current_stage} ==")
-        narration = generate_narration(script, str(work_dir / "narration.mp3"))
+        narration = generate_narration(script, str(work_dir / "narration.wav"))
         print(f"Narration: {narration['duration_seconds']}s, {narration['character_count']} chars")
 
         # --- Word timestamps + timeline ---
