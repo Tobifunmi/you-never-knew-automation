@@ -39,7 +39,7 @@ jobs:
         env:
           TOPICS_JSON: ${{ secrets.TOPICS_JSON }}
           VIDEOS_JSON: ${{ secrets.VIDEOS_JSON }}
-          TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
+          TOKEN_JSON: ${{ secrets.YOUTUBE_TOKEN_JSON }}
         run: |
           mkdir -p database
           if [ ! -f database/topics.json ] && [ -n "$TOPICS_JSON" ]; then echo "$TOPICS_JSON" > database/topics.json; fi
