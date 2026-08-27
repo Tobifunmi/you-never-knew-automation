@@ -24,8 +24,55 @@ Monitor Credit Usage Here - https://you-never-knew.netlify.app/
 | Background music (Jamendo, loops short tracks to fill narration length) | ✅ Done |
 | Topic engine + fact numbering | ✅ Done |
 | Autonomous topic/script generation (Gemini) | ✅ Done |
+| 48h YouTube Analytics feedback loop (feeds topic selection) | ✅ Done |
+| API usage dashboard (live quotas, call/video correlation, self-tracked counts) | ✅ Done |
 | Full unattended automation (GitHub Actions) | ✅ Done, `workflow_dispatch`; scheduled cron (Mon/Thu) added but verify enabled |
 | Shorts "Related video" End Screen automation | 🔜 Future work — see below |
+
+## Analytics feedback loop
+
+Every run starts with **Stage A0**, before topic selection: `engines/analytics.py`
+scans `database/videos.json` for any video that's crossed 48 hours since
+publish and doesn't have performance data yet, pulls its cumulative
+views/retention from the **YouTube Analytics API**, and writes it back
+into that video's record. Once at least 3 videos have this captured, a
+short retention-by-category digest gets appended to the Gemini topic
+prompt as a soft nudge — it leans topic selection toward categories
+that have retained viewers well, without ever overriding the
+exclusion/variety rules.
+
+This requires the **`yt-analytics.readonly`** OAuth scope in addition
+to the original upload scope (see `SCOPES` in `engines/youtube.py`). A
+`token.json` minted before this was added needs **one fresh interactive
+re-auth** (`python main.py auth`) to pick up the new scope — Google
+won't silently widen an existing token's permissions. After re-auth,
+update the `YOUTUBE_TOKEN_JSON` GitHub Secret with the new token so CI
+runs pick it up too.
+
+This never blocks a real video: every function in `analytics.py`
+swallows its own errors and logs a message rather than raising, so a
+missing scope, a Google API hiccup, or no eligible videos yet just
+means "no context this run" — not a pipeline failure.
+
+## API usage dashboard
+
+Live at the Netlify URL above — separate repo
+(`you-never-knew-dashboard`), separate deploy, separate environment
+variables (Netlify env vars are NOT the same as this repo's GitHub
+Secrets; both need the relevant API keys set independently).
+
+- **ElevenLabs / Pexels / Pixabay**: live quota pulled directly from
+  each provider at page load, plus a self-tracked "N calls across M
+  video(s)" note layered on top — useful for spotting a video that
+  burned unusual credits (retries, long scripts) even though the live
+  percentage alone can't show that.
+- **Jamendo / Gemini / YouTube Data API**: self-tracked only (these
+  providers don't expose a queryable remaining-quota endpoint), read
+  from `database/usage_log.json`, which every wired-in engine
+  (`elevenlabs.py`, `footage.py`, `music.py`, `gemini.py`, `youtube.py`)
+  writes to via `engines/usage_tracker.py::log_call()`.
+- Every card links out to that provider's own dashboard for the
+  authoritative number.
 
 ## Trigger
 
@@ -45,8 +92,9 @@ unattended — check the workflow file directly rather than assuming.
 - Windows 10/11, PowerShell
 - Python 3.11+, venv at `.venv`
 - ffmpeg (gyan.dev full build), on PATH
-- A Google Cloud project with YouTube Data API v3 enabled, OAuth 2.0
-  Desktop App credentials
+- A Google Cloud project with **YouTube Data API v3** and **YouTube
+  Analytics API** both enabled, OAuth 2.0 Desktop App credentials with
+  the scopes in `engines/youtube.py::SCOPES` (upload + `yt-analytics.readonly`)
 - API keys: `ELEVENLABS_API_KEY` + `ELEVENLABS_VOICE_ID`, `PEXELS_API_KEY`,
   `PIXABAY_API_KEY`, `JAMENDO_CLIENT_ID`, `GEMINI_API_KEY`
 - `nltk` WordNet corpus (`nltk.download('wordnet')`,
@@ -111,13 +159,25 @@ you-never-knew-automation/
 │                                 from GitHub Secret in CI
 ├── database/
 │   ├── topics.json            — completed + reserved topics (source of truth)
-│   ├── videos.json            — per-video records, keyed by fact_number
+│   ├── videos.json            — per-video records, keyed by fact_number;
+│   │                             includes published_at/category (for
+│   │                             analytics grouping) and, once a video
+│   │                             clears 48h, a performance block
+│   ├── usage_log.json         — self-tracked API call counts (Jamendo/
+│   │                             Gemini/YouTube/ElevenLabs/Pexels/Pixabay),
+│   │                             written by engines/usage_tracker.py,
+│   │                             read by the Netlify usage dashboard
 │   └── playlists.json         — legacy, not actively used
 ├── engines/
 │   ├── topic_engine.py        — duplicate checking, reserve/complete/release
 │   ├── numbering.py           — fact number assignment, state recording
 │   ├── script_engine.py       — parses human-written script text files
-│   ├── gemini.py              — autonomous topic + script generation
+│   ├── gemini.py              — autonomous topic + script generation,
+│   │                             accepts an optional performance-context
+│   │                             digest from analytics.py
+│   ├── analytics.py           — 48h+ YouTube Analytics capture per video,
+│   │                             builds the retention-by-category digest
+│   │                             fed into gemini.py's topic prompt
 │   ├── elevenlabs.py          — narration (TTS)
 │   ├── captions.py            — Whisper word timestamps, ASS caption files
 │   ├── timeline.py            — maps script segments to audio time ranges
@@ -126,10 +186,15 @@ you-never-knew-automation/
 │   │                             a last-resort (non-relevance-checked) fallback
 │   ├── renderer.py             — normalize/concat/burn-in captions (FFmpeg)
 │   ├── metadata.py            — title/description/tags, WordNet-based
-│   │                             playlist categorization
+│   │                             playlist categorization (scans every
+│   │                             word in the topic, not just the first)
 │   ├── music.py               — Jamendo background track fetch + mix,
 │   │                             loops short tracks to fill narration length
-│   └── youtube.py              — upload, playlist management, retry logic
+│   ├── usage_tracker.py       — writes database/usage_log.json;
+│   │                             log_call(service, fact_number=...)
+│   │                             correlates calls to the video that made them
+│   └── youtube.py              — upload, playlist management, retry logic,
+│                                  OAuth scopes (upload + Analytics readonly)
 ├── test_assets/                — sample scripts
 ├── work/Fact_NNN_slug/          — per-video working directory
 └── .github/workflows/
@@ -138,13 +203,17 @@ you-never-knew-automation/
 
 ## Known limitations (accepted, not bugs to chase)
 
-- **WordNet categorization** can misclassify ambiguous or proper-noun
-  topics (e.g. multi-word names like "Taj Mahal" may not resolve to a
-  WordNet noun sense at all, falling through to the generic "Amazing
-  Facts" category). Occasional one-off additions to `CATEGORY_KEYWORDS`
-  are fine as ordinary code maintenance; AI-based classification and
-  manual per-run correction were both explicitly rejected on cost/pattern
-  grounds.
+- **WordNet categorization** now scans every non-stopword word in the
+  topic (not just the first) and has landmark/element/geological-feature
+  keyword coverage, so multi-word proper nouns like "The Dead Sea" or
+  "Giant's Causeway" resolve correctly rather than falling through to
+  the generic "Amazing Facts" category (verified against full history:
+  0/13 defaulted, was 6/13 before the fix). Rare single-word sense
+  ambiguity can still misfire (e.g. "Chess" resolves to a WordNet
+  plant sense before the board-game sense) — accepted, not worth a new
+  playlist category for one word. Occasional keyword-dict additions are
+  fine as ordinary maintenance; AI-based classification was explicitly
+  rejected on cost/pattern grounds.
 - **`footage.py`'s generic fallback** (`"nature landscape"` / `"scenery"`)
   has no topic-relevance check and will succeed silently rather than
   failing loudly. This only bites when a topic has genuinely thin stock
@@ -158,6 +227,14 @@ you-never-knew-automation/
   reusing `script_engine.parse_script()` — both define the same script
   dict shape but as separate code paths. If that shape ever changes,
   both need updating.
+- **The 48h analytics performance snapshot is captured once, not
+  continuously refreshed.** A video's `performance` block reflects
+  cumulative stats at the moment it first crossed 48h old — later
+  views don't update it. This is a deliberate "how did it land"
+  snapshot, not a live number. The category-retention digest fed to
+  Gemini also stays silent (empty string, no prompt change) until at
+  least 3 videos have a captured snapshot, to avoid skewing topic
+  choice off one or two data points.
 
 ## Future work — Shorts "Related Video" (End Screen)
 
