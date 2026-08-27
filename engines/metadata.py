@@ -8,9 +8,12 @@ import nltk
 CATEGORY_KEYWORDS = {
     "Nature Facts": [
         "plant", "animal", "insect", "bird", "fish", "tree", "flower", "forest",
-        "ocean", "jungle", "reef", "mammal", "reptile", "amphibian", "shark",
+        "ocean", "sea", "jungle", "reef", "mammal", "reptile", "amphibian", "shark",
         "dolphin", "whale", "spider", "bee", "butterfly", "frog", "snake",
         "coral", "leaf", "wildlife", "rainforest", "predator", "prey",
+        "lake", "river", "waterfall", "glacier", "volcano", "canyon", "desert",
+        "island", "cave", "salt flat", "salar", "geyser", "dune",
+        "bermuda triangle",
     ],
     "Space Facts": [
         "space", "planet", "star", "moon", "sun", "galaxy", "asteroid",
@@ -20,10 +23,17 @@ CATEGORY_KEYWORDS = {
     "History Facts": [
         "ancient", "pyramid", "empire", "war", "castle", "medieval",
         "civilization", "historical", "gladiator", "titanic", "ruins",
+        "tomb", "mausoleum", "dynasty",
+    ],
+    "Architecture & Structures Facts": [
+        "skyscraper", "cathedral", "temple", "tower", "bridge", "causeway",
+        "statue", "monument", "palace", "fort", "fortress", "wall", "dam",
+        "stadium", "lighthouse", "mahal",
     ],
     "Science & Technology Facts": [
         "physics", "chemistry", "technology", "engineering", "invention",
         "machine", "robot", "computer", "electricity", "gravity",
+        "neon", "element", "chemical",
     ],
     "Everyday Objects Facts": [
         "pencil", "umbrella", "zipper", "clock", "mirror", "candle",
@@ -38,6 +48,7 @@ HYPERNYM_CATEGORY_MAP = [
     ("celestial_body.n.01", "Space Facts"),
     ("star.n.01", "Space Facts"),
     ("planet.n.01", "Space Facts"),
+    ("chemical_element.n.01", "Science & Technology Facts"),
     ("animal.n.01", "Nature Facts"),
     ("plant.n.02", "Nature Facts"),
     ("geological_formation.n.01", "Nature Facts"),
@@ -45,9 +56,17 @@ HYPERNYM_CATEGORY_MAP = [
     ("body_of_water.n.01", "Nature Facts"),
     ("structure.n.01", "Architecture & Structures Facts"),
     ("building.n.01", "Architecture & Structures Facts"),
+    ("road.n.01", "Architecture & Structures Facts"),
+    ("sculpture.n.01", "Architecture & Structures Facts"),
     ("instrumentality.n.03", "Everyday Objects Facts"),
     ("machine.n.01", "Science & Technology Facts"),
 ]
+
+# Words too generic/grammatical to carry any topic signal — skipped in the
+# WordNet fallback so e.g. "The Dead Sea" doesn't get stuck checking "The".
+_STOPWORDS = {
+    "the", "a", "an", "of", "de", "la", "le", "el", "du", "von", "van", "and",
+}
 
 def _singularize(word: str) -> str:
     """Lightweight English depluralizer — handles common suffix patterns
@@ -64,27 +83,34 @@ def _singularize(word: str) -> str:
 
 def _wordnet_category(topic: str) -> str | None:
     """
-    Free, offline fallback for when the keyword dict misses. Checks the
-    first several WordNet noun senses of the topic's first word (not just
-    the single most-common sense, since that's sometimes the wrong one —
-    e.g. "volcano"'s top sense is an unrelated 'vent' meaning) and returns
-    the first one whose hypernym chain matches a known category. No API
-    calls, no cost. Rare ambiguous words (e.g. "chess") can still resolve
-    to an unrelated sense; this is an accepted limitation.
+    Free, offline fallback for when the keyword dict misses. Multi-word
+    topics are common here ("The Dead Sea", "Giant's Causeway", "The
+    Statue of Liberty") and the category-bearing word is often NOT the
+    first one — articles ("The") carry no signal, and even content words
+    can be the wrong ones ("Giant's" in "Giant's Causeway"). So this
+    checks every non-stopword word in the topic, left to right, and
+    returns the first one whose hypernym chain matches a known category
+    — not just the first word overall.
+
+    For each word, checks the first several WordNet noun senses (not
+    just the single most-common sense, since that's sometimes the wrong
+    one — e.g. "volcano"'s top sense is an unrelated 'vent' meaning).
+    No API calls, no cost. Rare ambiguous words (e.g. "chess") can still
+    resolve to an unrelated sense; this is an accepted limitation.
     """
-    first_word_raw = topic.strip().split()[0].lower()
-    first_word = _singularize(first_word_raw)
+    words = re.findall(r"[A-Za-z]+", topic)
+    candidates = [_singularize(w) for w in words if w.lower() not in _STOPWORDS]
 
-    synsets = wn.synsets(first_word, pos=wn.NOUN) or wn.synsets(first_word_raw, pos=wn.NOUN)
-    if not synsets:
-        return None
-
-    for synset in synsets[:5]:
-        hypernym_names = {s.name() for path in synset.hypernym_paths() for s in path}
-        hypernym_names.add(synset.name())
-        for concept, category in HYPERNYM_CATEGORY_MAP:
-            if concept in hypernym_names:
-                return category
+    for word in candidates:
+        synsets = wn.synsets(word, pos=wn.NOUN)
+        if not synsets:
+            continue
+        for synset in synsets[:5]:
+            hypernym_names = {s.name() for path in synset.hypernym_paths() for s in path}
+            hypernym_names.add(synset.name())
+            for concept, category in HYPERNYM_CATEGORY_MAP:
+                if concept in hypernym_names:
+                    return category
 
     return None
 
