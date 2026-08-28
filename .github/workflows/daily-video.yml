@@ -2,7 +2,7 @@ name: Daily Autonomous Video Generation
 
 on:
   #schedule:
-  #- cron: '0 10 * * 1,4'
+  #- cron: '0 10 * * *'  # Every day at 10:00 UTC
 
   # Manual trigger button in GitHub Actions UI
   workflow_dispatch:

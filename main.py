@@ -157,7 +157,7 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
         work_dir.mkdir(parents=True, exist_ok=True)
 
         # --- Stage C: narration ---
-        current_stage = "Stage C: Generating narration (ElevenLabs)"
+        current_stage = "Stage C: Generating narration (Kokoro)"
         print(f"== {current_stage} ==")
         narration = generate_narration(script, str(work_dir / "narration.wav"))
         print(f"Narration: {narration['duration_seconds']}s, {narration['character_count']} chars")

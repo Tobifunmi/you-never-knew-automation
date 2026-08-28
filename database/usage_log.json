@@ -1,43 +1,44 @@
 {
   "gemini": {
-    "count": 16,
+    "count": 18,
     "since": "2026-08-21",
-    "last_call": "2026-08-25 23:13 UTC",
+    "last_call": "2026-08-28 00:48 UTC",
     "videos": []
   },
   "jamendo": {
-    "count": 8,
+    "count": 9,
     "since": "2026-08-21",
-    "last_call": "2026-08-25 23:17 UTC",
+    "last_call": "2026-08-28 00:55 UTC",
     "videos": []
   },
   "youtube_upload": {
-    "count": 6,
+    "count": 7,
     "since": "2026-08-21",
-    "last_call": "2026-08-25 23:20 UTC",
+    "last_call": "2026-08-28 00:56 UTC",
     "videos": []
   },
   "youtube_playlist_list": {
-    "count": 6,
+    "count": 7,
     "since": "2026-08-21",
-    "last_call": "2026-08-25 23:23 UTC",
+    "last_call": "2026-08-28 00:56 UTC",
     "videos": []
   },
   "youtube_playlist_create": {
-    "count": 1,
+    "count": 2,
     "since": "2026-08-21",
-    "last_call": "2026-08-21 09:30 UTC"
+    "last_call": "2026-08-28 00:56 UTC",
+    "videos": []
   },
   "youtube_playlist_item_list": {
-    "count": 6,
+    "count": 7,
     "since": "2026-08-21",
-    "last_call": "2026-08-25 23:23 UTC",
+    "last_call": "2026-08-28 00:57 UTC",
     "videos": []
   },
   "youtube_playlist_item_insert": {
-    "count": 6,
+    "count": 7,
     "since": "2026-08-21",
-    "last_call": "2026-08-25 23:23 UTC",
+    "last_call": "2026-08-28 00:57 UTC",
     "videos": []
   },
   "elevenlabs": {
@@ -50,21 +51,29 @@
     "last_call": "2026-08-25 23:14 UTC"
   },
   "pixabay": {
-    "count": 17,
+    "count": 26,
     "since": "2026-08-25",
     "videos": [
       185,
-      186
+      186,
+      187
     ],
-    "last_call": "2026-08-25 23:15 UTC"
+    "last_call": "2026-08-28 00:53 UTC"
   },
   "pexels": {
-    "count": 9,
+    "count": 13,
     "since": "2026-08-25",
     "videos": [
       185,
-      186
+      186,
+      187
     ],
-    "last_call": "2026-08-25 23:15 UTC"
+    "last_call": "2026-08-28 00:53 UTC"
+  },
+  "youtube_analytics": {
+    "count": 2,
+    "since": "2026-08-28",
+    "videos": [],
+    "last_call": "2026-08-28 00:48 UTC"
   }
 }
