@@ -8,7 +8,16 @@
       "narration_path": "work/Fact_173_test/narration.mp3",
       "playlist_id": "PLOOM2rEPGwC0",
       "youtube_id": "_TlVg1uyHnw",
-      "title": "Fact 173: 5 Facts You Didn't Know About Carnivorous Pitcher Plants"
+      "title": "Fact 173: 5 Facts You Didn't Know About Carnivorous Pitcher Plants",
+      "live_published_at": "2026-08-20T02:39:06Z",
+      "performance": {
+        "views": 119,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 51.59,
+        "estimatedMinutesWatched": 16
+      },
+      "performance_captured_at": "2026-08-28T20:21:50.166726+00:00"
     },
     {
       "fact_number": 174,
@@ -29,7 +38,8 @@
       "title": "Fact 175: 5 Facts You Didn't Know About Pangolins",
       "narration_duration_seconds": 80.48,
       "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_175_pangolins\\narration.mp3",
-      "related_video_id": null
+      "related_video_id": null,
+      "live_published_at": "2026-08-26T23:00:03Z"
     },
     {
       "fact_number": 176,
@@ -40,7 +50,8 @@
       "title": "Fact 176: 5 Facts You Didn't Know About Geysers",
       "narration_duration_seconds": 103.1,
       "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_176_geysers\\narration.mp3",
-      "related_video_id": null
+      "related_video_id": null,
+      "live_published_at": "2026-08-28T01:11:54Z"
     },
     {
       "fact_number": 177,
@@ -131,7 +142,16 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_184_submarines/narration.mp3",
       "related_video_id": null,
       "music_track_id": "jamendo:843407",
-      "music_track_name": "the end of the innocence"
+      "music_track_name": "the end of the innocence",
+      "live_published_at": "2026-08-24T10:46:29Z",
+      "performance": {
+        "views": 976,
+        "likes": 25,
+        "comments": 0,
+        "averageViewPercentage": 81.67,
+        "estimatedMinutesWatched": 1044
+      },
+      "performance_captured_at": "2026-08-28T20:21:50.166726+00:00"
     },
     {
       "fact_number": 185,
@@ -200,6 +220,21 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095114",
       "music_track_name": "Best Route to a Dream"
+    },
+    {
+      "fact_number": 189,
+      "topic": "Bicycles",
+      "state": "playlist_added",
+      "youtube_id": "YnW_gqOUHc0",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 189: 5 Facts You Didn't Know About Bicycles",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-08-28T20:50:49.765115+00:00",
+      "narration_duration_seconds": 109.75,
+      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_189_bicycles\\narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1426518",
+      "music_track_name": "Incandescent"
     }
   ],
   "next_fact_number": 173
