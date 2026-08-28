@@ -1,26 +1,26 @@
 {
   "gemini": {
-    "count": 18,
+    "count": 20,
     "since": "2026-08-21",
-    "last_call": "2026-08-28 00:48 UTC",
+    "last_call": "2026-08-28 01:07 UTC",
     "videos": []
   },
   "jamendo": {
-    "count": 9,
+    "count": 10,
     "since": "2026-08-21",
-    "last_call": "2026-08-28 00:55 UTC",
+    "last_call": "2026-08-28 01:10 UTC",
     "videos": []
   },
   "youtube_upload": {
-    "count": 7,
+    "count": 8,
     "since": "2026-08-21",
-    "last_call": "2026-08-28 00:56 UTC",
+    "last_call": "2026-08-28 01:12 UTC",
     "videos": []
   },
   "youtube_playlist_list": {
-    "count": 7,
+    "count": 8,
     "since": "2026-08-21",
-    "last_call": "2026-08-28 00:56 UTC",
+    "last_call": "2026-08-28 01:12 UTC",
     "videos": []
   },
   "youtube_playlist_create": {
@@ -30,15 +30,15 @@
     "videos": []
   },
   "youtube_playlist_item_list": {
-    "count": 7,
+    "count": 8,
     "since": "2026-08-21",
-    "last_call": "2026-08-28 00:57 UTC",
+    "last_call": "2026-08-28 01:12 UTC",
     "videos": []
   },
   "youtube_playlist_item_insert": {
-    "count": 7,
+    "count": 8,
     "since": "2026-08-21",
-    "last_call": "2026-08-28 00:57 UTC",
+    "last_call": "2026-08-28 01:12 UTC",
     "videos": []
   },
   "elevenlabs": {
@@ -51,29 +51,31 @@
     "last_call": "2026-08-25 23:14 UTC"
   },
   "pixabay": {
-    "count": 26,
+    "count": 36,
     "since": "2026-08-25",
     "videos": [
       185,
       186,
-      187
+      187,
+      188
     ],
-    "last_call": "2026-08-28 00:53 UTC"
+    "last_call": "2026-08-28 01:09 UTC"
   },
   "pexels": {
-    "count": 13,
+    "count": 18,
     "since": "2026-08-25",
     "videos": [
       185,
       186,
-      187
+      187,
+      188
     ],
-    "last_call": "2026-08-28 00:53 UTC"
+    "last_call": "2026-08-28 01:09 UTC"
   },
   "youtube_analytics": {
-    "count": 2,
+    "count": 3,
     "since": "2026-08-28",
     "videos": [],
-    "last_call": "2026-08-28 00:48 UTC"
+    "last_call": "2026-08-28 01:07 UTC"
   }
 }

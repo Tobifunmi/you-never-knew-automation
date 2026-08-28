@@ -185,6 +185,21 @@
       "related_video_id": null,
       "music_track_id": "jamendo:843407",
       "music_track_name": "the end of the innocence"
+    },
+    {
+      "fact_number": 188,
+      "topic": "Stonehenge",
+      "state": "playlist_added",
+      "youtube_id": "MbQCixHWHSw",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 188: 5 Facts You Didn't Know About Stonehenge",
+      "category": "Amazing Facts",
+      "published_at": "2026-08-28T01:12:33.941517+00:00",
+      "narration_duration_seconds": 105.35,
+      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_188_stonehenge\\narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095114",
+      "music_track_name": "Best Route to a Dream"
     }
   ],
   "next_fact_number": 173
