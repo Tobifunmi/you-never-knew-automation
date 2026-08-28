@@ -87,36 +87,39 @@ def _fmt_unix(ts) -> str:
     return datetime.fromtimestamp(int(ts), tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
 
-def check_elevenlabs() -> dict:
-    api_key = os.environ.get("ELEVENLABS_API_KEY")
-    dashboard_url = "https://elevenlabs.io/app/usage"
-    if not api_key:
-        return {"service": "ElevenLabs", "status": "no API key set", "live": False, "dashboard_url": dashboard_url}
-
-    try:
-        resp = requests.get(
-            "https://api.elevenlabs.io/v1/user/subscription",
-            headers={"xi-api-key": api_key},
-            timeout=15,
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        used = data.get("character_count", 0)
-        limit = data.get("character_limit", 0)
-        pct = (used / limit * 100) if limit else 0
+def check_kokoro() -> dict:
+    """
+    Kokoro runs 100% locally — there's no external API, no account,
+    and no quota to check. This isn't a "live" check like the others;
+    it just surfaces the local production count so the dashboard still
+    shows something meaningful for the engine actually narrating every
+    video, instead of a frozen ElevenLabs number nothing calls anymore.
+    """
+    dashboard_url = "https://huggingface.co/hexgrad/Kokoro-82M"
+    if not USAGE_LOG_PATH.exists():
         return {
-            "service": "ElevenLabs",
-            "live": True,
-            "used": used,
-            "limit": limit,
-            "pct": round(pct, 1),
-            "resets": _fmt_unix(data.get("next_character_count_reset_unix")),
-            "tier": data.get("tier"),
-            "note": _self_tracked_note("elevenlabs"),
+            "service": "Kokoro (narration)",
+            "live": False,
+            "status": "runs 100% locally — no usage cap or account. No videos narrated yet.",
             "dashboard_url": dashboard_url,
         }
-    except Exception as e:
-        return {"service": "ElevenLabs", "status": f"error: {e}", "live": False, "dashboard_url": dashboard_url}
+    try:
+        log = json.loads(USAGE_LOG_PATH.read_text(encoding="utf-8"))
+        entry = log.get("kokoro", {})
+        count = entry.get("count", 0)
+        video_count = len(entry.get("videos", []))
+        if count == 0:
+            status = "runs 100% locally — no usage cap or account. No videos narrated yet."
+        else:
+            status = f"runs 100% locally — no usage cap or account. {count} video(s) narrated so far."
+        return {"service": "Kokoro (narration)", "live": False, "status": status, "dashboard_url": dashboard_url}
+    except Exception:
+        return {
+            "service": "Kokoro (narration)",
+            "live": False,
+            "status": "runs 100% locally — no usage cap or account.",
+            "dashboard_url": dashboard_url,
+        }
 
 
 def check_pexels() -> dict:
@@ -377,7 +380,7 @@ def write_html_dashboard(results: list, output_path: str = "usage_dashboard.html
 
 def main():
     results = [
-        check_elevenlabs(),
+        check_kokoro(),
         check_pexels(),
         check_pixabay(),
         check_self_tracked("jamendo", "Jamendo", "https://devportal.jamendo.com/"),

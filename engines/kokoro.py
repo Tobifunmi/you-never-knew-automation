@@ -40,6 +40,8 @@ import numpy as np
 import soundfile as sf
 from dotenv import load_dotenv
 
+from . import usage_tracker
+
 load_dotenv()
 
 # Voice pick: "am_adam" is Kokoro's American-English male voice closest
@@ -124,6 +126,11 @@ def generate_narration(script: dict, output_path: str) -> dict:
     sf.write(str(output_path), full_audio, SAMPLE_RATE)
 
     duration = round(len(full_audio) / SAMPLE_RATE, 2)
+
+    # Unlike the paid engines this replaced, there's no credit spent
+    # here — this is purely a production counter for the dashboard
+    # ("N videos narrated locally"), so it's only logged on success.
+    usage_tracker.log_call("kokoro", fact_number=script.get("fact_number"))
 
     return {
         "path": str(output_path),
