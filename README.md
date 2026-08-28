@@ -54,6 +54,18 @@ swallows its own errors and logs a message rather than raising, so a
 missing scope, a Google API hiccup, or no eligible videos yet just
 means "no context this run" — not a pipeline failure.
 
+**The 48h clock is measured from the video's actual live-publish time,
+not upload-completion time.** `published_at` (set in `main.py` right
+after `upload_video()` returns) only reflects when the file finished
+uploading — for a scheduled video that can be well before it's
+actually public. Before counting a video eligible, `analytics.py` now
+confirms its real `privacyStatus` via the YouTube Data API; a
+still-private/scheduled video is skipped (not "not old enough yet" —
+genuinely not live). Once confirmed public, YouTube's own
+`snippet.publishedAt` is cached on the record as `live_published_at`
+and used for the 48h window from then on, so this only costs one
+extra read call per video, the first time it's checked.
+
 ## API usage dashboard
 
 Live at the Netlify URL above — separate repo
@@ -185,9 +197,13 @@ you-never-knew-automation/
 ├── database/
 │   ├── topics.json            — completed + reserved topics (source of truth)
 │   ├── videos.json            — per-video records, keyed by fact_number;
-│   │                             includes published_at/category (for
-│   │                             analytics grouping) and, once a video
-│   │                             clears 48h, a performance block
+│   │                             includes published_at (upload-completion
+│   │                             time)/category (for analytics grouping),
+│   │                             live_published_at (actual YouTube go-live
+│   │                             time, confirmed + cached by analytics.py
+│   │                             the first time a video is seen public) and,
+│   │                             once a video clears 48h from THAT
+│   │                             timestamp, a performance block
 │   ├── usage_log.json         — self-tracked API call counts (Jamendo/
 │   │                             Gemini/YouTube/Kokoro/Pexels/Pixabay),
 │   │                             written by engines/usage_tracker.py,
@@ -224,7 +240,12 @@ you-never-knew-automation/
 │   │                             playlist categorization (scans every
 │   │                             word in the topic, not just the first)
 │   ├── music.py               — Jamendo background track fetch + mix,
-│   │                             loops short tracks to fill narration length
+│   │                             loops short tracks to fill narration length;
+│   │                             VIBE_MAP tags are space-separated (not
+│   │                             "+"-joined) — requests percent-encodes a
+│   │                             literal "+" in a params value, which
+│   │                             Jamendo then reads back as one literal
+│   │                             "tag+tag" tag instead of two tags
 │   ├── usage_tracker.py       — writes database/usage_log.json;
 │   │                             log_call(service, fact_number=...)
 │   │                             correlates calls to the video that made them
@@ -265,6 +286,22 @@ you-never-knew-automation/
   reusing `script_engine.parse_script()` — both define the same script
   dict shape but as separate code paths. If that shape ever changes,
   both need updating.
+- **A `requests` `params` dict silently mangles literal "+" characters.**
+  `VIBE_MAP` tag values used to be written `"cinematic+ambient"`,
+  following Jamendo's documented `+`-as-separator format for multi-value
+  params. But `requests` percent-encodes a literal `+` in a params dict
+  value to `%2B` (to disambiguate it from an encoded space), which
+  Jamendo decodes back to a literal `+` and searches for one tag named
+  `"cinematic+ambient"` — which doesn't exist — instead of the two tags
+  `cinematic` and `ambient`. Net effect: every topic-specific ("Tier 1")
+  Jamendo search silently returned zero results from the start, and
+  every video's music fell through to the generic single-tag
+  `"cinematic"` fallback regardless of actual topic/vibe — not a crash,
+  just quietly never doing what `VIBE_MAP` was there to do. Fixed by
+  using a plain space instead (`requests` encodes that to a raw `+` on
+  the wire, matching Jamendo's actual expected format). Worth
+  remembering for any other multi-value Jamendo/similar API param added
+  later — don't hand-write the `+` yourself, let the space do it.
 - **The 48h analytics performance snapshot is captured once, not
   continuously refreshed.** A video's `performance` block reflects
   cumulative stats at the moment it first crossed 48h old — later
