@@ -26,7 +26,7 @@ Monitor Credit Usage Here - https://you-never-knew.netlify.app/
 | Autonomous topic/script generation (Gemini) | ✅ Done |
 | 48h YouTube Analytics feedback loop (feeds topic selection) | ✅ Done |
 | API usage dashboard (live quotas, call/video correlation, self-tracked counts) | ✅ Done |
-| Full unattended automation (GitHub Actions) | ✅ Done, `workflow_dispatch`; scheduled cron (Mon/Thu) added but verify enabled |
+| Full unattended automation (GitHub Actions) | ⚠️ `workflow_dispatch` (manual) only — cron is set to **daily** but deliberately left commented out until the unpublished-video backlog clears |
 | Shorts "Related video" End Screen automation | 🔜 Future work — see below |
 
 ## Analytics feedback loop
@@ -61,31 +61,45 @@ Live at the Netlify URL above — separate repo
 variables (Netlify env vars are NOT the same as this repo's GitHub
 Secrets; both need the relevant API keys set independently).
 
-- **ElevenLabs / Pexels / Pixabay**: live quota pulled directly from
-  each provider at page load, plus a self-tracked "N calls across M
-  video(s)" note layered on top — useful for spotting a video that
-  burned unusual credits (retries, long scripts) even though the live
-  percentage alone can't show that.
+- **Kokoro (narration)**: not a live quota check — Kokoro runs 100%
+  locally with no account or cap to query. The card just reads the
+  self-tracked "videos narrated" count from `usage_log.json`, mainly
+  so the dashboard shows *something* real for the engine actually
+  narrating every video, instead of a stale ElevenLabs number nothing
+  calls anymore (ElevenLabs was replaced this session — see Known
+  limitations).
+- **Pexels / Pixabay**: live quota pulled directly from each provider
+  at page load, plus a self-tracked "N calls across M video(s)" note
+  layered on top — useful for spotting a video that burned unusual
+  credits (retries, thin footage coverage) even though the live
+  percentage alone can't show that. Both checks send a random
+  cache-busting query param on every request — Pexels was once
+  observed serving an identical cached response (frozen rate-limit
+  headers) for the check's always-identical query, making "used" look
+  stuck even as real usage climbed; confirmed fixed by this cache-bust.
 - **Jamendo / Gemini / YouTube Data API**: self-tracked only (these
   providers don't expose a queryable remaining-quota endpoint), read
   from `database/usage_log.json`, which every wired-in engine
-  (`elevenlabs.py`, `footage.py`, `music.py`, `gemini.py`, `youtube.py`)
+  (`kokoro.py`, `footage.py`, `music.py`, `gemini.py`, `youtube.py`)
   writes to via `engines/usage_tracker.py::log_call()`.
 - Every card links out to that provider's own dashboard for the
   authoritative number.
 
 ## Trigger
 
-Currently `workflow_dispatch` (manual). A `schedule` cron for **Monday and
-Thursday** has been added to `daily-video.yml`:
+Currently `workflow_dispatch` (manual) only. `daily-video.yml`'s cron
+is set to **daily**, but deliberately left commented out:
 
 ```yaml
-schedule:
-  - cron: '0 10 * * 1,4'
+  #schedule:
+  #- cron: '0 10 * * *'
 ```
 
-Confirm this is actually uncommented/active before relying on it to run
-unattended — check the workflow file directly rather than assuming.
+This is intentional, not an oversight — there's an unpublished-video
+backlog to clear before daily posting goes live. Activating it later
+is a one-line change (delete the two `#`s). Confirm this file's actual
+state before relying on either "on" or "off" — it's been wrong in both
+directions before (see Known limitations).
 
 ## Requirements
 
@@ -175,7 +189,7 @@ you-never-knew-automation/
 │   │                             analytics grouping) and, once a video
 │   │                             clears 48h, a performance block
 │   ├── usage_log.json         — self-tracked API call counts (Jamendo/
-│   │                             Gemini/YouTube/ElevenLabs/Pexels/Pixabay),
+│   │                             Gemini/YouTube/Kokoro/Pexels/Pixabay),
 │   │                             written by engines/usage_tracker.py,
 │   │                             read by the Netlify usage dashboard
 │   └── playlists.json         — legacy, not actively used
@@ -190,13 +204,16 @@ you-never-knew-automation/
 │   │                             builds the retention-by-category digest
 │   │                             fed into gemini.py's topic prompt
 │   ├── kokoro.py               — narration (TTS), local/offline via
-│   │                             Kokoro-82M, no API key or char limit;
+│   │                             Kokoro-82M, no API key or char limit,
+│   │                             logs a self-tracked "videos narrated"
+│   │                             count (no credit spent, so success-only);
 │   │                             requires the espeak-ng SYSTEM package
 │   │                             (see Requirements below)
 │   ├── elevenlabs.py          — narration (TTS), PREVIOUS engine, no
-│   │                             longer imported by main.py, kept as an
-│   │                             easy rollback path (swap one import +
-│   │                             one filename in main.py to revert)
+│   │                             longer imported by main.py or checked
+│   │                             by the dashboard, kept as an easy
+│   │                             rollback path (swap one import + one
+│   │                             filename in main.py to revert)
 │   ├── captions.py            — Whisper word timestamps, ASS caption files
 │   ├── timeline.py            — maps script segments to audio time ranges
 │   ├── footage.py             — Pixabay → Pexels waterfall w/ relevance +
