@@ -43,6 +43,7 @@ generate the counts itself.
 import json
 import os
 import re
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -131,8 +132,12 @@ def check_pexels() -> dict:
     try:
         resp = requests.get(
             "https://api.pexels.com/videos/search",
-            headers={"Authorization": api_key},
-            params={"query": "nature", "per_page": 1},
+            headers={"Authorization": api_key, "Cache-Control": "no-cache"},
+            # Cache-bust with a random param — an identical repeated query
+            # risks a cached Pexels response with frozen rate-limit
+            # headers, which showed up as the dashboard's "used" number
+            # never moving even as real usage climbed.
+            params={"query": "nature", "per_page": 1, "_": uuid.uuid4().hex},
             timeout=15,
         )
         resp.raise_for_status()
@@ -171,7 +176,8 @@ def check_pixabay() -> dict:
     try:
         resp = requests.get(
             "https://pixabay.com/api/videos/",
-            params={"key": api_key, "q": "nature", "per_page": 3},
+            headers={"Cache-Control": "no-cache"},
+            params={"key": api_key, "q": "nature", "per_page": 3, "_": uuid.uuid4().hex},
             timeout=15,
         )
         resp.raise_for_status()
