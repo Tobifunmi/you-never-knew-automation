@@ -15,15 +15,28 @@ class MusicError(Exception):
     pass
 
 
-# Map topic / content archetypes to high-quality background music tags on Jamendo
+# Map topic / content archetypes to high-quality background music tags on
+# Jamendo. Space-separated (not "+"-joined) deliberately: Jamendo's API
+# expects multi-value list params as raw space/"+" in the URL, which
+# decodes server-side to a real space. `requests` percent-encodes a
+# literal '+' character in a params dict value to '%2B' (to disambiguate
+# it from an encoded space), which decodes back to a literal "+" on
+# Jamendo's end — so a tag string written as "cinematic+ambient" here was
+# being sent, and searched for, as the single literal tag
+# "cinematic+ambient" (which no track has), not the two tags "cinematic"
+# and "ambient". A plain space avoids the ambiguity: requests encodes it
+# to a raw "+" on the wire, which is exactly the separator Jamendo's own
+# API examples use. This means every "Tier 1" topic-specific search was
+# silently returning zero results and every video was landing on the
+# generic "cinematic"-only fallback regardless of topic.
 VIBE_MAP = {
-    "history": "ambient+cinematic",
-    "space": "space+ambient",
-    "science": "electronic+ambient",
-    "tech": "corporate+technology",
-    "nature": "acoustic+documentary",
-    "crime": "dark+suspense",
-    "default": "cinematic+ambient",
+    "history": "ambient cinematic",
+    "space": "space ambient",
+    "science": "electronic ambient",
+    "tech": "corporate technology",
+    "nature": "acoustic documentary",
+    "crime": "dark suspense",
+    "default": "cinematic ambient",
 }
 
 # A track shorter than this sounds choppy/obviously looped even with a
