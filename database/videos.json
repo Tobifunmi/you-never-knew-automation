@@ -31,113 +31,11 @@
     },
     {
       "fact_number": 175,
-      "topic": "Pangolins",
-      "state": "uploaded",
-      "youtube_id": "wF3mXOU5OOA",
-      "playlist_id": "PLUA2Lnfg4FRI",
-      "title": "Fact 175: 5 Facts You Didn't Know About Pangolins",
-      "narration_duration_seconds": 80.48,
-      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_175_pangolins\\narration.mp3",
-      "related_video_id": null,
-      "live_published_at": "2026-08-26T23:00:03Z"
-    },
-    {
-      "fact_number": 176,
-      "topic": "Geysers",
-      "state": "uploaded",
-      "youtube_id": "pX-4W5pUjkk",
-      "playlist_id": "PLUA2Lnfg4FRI",
-      "title": "Fact 176: 5 Facts You Didn't Know About Geysers",
-      "narration_duration_seconds": 103.1,
-      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_176_geysers\\narration.mp3",
-      "related_video_id": null,
-      "live_published_at": "2026-08-28T01:11:54Z"
-    },
-    {
-      "fact_number": 177,
-      "topic": "Skyscrapers",
-      "state": "playlist_added",
-      "youtube_id": "FW426WqBfOo",
-      "playlist_id": "PLUA2Lnfg4FRI",
-      "title": "Fact 177: 5 Facts You Didn't Know About Skyscrapers",
-      "narration_duration_seconds": 124.16,
-      "related_video_id": null
-    },
-    {
-      "fact_number": 178,
-      "topic": "Taj Mahal",
-      "state": "published",
-      "youtube_id": "sic-XF_03_o",
-      "playlist_id": "PLUA2Lnfg4FRI",
-      "title": "Fact 178: 5 Facts You Didn't Know About Taj Mahal",
-      "narration_duration_seconds": 102.66,
-      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_178_taj_mahal/narration.mp3",
-      "related_video_id": null
-    },
-    {
-      "fact_number": 179,
-      "topic": "The Dead Sea",
-      "state": "playlist_added",
-      "youtube_id": "8HqK0BNfKKQ",
-      "playlist_id": "PLUA2Lnfg4FRI",
-      "title": "Fact 179: 5 Facts You Didn't Know About The Dead Sea",
-      "narration_duration_seconds": 95.66,
-      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_179_the_dead_sea/narration.mp3",
-      "related_video_id": null
-    },
-    {
-      "fact_number": 180,
-      "topic": "The Statue of Liberty",
-      "state": "playlist_added",
-      "youtube_id": "VqkUR2pu1X4",
-      "playlist_id": "PLUA2Lnfg4FRI",
-      "title": "Fact 180: 5 Facts You Didn't Know About The Statue of Liberty",
-      "narration_duration_seconds": 117.39,
-      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_180_the_statue_of_liberty/narration.mp3",
-      "related_video_id": null
-    },
-    {
-      "fact_number": 181,
-      "topic": "Typewriters",
-      "state": "playlist_added",
-      "youtube_id": "rRAnMHpgBgc",
-      "playlist_id": "PLEHAlD_hPg1c",
-      "title": "Fact 181: 5 Facts You Didn't Know About Typewriters",
-      "narration_duration_seconds": 128.5,
-      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_181_typewriters\\narration.mp3",
-      "related_video_id": null
-    },
-    {
-      "fact_number": 182,
-      "topic": "Salar de Uyuni",
-      "state": "playlist_added",
-      "youtube_id": "S8h0knfKvIk",
-      "playlist_id": "PLUA2Lnfg4FRI",
-      "title": "Fact 182: 5 Facts You Didn't Know About Salar de Uyuni",
-      "narration_duration_seconds": 118.51,
-      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_182_salar_de_uyuni\\narration.mp3",
-      "related_video_id": null
-    },
-    {
-      "fact_number": 183,
-      "topic": "Giant's Causeway",
-      "state": "playlist_added",
-      "youtube_id": "0PXHPz-I_ro",
-      "playlist_id": "PLUA2Lnfg4FRI",
-      "title": "Fact 183: 5 Facts You Didn't Know About Giant's Causeway",
-      "narration_duration_seconds": 138.81,
-      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_183_giants_causeway\\narration.mp3",
-      "related_video_id": null,
-      "music_track_id": "jamendo:1095114",
-      "music_track_name": "Best Route to a Dream"
-    },
-    {
-      "fact_number": 184,
       "topic": "Submarines",
       "state": "playlist_added",
       "youtube_id": "HkMftd9AY3Y",
       "playlist_id": "PLEHAlD_hPg1c",
-      "title": "Fact 184: 5 Facts You Didn't Know About Submarines",
+      "title": "Fact 175: 5 Facts You Didn't Know About Submarines",
       "narration_duration_seconds": 128.91,
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_184_submarines/narration.mp3",
       "related_video_id": null,
@@ -152,6 +50,108 @@
         "estimatedMinutesWatched": 1044
       },
       "performance_captured_at": "2026-08-28T20:21:50.166726+00:00"
+    },
+    {
+      "fact_number": 176,
+      "topic": "Pangolins",
+      "state": "uploaded",
+      "youtube_id": "wF3mXOU5OOA",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 176: 5 Facts You Didn't Know About Pangolins",
+      "narration_duration_seconds": 80.48,
+      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_176_pangolins\\narration.mp3",
+      "related_video_id": null,
+      "live_published_at": "2026-08-26T23:00:03Z"
+    },
+    {
+      "fact_number": 177,
+      "topic": "Geysers",
+      "state": "uploaded",
+      "youtube_id": "pX-4W5pUjkk",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 177: 5 Facts You Didn't Know About Geysers",
+      "narration_duration_seconds": 103.1,
+      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_177_geysers\\narration.mp3",
+      "related_video_id": null,
+      "live_published_at": "2026-08-28T01:11:54Z"
+    },
+    {
+      "fact_number": 178,
+      "topic": "Skyscrapers",
+      "state": "playlist_added",
+      "youtube_id": "FW426WqBfOo",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 178: 5 Facts You Didn't Know About Skyscrapers",
+      "narration_duration_seconds": 124.16,
+      "related_video_id": null
+    },
+    {
+      "fact_number": 179,
+      "topic": "Taj Mahal",
+      "state": "published",
+      "youtube_id": "sic-XF_03_o",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 179: 5 Facts You Didn't Know About Taj Mahal",
+      "narration_duration_seconds": 102.66,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_178_taj_mahal/narration.mp3",
+      "related_video_id": null
+    },
+    {
+      "fact_number": 180,
+      "topic": "The Dead Sea",
+      "state": "playlist_added",
+      "youtube_id": "8HqK0BNfKKQ",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 180: 5 Facts You Didn't Know About The Dead Sea",
+      "narration_duration_seconds": 95.66,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_179_the_dead_sea/narration.mp3",
+      "related_video_id": null
+    },
+    {
+      "fact_number": 181,
+      "topic": "The Statue of Liberty",
+      "state": "playlist_added",
+      "youtube_id": "VqkUR2pu1X4",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 181: 5 Facts You Didn't Know About The Statue of Liberty",
+      "narration_duration_seconds": 117.39,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_180_the_statue_of_liberty/narration.mp3",
+      "related_video_id": null
+    },
+    {
+      "fact_number": 182,
+      "topic": "Typewriters",
+      "state": "playlist_added",
+      "youtube_id": "rRAnMHpgBgc",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 182: 5 Facts You Didn't Know About Typewriters",
+      "narration_duration_seconds": 128.5,
+      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_182_typewriters\\narration.mp3",
+      "related_video_id": null
+    },
+    {
+      "fact_number": 183,
+      "topic": "Salar de Uyuni",
+      "state": "playlist_added",
+      "youtube_id": "S8h0knfKvIk",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 183: 5 Facts You Didn't Know About Salar de Uyuni",
+      "narration_duration_seconds": 118.51,
+      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_183_salar_de_uyuni\\narration.mp3",
+      "related_video_id": null
+    },
+    {
+      "fact_number": 184,
+      "topic": "Giant's Causeway",
+      "state": "playlist_added",
+      "youtube_id": "0PXHPz-I_ro",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 184: 5 Facts You Didn't Know About Giant's Causeway",
+      "narration_duration_seconds": 138.81,
+      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_184_giants_causeway\\narration.mp3",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095114",
+      "music_track_name": "Best Route to a Dream"
     },
     {
       "fact_number": 185,
@@ -223,19 +223,27 @@
     },
     {
       "fact_number": 189,
+      "topic": "The Panama Canal",
+      "state": "playlist_added",
+      "youtube_id": "rfdqx4rCdYM",
+      "title": "Fact 189: 5 Facts You Didn't Know About The Panama Canal",
+      "category": "Nature Facts"
+    },
+    {
+      "fact_number": 190,
       "topic": "Bicycles",
       "state": "playlist_added",
       "youtube_id": "YnW_gqOUHc0",
       "playlist_id": "PLEHAlD_hPg1c",
-      "title": "Fact 189: 5 Facts You Didn't Know About Bicycles",
+      "title": "Fact 190: 5 Facts You Didn't Know About Bicycles",
       "category": "Everyday Objects Facts",
       "published_at": "2026-08-28T20:50:49.765115+00:00",
       "narration_duration_seconds": 109.75,
-      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_189_bicycles\\narration.wav",
+      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_190_bicycles\\narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1426518",
       "music_track_name": "Incandescent"
     }
   ],
-  "next_fact_number": 173
+  "next_fact_number": 191
 }
