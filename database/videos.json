@@ -61,7 +61,15 @@
       "narration_duration_seconds": 80.48,
       "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_176_pangolins\\narration.mp3",
       "related_video_id": null,
-      "live_published_at": "2026-08-26T23:00:03Z"
+      "live_published_at": "2026-08-26T23:00:03Z",
+      "performance": {
+        "views": 1234,
+        "likes": 48,
+        "comments": 0,
+        "averageViewPercentage": 79.03,
+        "estimatedMinutesWatched": 834
+      },
+      "performance_captured_at": "2026-08-29T14:38:18.804941+00:00"
     },
     {
       "fact_number": 177,
@@ -83,7 +91,16 @@
       "playlist_id": "PLUA2Lnfg4FRI",
       "title": "Fact 178: 5 Facts You Didn't Know About Skyscrapers",
       "narration_duration_seconds": 124.16,
-      "related_video_id": null
+      "related_video_id": null,
+      "live_published_at": "2026-08-20T18:08:25Z",
+      "performance": {
+        "views": 4,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 41.75,
+        "estimatedMinutesWatched": 2
+      },
+      "performance_captured_at": "2026-08-29T14:38:18.804941+00:00"
     },
     {
       "fact_number": 179,
@@ -243,6 +260,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1426518",
       "music_track_name": "Incandescent"
+    },
+    {
+      "fact_number": 191,
+      "topic": "Popcorn",
+      "state": "playlist_added",
+      "youtube_id": "jhiIxuq0gis",
+      "playlist_id": "PLOOM2rEPGwC0",
+      "title": "Fact 191: 5 Facts You Didn't Know About Popcorn",
+      "category": "Nature Facts",
+      "published_at": "2026-08-29T14:44:02.584141+00:00",
+      "scheduled_publish_at": null,
+      "narration_duration_seconds": 104.72,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_191_popcorn/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1322713",
+      "music_track_name": "Epic Cinematic Score"
     }
   ],
   "next_fact_number": 191
