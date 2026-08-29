@@ -276,6 +276,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1322713",
       "music_track_name": "Epic Cinematic Score"
+    },
+    {
+      "fact_number": 192,
+      "topic": "Chewing Gum",
+      "state": "playlist_added",
+      "youtube_id": "7UDJ367RLX8",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 192: 5 Facts You Didn't Know About Chewing Gum",
+      "category": "Amazing Facts",
+      "published_at": "2026-08-29T14:57:31.354669+00:00",
+      "scheduled_publish_at": "2026-09-11T23:00:00Z",
+      "narration_duration_seconds": 106.9,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_192_chewing_gum/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1413591",
+      "music_track_name": "The Epic"
     }
   ],
   "next_fact_number": 191
