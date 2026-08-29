@@ -12,6 +12,7 @@ from engines import gemini
 from engines import music
 from engines import notifications
 from engines import analytics
+from engines import scheduling
 from engines.script_engine import parse_script, ScriptParseError
 from engines.kokoro import generate_narration, NarrationError
 from engines.captions import (
@@ -236,7 +237,20 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
         print(f"Category: {metadata['category']}")
 
         # --- Stage H: upload ---
-        privacy_status = "public" if production else "unlisted"
+        # Scheduling only applies to real production publishes — an
+        # unlisted dev/test run has no publish date to protect, and
+        # scheduling.compute_next_publish_at() anchors on the latest
+        # video's REAL YouTube status, which a throwaway test upload
+        # shouldn't be allowed to perturb.
+        scheduling_enabled = production and config.get("scheduling", {}).get("enabled", False)
+        publish_at = None
+        if scheduling_enabled:
+            current_stage = "Stage H: Computing next scheduled publish time"
+            print(f"== {current_stage} ==")
+            publish_at = scheduling.compute_next_publish_at(publisher, config)
+            print(f"Scheduled publish time: {publish_at}")
+
+        privacy_status = "private" if scheduling_enabled else ("public" if production else "unlisted")
         current_stage = f"Stage H: Uploading to YouTube (privacy={privacy_status})"
         print(f"== {current_stage} ==")
 
@@ -251,9 +265,13 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
             tags=metadata["tags"],
             category_id=config["youtube"].get("category_id", "27"),
             privacy_status=privacy_status,
+            publish_at=publish_at,
         )
         published_at = datetime.now(timezone.utc).isoformat()
-        print(f"Uploaded: https://www.youtube.com/watch?v={video_id}")
+        if publish_at:
+            print(f"Uploaded (private, scheduled for {publish_at}): https://www.youtube.com/watch?v={video_id}")
+        else:
+            print(f"Uploaded: https://www.youtube.com/watch?v={video_id}")
 
         # --- Record + complete topic — done IMMEDIATELY after upload,
         # BEFORE playlist logic. This ordering is deliberate and load-
@@ -268,12 +286,13 @@ def run_pipeline(script_path: str | None = None, production: bool = False):
         numbering.record_video_state(
             fact_number=fact_number,
             topic=topic,
-            state="published" if production else "uploaded",
+            state="scheduled" if scheduling_enabled else ("published" if production else "uploaded"),
             youtube_id=video_id,
             playlist_id=None,  # filled in below if the playlist step succeeds
             title=metadata["title"],
             category=metadata["category"],
             published_at=published_at,
+            scheduled_publish_at=publish_at,  # None unless scheduling_enabled; read back by scheduling.py next run
             narration_duration_seconds=narration["duration_seconds"],
             narration_path=narration["path"],
             related_video_id=None,  # reserved for future Related Video work, not yet automated

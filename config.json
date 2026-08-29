@@ -8,6 +8,10 @@
     "default_playlist": "",
     "auto_create_playlists": true
   },
+  "scheduling": {
+    "enabled": false,
+    "cadence_hours": 24
+  },
   "description": {
     "template": "{intro}\\n\\nIn this video, discover 5 fascinating facts about {topic} that will completely change the way you look at {topic_lower} forever!\\n\\nSubscribe to You Never Knew for more incredible facts, and share in the comments: Which {topic} fact amazed you the most?\\n\\n{hashtags}"
   }
