@@ -32,7 +32,10 @@ def get_next_fact_number() -> int:
     completed_numbers = [
         v["fact_number"] for v in videos
         if v.get("fact_number") is not None
-        and v.get("state") in ("published", "uploaded", "playlist_added")
+        # "scheduled" = privately uploaded with a future status.publishAt
+        # (see engines/scheduling.py) — the fact number is spoken for
+        # even though the video isn't public yet.
+        and v.get("state") in ("published", "uploaded", "playlist_added", "scheduled")
     ]
 
     if completed_numbers:
@@ -43,6 +46,21 @@ def get_next_fact_number() -> int:
         return seed
 
     return 1
+
+
+def get_latest_video_record() -> dict | None:
+    """
+    The video record with the highest fact_number, regardless of state.
+    Used by engines/scheduling.py as the starting point for cross-
+    checking against YouTube's real status before scheduling the next
+    video's publishAt.
+    """
+    data = _load()
+    videos = data.get("videos", [])
+    numbered = [v for v in videos if v.get("fact_number") is not None]
+    if not numbered:
+        return None
+    return max(numbered, key=lambda v: v["fact_number"])
 
 
 def record_video_state(fact_number: int, topic: str, state: str, **extra):
