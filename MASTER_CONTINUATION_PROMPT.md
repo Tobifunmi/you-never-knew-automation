@@ -39,17 +39,15 @@ captions, rendering, background music, metadata, YouTube upload,
 playlist assignment, database recording, 48h+ performance tracking, and
 failure notification all run on GitHub Actions (when triggered — see
 §9 on cron status). Runs locally on Windows for development/testing —
-and see §4b for a real, unresolved open question about which mode
-recent runs have actually been happening in.
+recent runs (facts 187, 188) were confirmed to have been local runs,
+not GitHub Actions runs, despite earlier being described in
+conversation as run "through GitHub" (§4b, resolved).
 
-**16 videos successfully produced so far** (`database/videos.json`,
-fact numbers 173–188), all currently `unlisted` (test/dev mode — the
-channel has not gone to production/public posting yet). **Fact 189
-("Bicycles") was attempted this session and failed** at the background-
-music stage — see §4c. The topic reservation was released for retry
-(the pipeline's normal failure-path behavior), so the next run may
-retry "Bicycles" or pick a new topic, depending on what `topic_engine`
-does with a released-not-completed topic.
+**17 videos successfully produced so far** (`database/videos.json`,
+fact numbers 173–189), all currently `unlisted` (test/dev mode — the
+channel has not gone to production/public posting yet). Fact 189
+("Bicycles") failed once at the background-music stage due to a
+transient Jamendo issue, was retried, and succeeded — see §4c.
 
 ---
 
@@ -62,21 +60,21 @@ does with a released-not-completed topic.
 | Footage (Pixabay → Pexels waterfall) | ✅ Done |
 | Captions (local Whisper, burned-in ASS) | ✅ Done |
 | Render (FFmpeg, 1080×1920) | ✅ Done |
-| Background music (Jamendo, loops short tracks, blocklist-aware) | ⚠️ Works, but see §4c for a real transient failure on Fact 189 and §6 item 20 for a genuine multi-tag-search bug just fixed |
+| Background music (Jamendo, loops short tracks, blocklist-aware) | ✅ Done — `+`-encoding bug fixed and confirmed pushed (§4c/§6 item 20); Fact 189 retried and succeeded on retry, confirming the original failure was transient (§4c(b)) |
 | Topic engine + fact numbering | ✅ Done |
 | Autonomous topic/script generation (Gemini) | ✅ Done, audited |
-| 48h YouTube Analytics feedback loop (Stage A0, feeds topic selection) | ✅ Done — **gating logic corrected this session, see §4a** |
+| 48h YouTube Analytics feedback loop (Stage A0, feeds topic selection) | ✅ Done — **gating logic corrected, confirmed pushed, see §4a** |
 | Category-guessing fix (WordNet: scans every word, not just the first) | ✅ Done — verified 0/13 fall to default (was 6/13) |
 | API usage dashboard: live quotas, call/video correlation, hyperlinks | ✅ Done |
-| Kokoro dashboard card (self-tracked "videos narrated" count) | ✅ Code correct — showed 0 due to a timing gap (tracking code landed after the only two Kokoro videos so far were produced), not a bug; will populate on the next successful narration |
-| Full unattended automation (GitHub Actions) | ⚠️ Cron set to **daily**, deliberately left commented out — `workflow_dispatch` (manual button) only, until the unpublished-video backlog clears. This is an explicit, repeated choice, not an oversight. |
-| Email failure notifications (Gmail SMTP) | ⚠️ **Regressed this session** — see §4c. Previously confirmed working; failed with a local connection timeout on the Fact 189 failure. Not yet diagnosed further. |
+| Kokoro dashboard card (self-tracked "videos narrated" count) | ✅ Done, confirmed — `usage_log.json` now has a populated `kokoro` key and the dashboard reflects it correctly |
+| Full unattended automation (GitHub Actions) | ⚠️ Cron set to **daily**, deliberately left commented out — `workflow_dispatch` (manual button) only, until the unpublished-video backlog clears. Explicitly re-confirmed this session: **do not uncomment yet.** |
+| Email failure notifications (Gmail SMTP) | ⚠️ Still unresolved — the `WinError 10060` from Fact 189's first attempt hasn't recurred since (Fact 189's retry succeeded, so no failure email was needed), so there's no fresh data either way. User's stance: revisit only if it happens again. Not actively being chased. |
 | Playlist/record ordering bug | ✅ Fixed (historical) |
 | CI secret name mismatch (`TOKEN_JSON` vs `YOUTUBE_TOKEN_JSON`) | ✅ Fixed |
 | Persistent Jamendo track blocklist | ✅ Done, in active use, currently tiny (1 track) |
 | Shorts "Related video" End Screen | 🔜 Deliberately deferred |
 | Google AI Plus/Pro student offer | ℹ️ Researched, concluded **not needed** — see §8b |
-| **Local-vs-GitHub-Actions provenance of recent videos** | ❓ Open question, not resolved this session — see §4b |
+| **Local-vs-GitHub-Actions provenance of recent videos** | ✅ Resolved — see §4b. It was a local run; the user misspoke earlier in referring to it as a GitHub Actions run. |
 
 ---
 
@@ -297,12 +295,21 @@ performance check on actual live-publish time, not upload time").
 
 ---
 
-## 4b. Open question: are recent runs actually going through GitHub Actions?
+## 4b. Local-vs-GitHub-Actions provenance — RESOLVED
 
-**Not resolved this session — worth settling before trusting the
-"unattended automation" story.** `database/videos.json`'s
-`narration_path` field reveals which machine actually ran a given
-pipeline invocation:
+**Resolved.** The user confirmed directly: the run that produced Facts
+187 and 188 (and was earlier described in conversation as "one run
+through GitHub") was in fact a **local** run — the user misspoke
+earlier, not a pipeline bug or a workflow silently failing. The
+`workflow_dispatch` / GitHub Actions path itself remains untested
+recently as far as this document's evidence goes; the local-vs-Actions
+*mystery* specifically is closed, but that doesn't by itself confirm
+Actions currently works end-to-end — just that these particular
+records were never claiming to be an Actions run in the first place.
+Original reasoning preserved below for context.
+
+`database/videos.json`'s `narration_path` field reveals which machine
+actually ran a given pipeline invocation:
 - Facts 178, 179, 180, 184 show real GitHub Actions runner paths
   (`/home/runner/work/you-never-knew-automation/you-never-knew-
   automation/work/Fact_NNN_.../narration.mp3`).
@@ -330,7 +337,7 @@ uncommenting the daily cron (§10).
 
 ---
 
-## 4c. Fact 189 ("Bicycles") — real failed run, THIS session
+## 4c. Fact 189 ("Bicycles") — failed once, retried successfully, THIS session
 
 Full run log (local, `python main.py run`, no `--production`) supplied
 by the user:
@@ -360,14 +367,19 @@ by the user:
    local network/firewall-level SMTP connection timeout (port 465,
    `smtp.gmail.com`), not a code bug — looks like something on the
    user's Windows machine (firewall, ISP, VPN) is currently blocking
-   that outbound connection. **Not diagnosed further this session —
-   worth checking Windows Defender Firewall / router / ISP port-465
-   blocking if this recurs, especially since it means failures during
-   unattended runs currently would NOT be reported.**
+   that outbound connection. **User's explicit decision: not
+   investigating unless it happens again** (Fact 189's retry succeeded
+   with no failure to email, so there's no fresh data either way).
+   Still worth remembering it means failures during unattended runs
+   currently would NOT be reliably reported, if that ever becomes
+   relevant again.
 9. Pipeline correctly released the "Bicycles" topic reservation for
    retry and exited cleanly (no partial/corrupt state left behind —
    the existing failure-path design, from historical bug fix §6 item
    4, worked as intended here).
+10. **Retried, this session, after the analysis below** — completed
+    successfully end-to-end, including upload. Fact 189 is now a real
+    published (unlisted) video, bringing the total to 17 (§1).
 
 **Two separate things came out of investigating the Jamendo failure:**
 
@@ -403,22 +415,19 @@ multi-tag search silently matching nothing"). **Also documented in
 `README.md`'s Known Limitations section** (worth remembering as a
 general gotcha for any future multi-value API param, not just this one
 call site) and in the `music.py` structure comment in the repo tree.
-**Patch delivered; application/push status not yet confirmed by the
-user as of this document's writing — verify `git log` on `music.py`
-in any follow-up before assuming it's live.**
+**Confirmed applied and pushed by the user** — live on `main`.
 
-**(b) Tonight's specific failure is likely NOT explained by (a).** The
-fallback tier (`tags="cinematic"`, a single tag, never touched by the
-`+`-encoding bug) *also* came back with nothing usable. The blocklist
-is tiny (1 track: `jamendo:1073214`, "Audio has copyright claim") —
-nowhere near enough to exhaust the top-20-by-popularity result set on
-its own. Most likely a one-off Jamendo-side hiccup (rate limit,
-transient catalog gap, or bad luck in exactly which 20 tracks came
-back) rather than a code bug. **Recommended next step: just retry the
-run** — the topic was already released for that. If it fails the same
-way again on retry, that would be real signal worth investigating
-further (e.g. temporarily logging the raw Jamendo API response body on
-a `MusicError`, or checking Jamendo's own status page).
+**(b) The original failure did not recur on retry — confirmed
+transient.** The user retried the Fact 189 ("Bicycles") run and it
+completed successfully end-to-end (narration through upload). This
+confirms the working theory from earlier: the fallback-tier failure
+(plain `"cinematic"`, unaffected by the `+`-encoding bug) was a one-off
+Jamendo-side hiccup, not a deeper code issue. **User's explicit
+decision: not investigating further unless it happens again** — if the
+same `MusicError` recurs on a future run, that's the point at which
+it's worth real investigation (e.g. logging the raw Jamendo API
+response body on a `MusicError`, checking Jamendo's status page). Until
+then, treat it as resolved.
 
 ---
 
@@ -645,16 +654,18 @@ unchanged. Item 20 new this session.)*
     see §4 for full detail. Not a "bug" exactly, but listed here for
     chronological completeness since it triggered cascading dashboard
     changes (items above).
-20. **NEW — Jamendo `VIBE_MAP` multi-tag searches silently broken by
+20. **Jamendo `VIBE_MAP` multi-tag searches silently broken by
     `requests`' `+`-encoding behavior, since the tag system was
     introduced.** Full detail in §4c(a). Fixed by switching `VIBE_MAP`
-    from `+`-joined to space-joined tag strings. Patch delivered;
-    application/push not yet confirmed as of this document.
-21. **NEW, UNRESOLVED — Gmail SMTP failure notifications timing out
-    locally.** `[WinError 10060]` on the Fact 189 failure — see §4c
-    item 8. Not yet diagnosed (likely local firewall/ISP/VPN blocking
-    outbound port 465, not a code issue) — flagged for the next
-    session, not fixed.
+    from `+`-joined to space-joined tag strings. **Confirmed applied
+    and pushed.** Fact 189 retried successfully afterward, which also
+    confirms the original fallback-tier failure was a one-off, not a
+    second bug (§4c(b)).
+21. **DEFERRED, not investigating unless it recurs — Gmail SMTP
+    failure notifications timing out locally.** `[WinError 10060]` on
+    the Fact 189 failure — see §4c item 8. Likely local firewall/ISP/
+    VPN blocking outbound port 465, not a code issue. Explicit user
+    call: only revisit if it happens again.
 
 ---
 
@@ -823,8 +834,7 @@ live-publish-time analytics gating explanation (§4a) in the Analytics
 Feedback Loop section and the `videos.json` field list, and the
 Jamendo `+`-encoding bug + fix (§4c(a)) in the `music.py` structure
 comment and a new Known Limitations entry. Delivered as a `git am`
-patch; **application/push status not yet confirmed by the user** as of
-this document's writing.
+patch; **confirmed applied and pushed by the user.**
 
 **A committed copy of an earlier version of this exact document**
 lives at `/MASTER_CONTINUATION_PROMPT.md` in the automation repo root
@@ -868,10 +878,16 @@ this project's actual history:
   SMTP-over-OAuth precedents.
 - **Be honest about what was and wasn't actually verified**, including
   patch application status: this document explicitly distinguishes
-  "patch delivered" from "confirmed applied and pushed" for each of
-  this session's three changes (analytics.py — confirmed; music.py —
-  not yet confirmed; README.md — not yet confirmed) rather than
-  assuming success.
+  "patch delivered" from "confirmed applied and pushed" for each
+  change rather than assuming success. All three of this session's
+  patches (analytics.py, music.py, README.md) are now confirmed
+  applied and pushed.
+- **Take an explicit user decision not to chase something further at
+  face value, and reflect it accurately rather than re-flagging it as
+  still-urgent.** Both the SMTP timeout and the "what if Jamendo fails
+  again" question got an explicit "only if it recurs" from the user —
+  this document marks both as deliberately deferred, not as open bugs
+  needing attention next session.
 - **Isolate failure domains.** A failure in one stage should never
   retroactively invalidate work that already genuinely succeeded —
   Fact 189's Kokoro narration, footage, and captions all genuinely
@@ -893,29 +909,32 @@ this project's actual history:
 
 ---
 
-## 13. Immediate open items for the next conversation
+## 13. Where things stand — prior open items, now resolved
 
-In rough priority order:
+All six open items from the previous version of this document were
+checked off in a single follow-up:
 
-1. **Confirm the two pending patches (music.py's Jamendo fix, and the
-   README update) were actually applied via `git am` and pushed.** The
-   analytics.py patch (§4a) was confirmed; these two were not, as of
-   this document.
-2. **Retry Fact 189 ("Bicycles")** — topic was released, should be
-   pickable again on the next run. Watch whether the Jamendo failure
-   recurs; if it does, that upgrades from "probably transient" to
-   "worth real investigation" (§4c(b)).
-3. **Diagnose the Gmail SMTP `WinError 10060`** (§6 item 21, §4c item
-   8) — currently unreported failures during unattended runs is a real
-   gap, especially relevant before ever enabling the daily cron.
-4. **Settle the local-vs-Actions provenance question (§4b)** — has
-   `workflow_dispatch` actually been run successfully recently? Worth
-   doing one explicit, watched Actions run and checking the resulting
-   `narration_path` to confirm.
-5. **Check whether `usage_log.json` now has a `kokoro` key** after
-   Fact 189's narration (which ran after the tracking code landed) —
-   confirms the dashboard will populate correctly, or reveals a fresh
-   regression if it's still empty.
-6. Once 1–4 are settled, re-evaluate whether the unpublished-video
-   backlog has cleared enough to reconsider uncommenting the daily
-   cron (still an explicit "not yet" as of this document).
+1. **Both pending patches (music.py's Jamendo fix, README update)** —
+   confirmed applied via `git am` and pushed. All three of this
+   session's patches (analytics.py, music.py, README.md) are now live
+   on `main`.
+2. **Fact 189 ("Bicycles") retry** — ran successfully. Confirms the
+   original Jamendo fallback-tier failure was transient, not a deeper
+   bug (§4c(b)).
+3. **Gmail SMTP `WinError 10060`** — explicit user call: not
+   investigating unless it recurs. Hasn't recurred (no failure to
+   email since the successful retry). Deliberately deferred, not
+   actively tracked.
+4. **Local-vs-Actions provenance** — resolved. Confirmed a
+   misstatement earlier in conversation, not a real ambiguity: the run
+   was local, described inaccurately as "through GitHub" at the time.
+5. **`usage_log.json`'s `kokoro` key** — confirmed present and the
+   dashboard now reflects it correctly.
+6. **Daily cron** — explicit "don't uncomment yet," reconfirmed.
+   Backlog-clearing is still the stated condition before revisiting
+   this.
+
+**No new open items as of this document.** The project is in a
+settled, fully-resolved state at this checkpoint — any follow-up
+conversation can treat everything above as current ground truth
+without a pending-verification list to work through first.
