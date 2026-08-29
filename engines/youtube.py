@@ -100,9 +100,34 @@ class YouTubePublisher:
         tags: list[str],
         category_id: str = "27",
         privacy_status: str = "unlisted",
+        publish_at: Optional[str] = None,
     ) -> str:
+        """
+        `publish_at`, when given, is an ISO 8601 UTC timestamp
+        ("...Z"-suffixed) for YouTube's own `status.publishAt`. This is
+        real scheduling — YouTube itself flips the video to public at
+        that exact timestamp — as opposed to the old approach of
+        uploading public/unlisted immediately and manually re-scheduling
+        by hand afterward in Studio, which is what caused a video to
+        briefly go live before its intended date (and then, once
+        re-scheduled, keep leaning on that original live timestamp).
+
+        Passing `publish_at` forces `privacyStatus` to "private"
+        regardless of what `privacy_status` was given — YouTube requires
+        a scheduled video to be private until `publishAt` arrives, and
+        rejects `publishAt` on any other privacyStatus.
+        """
         if self.youtube is None:
             self.authenticate()
+
+        effective_privacy = "private" if publish_at else privacy_status
+
+        status: dict = {
+            "privacyStatus": effective_privacy,
+            "selfDeclaredMadeForKids": False,
+        }
+        if publish_at:
+            status["publishAt"] = publish_at
 
         body = {
             "snippet": {
@@ -111,10 +136,7 @@ class YouTubePublisher:
                 "tags": tags,
                 "categoryId": category_id,
             },
-            "status": {
-                "privacyStatus": privacy_status,
-                "selfDeclaredMadeForKids": False,
-            },
+            "status": status,
         }
 
         media = MediaFileUpload(
@@ -136,6 +158,45 @@ class YouTubePublisher:
             _, response = request.next_chunk()
 
         return response["id"]
+
+    def get_video_status(self, video_id: str) -> Optional[dict]:
+        """
+        Raw `status` + `snippet` for a single video via the Data API.
+        Returns None if the video doesn't exist or the lookup fails, so
+        callers can use a plain `if status:` check.
+
+        Used by engines/scheduling.py to verify the local database's
+        idea of the most recently scheduled video against what YouTube
+        actually has on record, before trusting it to anchor the next
+        video's publish time. Mirrors the pattern already established in
+        engines/analytics.py's `_get_live_publish_info` (never trust
+        local state alone for anything that gates a real publish
+        action) — kept as a separate public method here rather than
+        reusing that private helper, since this needs the full
+        status/snippet payload rather than the reduced is_public shape
+        analytics.py needs.
+        """
+        if self.youtube is None:
+            self.authenticate()
+
+        try:
+            usage_tracker.log_call("youtube_data_status")
+            response = self.youtube.videos().list(
+                part="status,snippet",
+                id=video_id,
+            ).execute()
+        except HttpError as e:
+            print(f"youtube: status check failed for {video_id}: {e}")
+            return None
+
+        items = response.get("items", [])
+        if not items:
+            return None
+
+        return {
+            "status": items[0].get("status", {}),
+            "snippet": items[0].get("snippet", {}),
+        }
 
     def list_playlists(self) -> list[dict]:
         if self.youtube is None:
