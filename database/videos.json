@@ -81,7 +81,15 @@
       "narration_duration_seconds": 103.1,
       "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_177_geysers\\narration.mp3",
       "related_video_id": null,
-      "live_published_at": "2026-08-28T01:11:54Z"
+      "live_published_at": "2026-08-28T01:11:54Z",
+      "performance": {
+        "views": 7,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 100.41,
+        "estimatedMinutesWatched": 1
+      },
+      "performance_captured_at": "2026-09-12T19:37:04.865882+00:00"
     },
     {
       "fact_number": 178,
@@ -111,7 +119,16 @@
       "title": "Fact 179: 5 Facts You Didn't Know About Taj Mahal",
       "narration_duration_seconds": 102.66,
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_178_taj_mahal/narration.mp3",
-      "related_video_id": null
+      "related_video_id": null,
+      "live_published_at": "2026-08-20T21:22:32Z",
+      "performance": {
+        "views": 1,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 12.9,
+        "estimatedMinutesWatched": 0
+      },
+      "performance_captured_at": "2026-09-12T19:37:04.865882+00:00"
     },
     {
       "fact_number": 180,
@@ -122,7 +139,16 @@
       "title": "Fact 180: 5 Facts You Didn't Know About The Dead Sea",
       "narration_duration_seconds": 95.66,
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_179_the_dead_sea/narration.mp3",
-      "related_video_id": null
+      "related_video_id": null,
+      "live_published_at": "2026-08-20T22:55:44Z",
+      "performance": {
+        "views": 1,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 84.88,
+        "estimatedMinutesWatched": 1
+      },
+      "performance_captured_at": "2026-09-12T19:37:04.865882+00:00"
     },
     {
       "fact_number": 181,
@@ -133,7 +159,16 @@
       "title": "Fact 181: 5 Facts You Didn't Know About The Statue of Liberty",
       "narration_duration_seconds": 117.39,
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_180_the_statue_of_liberty/narration.mp3",
-      "related_video_id": null
+      "related_video_id": null,
+      "live_published_at": "2026-08-31T23:00:08Z",
+      "performance": {
+        "views": 337,
+        "likes": 12,
+        "comments": 0,
+        "averageViewPercentage": 119.75,
+        "estimatedMinutesWatched": 430
+      },
+      "performance_captured_at": "2026-09-12T19:37:04.865882+00:00"
     },
     {
       "fact_number": 182,
@@ -144,7 +179,16 @@
       "title": "Fact 182: 5 Facts You Didn't Know About Typewriters",
       "narration_duration_seconds": 128.5,
       "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_182_typewriters\\narration.mp3",
-      "related_video_id": null
+      "related_video_id": null,
+      "live_published_at": "2026-09-01T23:00:03Z",
+      "performance": {
+        "views": 1,
+        "likes": 1,
+        "comments": 0,
+        "averageViewPercentage": 78.54,
+        "estimatedMinutesWatched": 1
+      },
+      "performance_captured_at": "2026-09-12T19:37:04.865882+00:00"
     },
     {
       "fact_number": 183,
@@ -155,7 +199,16 @@
       "title": "Fact 183: 5 Facts You Didn't Know About Salar de Uyuni",
       "narration_duration_seconds": 118.51,
       "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_183_salar_de_uyuni\\narration.mp3",
-      "related_video_id": null
+      "related_video_id": null,
+      "live_published_at": "2026-09-02T23:00:18Z",
+      "performance": {
+        "views": 29,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 49.46,
+        "estimatedMinutesWatched": 16
+      },
+      "performance_captured_at": "2026-09-12T19:37:04.865882+00:00"
     },
     {
       "fact_number": 184,
@@ -168,7 +221,16 @@
       "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_184_giants_causeway\\narration.mp3",
       "related_video_id": null,
       "music_track_id": "jamendo:1095114",
-      "music_track_name": "Best Route to a Dream"
+      "music_track_name": "Best Route to a Dream",
+      "live_published_at": "2026-09-03T23:00:12Z",
+      "performance": {
+        "views": 36,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 52.32,
+        "estimatedMinutesWatched": 29
+      },
+      "performance_captured_at": "2026-09-12T19:37:04.865882+00:00"
     },
     {
       "fact_number": 185,
@@ -206,7 +268,16 @@
       "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_186_machu_picchu\\narration.mp3",
       "related_video_id": null,
       "music_track_id": "jamendo:1073219",
-      "music_track_name": "Dj Rostej - Secret Sorrow"
+      "music_track_name": "Dj Rostej - Secret Sorrow",
+      "live_published_at": "2026-09-05T23:00:35Z",
+      "performance": {
+        "views": 71,
+        "likes": 2,
+        "comments": 0,
+        "averageViewPercentage": 90.87,
+        "estimatedMinutesWatched": 87
+      },
+      "performance_captured_at": "2026-09-12T19:37:04.865882+00:00"
     },
     {
       "fact_number": 187,
@@ -221,7 +292,16 @@
       "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_187_solar_eclipses\\narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:843407",
-      "music_track_name": "the end of the innocence"
+      "music_track_name": "the end of the innocence",
+      "live_published_at": "2026-09-06T23:00:34Z",
+      "performance": {
+        "views": 345,
+        "likes": 1,
+        "comments": 0,
+        "averageViewPercentage": 47.28,
+        "estimatedMinutesWatched": 154
+      },
+      "performance_captured_at": "2026-09-12T19:37:04.865882+00:00"
     },
     {
       "fact_number": 188,
@@ -236,7 +316,16 @@
       "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_188_stonehenge\\narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095114",
-      "music_track_name": "Best Route to a Dream"
+      "music_track_name": "Best Route to a Dream",
+      "live_published_at": "2026-09-07T23:00:14Z",
+      "performance": {
+        "views": 34,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 32.91,
+        "estimatedMinutesWatched": 13
+      },
+      "performance_captured_at": "2026-09-12T19:37:04.865882+00:00"
     },
     {
       "fact_number": 189,
@@ -244,7 +333,16 @@
       "state": "playlist_added",
       "youtube_id": "rfdqx4rCdYM",
       "title": "Fact 189: 5 Facts You Didn't Know About The Panama Canal",
-      "category": "Nature Facts"
+      "category": "Nature Facts",
+      "live_published_at": "2026-08-28T09:16:28Z",
+      "performance": {
+        "views": 3,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 11.06,
+        "estimatedMinutesWatched": 0
+      },
+      "performance_captured_at": "2026-09-12T19:37:04.865882+00:00"
     },
     {
       "fact_number": 190,
@@ -259,7 +357,16 @@
       "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_190_bicycles\\narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1426518",
-      "music_track_name": "Incandescent"
+      "music_track_name": "Incandescent",
+      "live_published_at": "2026-09-09T23:00:24Z",
+      "performance": {
+        "views": 115,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 14.27,
+        "estimatedMinutesWatched": 16
+      },
+      "performance_captured_at": "2026-09-12T19:37:04.865882+00:00"
     },
     {
       "fact_number": 191,
@@ -275,7 +382,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_191_popcorn/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1322713",
-      "music_track_name": "Epic Cinematic Score"
+      "music_track_name": "Epic Cinematic Score",
+      "live_published_at": "2026-09-10T23:00:10Z"
     },
     {
       "fact_number": 192,
@@ -291,7 +399,24 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_192_chewing_gum/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1413591",
-      "music_track_name": "The Epic"
+      "music_track_name": "The Epic",
+      "live_published_at": "2026-09-11T23:00:34Z"
+    },
+    {
+      "fact_number": 193,
+      "topic": "Quicksand",
+      "state": "playlist_added",
+      "youtube_id": "5rgy6OkGiQE",
+      "playlist_id": "PLOOM2rEPGwC0",
+      "title": "Fact 193: 5 Facts You Didn't Know About Quicksand",
+      "category": "Nature Facts",
+      "published_at": "2026-09-12T19:50:44.919807+00:00",
+      "scheduled_publish_at": null,
+      "narration_duration_seconds": 102.95,
+      "narration_path": "C:\\Users\\user\\Documents\\You Never Knew\\work\\Fact_193_quicksand\\narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095113",
+      "music_track_name": "Call me Helen"
     }
   ],
   "next_fact_number": 191
