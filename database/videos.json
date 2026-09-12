@@ -417,6 +417,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095113",
       "music_track_name": "Call me Helen"
+    },
+    {
+      "fact_number": 194,
+      "topic": "Pistol Shrimp",
+      "state": "playlist_added",
+      "youtube_id": "ap4nsuIDBxg",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 194: 5 Facts You Didn't Know About Pistol Shrimp",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-09-12T20:36:38.318304+00:00",
+      "scheduled_publish_at": "2026-09-13T23:00:00Z",
+      "narration_duration_seconds": 104.0,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_194_pistol_shrimp/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1568720",
+      "music_track_name": "Entering"
     }
   ],
   "next_fact_number": 191
