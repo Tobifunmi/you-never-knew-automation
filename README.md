@@ -3,12 +3,13 @@
 Fully automated production and publishing pipeline for the YouTube channel
 **You Never Knew** ("5 Facts You Didn't Know About [Topic]" Shorts). Topic
 selection, script writing, narration, footage, captions, rendering,
-metadata, YouTube upload, and playlist assignment all run **unattended on
-GitHub Actions**.
+metadata, YouTube upload, scheduling, and playlist assignment all run
+**unattended on GitHub Actions**, triggered daily by an external scheduler.
 
 This started as a manual-input starter project (see "Original plan" below)
-but has since grown well past that — most stages listed there are done.
-This README reflects the real current state, not the original roadmap.
+but has since grown well past that — every stage listed there is done,
+including full unattended scheduling. This README reflects the real
+current state, not the original roadmap.
 
 Monitor Credit Usage Here - https://you-never-knew.netlify.app/
 
@@ -16,8 +17,8 @@ Monitor Credit Usage Here - https://you-never-knew.netlify.app/
 
 | Stage | Status |
 |---|---|
-| YouTube publisher (OAuth, upload, playlists, DB recording) | ✅ Done |
-| Narration (Kokoro-82M, local/offline, no API key or char cap) | ✅ Done — swapped from ElevenLabs this session |
+| YouTube publisher (OAuth, upload, scheduling, playlists, DB recording) | ✅ Done |
+| Narration (Kokoro-82M, local/offline, no API key or char cap) | ✅ Done |
 | Footage (Pixabay → Pexels waterfall, relevance-checked, variety-enforced) | ✅ Done |
 | Captions (local Whisper, burned-in ASS) | ✅ Done |
 | Render (FFmpeg, 1080×1920) | ✅ Done |
@@ -25,9 +26,49 @@ Monitor Credit Usage Here - https://you-never-knew.netlify.app/
 | Topic engine + fact numbering | ✅ Done |
 | Autonomous topic/script generation (Gemini) | ✅ Done |
 | 48h YouTube Analytics feedback loop (feeds topic selection) | ✅ Done |
+| Real YouTube scheduling (`status.publishAt`, one-video-ahead buffer) | ✅ Done |
 | API usage dashboard (live quotas, call/video correlation, self-tracked counts) | ✅ Done |
-| Full unattended automation (GitHub Actions) | ⚠️ `workflow_dispatch` (manual) only — cron is set to **daily** but deliberately left commented out until the unpublished-video backlog clears |
+| Full unattended automation | ✅ **Live** — see Trigger below |
 | Shorts "Related video" End Screen automation | 🔜 Future work — see below |
+
+## Scheduling
+
+Every production run (`--production`) that has `scheduling.enabled: true`
+in `config.json` uploads its video as **private with a real
+`status.publishAt`** set, rather than going public immediately.
+`engines/scheduling.py :: compute_next_publish_at()` decides that timestamp:
+
+1. Looks up the most recently recorded video. If there isn't one yet (a
+   genuinely fresh channel), the next video is scheduled for
+   `now + cadence_hours`.
+2. Otherwise, it doesn't trust the local database alone — it calls
+   `publisher.get_video_status()` to ask YouTube directly what that video's
+   real `privacyStatus` currently is.
+3. Anchors on whichever of these is true: the video's real `publishAt` (if
+   it's still scheduled/private), its real `snippet.publishedAt` (if it's
+   already gone public), or `now` (if it's unlisted or was manually
+   un-scheduled in Studio).
+4. Cross-checks the locally recorded `scheduled_publish_at` against what
+   YouTube actually reports. A mismatch (e.g. someone manually rescheduled
+   the video in Studio) raises `SchedulingDriftError` rather than silently
+   scheduling the next video on top of a stale assumption.
+5. Returns `max(anchor, now) + cadence_hours` (currently 24h) as the next
+   `publishAt`.
+
+**Net effect**: the channel always keeps roughly one video scheduled ahead
+of whatever's currently live, so a daily trigger never depends on a human
+noticing an empty queue in time. `engines/youtube.py :: upload_video()`
+enforces the YouTube-side rule that a `publishAt` forces `privacyStatus`
+to `"private"` regardless of what was otherwise requested — YouTube itself
+rejects `publishAt` on any other status.
+
+**Known limitation, by design, not a bug**: even on a completely empty
+backlog, a production run with scheduling enabled will schedule the video
+`cadence_hours` out — there's no path that publishes a production video
+instantly live. If the buffer is ever deliberately drained to zero and you
+want the very next video to go live immediately instead of waiting a full
+cadence period, that would need a small explicit change to this logic; it
+doesn't happen automatically today.
 
 ## Analytics feedback loop
 
@@ -57,11 +98,11 @@ means "no context this run" — not a pipeline failure.
 **The 48h clock is measured from the video's actual live-publish time,
 not upload-completion time.** `published_at` (set in `main.py` right
 after `upload_video()` returns) only reflects when the file finished
-uploading — for a scheduled video that can be well before it's
-actually public. Before counting a video eligible, `analytics.py` now
-confirms its real `privacyStatus` via the YouTube Data API; a
-still-private/scheduled video is skipped (not "not old enough yet" —
-genuinely not live). Once confirmed public, YouTube's own
+uploading — for a scheduled video (see Scheduling above) that can be
+well before it's actually public. Before counting a video eligible,
+`analytics.py` confirms its real `privacyStatus` via the YouTube Data
+API; a still-private/scheduled video is skipped (not "not old enough
+yet" — genuinely not live). Once confirmed public, YouTube's own
 `snippet.publishedAt` is cached on the record as `live_published_at`
 and used for the 48h window from then on, so this only costs one
 extra read call per video, the first time it's checked.
@@ -75,11 +116,7 @@ Secrets; both need the relevant API keys set independently).
 
 - **Kokoro (narration)**: not a live quota check — Kokoro runs 100%
   locally with no account or cap to query. The card just reads the
-  self-tracked "videos narrated" count from `usage_log.json`, mainly
-  so the dashboard shows *something* real for the engine actually
-  narrating every video, instead of a stale ElevenLabs number nothing
-  calls anymore (ElevenLabs was replaced this session — see Known
-  limitations).
+  self-tracked "videos narrated" count from `usage_log.json`.
 - **Pexels / Pixabay**: live quota pulled directly from each provider
   at page load, plus a self-tracked "N calls across M video(s)" note
   layered on top — useful for spotting a video that burned unusual
@@ -99,19 +136,40 @@ Secrets; both need the relevant API keys set independently).
 
 ## Trigger
 
-Currently `workflow_dispatch` (manual) only. `daily-video.yml`'s cron
-is set to **daily**, but deliberately left commented out:
+`daily-video.yml` only declares `workflow_dispatch:` (the manual "Run
+workflow" button) as its trigger — GitHub's own `schedule:` cron is
+**deliberately left commented out and unused**:
 
 ```yaml
   #schedule:
   #- cron: '0 10 * * *'
 ```
 
-This is intentional, not an oversight — there's an unpublished-video
-backlog to clear before daily posting goes live. Activating it later
-is a one-line change (delete the two `#`s). Confirm this file's actual
-state before relying on either "on" or "off" — it's been wrong in both
-directions before (see Known limitations).
+This is not an oversight and not a "not ready yet" placeholder — GitHub
+Actions' built-in cron scheduler is known to be unreliable (delayed or
+skipped runs, especially on lower-activity repos), so the actual daily
+trigger comes from an external service instead: **[cron-job.org](https://cron-job.org)**
+calls the workflow's `dispatches` REST API on a schedule, which GitHub
+treats identically to a human clicking "Run workflow."
+
+**cron-job.org job config**:
+- URL: `https://api.github.com/repos/Tobifunmi/you-never-knew-automation/actions/workflows/daily-video.yml/dispatches`
+- Method: `POST`
+- Headers: `Authorization: Bearer <fine-grained GitHub PAT>`,
+  `Accept: application/vnd.github+json`, `X-GitHub-Api-Version: 2022-11-28`,
+  `Content-Type: application/json`
+- Body: `{"ref": "main"}`
+
+The PAT is fine-grained, scoped to just this repo, with **Actions: Read
+and write** permission, and lives only in cron-job.org's job config — never
+committed here. **Check its expiration date periodically**; a lapsed token
+will silently break the daily trigger with no in-repo symptom until the
+Actions tab shows a gap.
+
+If `daily-video.yml` itself is ever modified, this trigger mechanism
+doesn't change — cron-job.org is calling the workflow by filename via the
+API, not depending on anything inside the file except that
+`workflow_dispatch:` stays declared.
 
 ## Requirements
 
@@ -126,6 +184,14 @@ directions before (see Known limitations).
 - A Google Cloud project with **YouTube Data API v3** and **YouTube
   Analytics API** both enabled, OAuth 2.0 Desktop App credentials with
   the scopes in `engines/youtube.py::SCOPES` (upload + `yt-analytics.readonly`)
+- **Google Auth Platform publishing status must be "In production"**, not
+  "Testing" — Google forcibly expires refresh tokens after 7 days for
+  apps left in Testing, which will silently break every scheduled/CI run
+  once the token dies. Moving to "In production" does NOT require full
+  Google verification for a personal-use app under the 100-user cap; it
+  just means an "unverified app" warning screen appears on manual re-auth
+  (click "Advanced" → "Go to [app name] (unsafe)" to proceed) — expected
+  and harmless here, not worth pursuing full verification (CASA) for.
 - API keys: `PEXELS_API_KEY`, `PIXABAY_API_KEY`, `JAMENDO_CLIENT_ID`,
   `GEMINI_API_KEY` (`ELEVENLABS_API_KEY`/`ELEVENLABS_VOICE_ID` no longer
   required — kept as GitHub Secrets harmlessly, but unused since the
@@ -139,14 +205,21 @@ directions before (see Known limitations).
   categorization
 - A YouTube channel with advanced features enabled (needed eventually for
   the Related Video work)
+- A [cron-job.org](https://cron-job.org) account (free) if you want the
+  daily trigger — see Trigger above. Not required for local/manual runs.
 
 Do not commit:
 - `credentials.json`
-- `token.json`
+- `token.json` / `token.json.bak` (or any other backup/rename of the
+  token file — one such file briefly entered local git history with real
+  credentials inside before being caught by GitHub's push protection;
+  everything matching `token.json*` should stay in `.gitignore`)
 - `.env`
 - API keys
 - refresh tokens
 - `storage_state.json` (if/when the Related Video automation lands — see below)
+- Any GitHub PAT used for the cron-job.org trigger (lives only in
+  cron-job.org's job config, never in this repo)
 
 ## Install
 
@@ -168,6 +241,10 @@ python main.py auth
 ```
 
 The first run opens Google's OAuth consent screen and creates `token.json`.
+If a `token.json` already exists but is dead (expired/revoked), **delete
+it first** — `authenticate()` tries to refresh whatever's on disk before
+ever falling back to a fresh interactive login, so a dead token will
+crash instead of prompting a new sign-in.
 
 ## Running the pipeline
 
@@ -175,10 +252,11 @@ The first run opens Google's OAuth consent screen and creates `token.json`.
 python main.py run test_assets\SomeScript.txt
 ```
 
-Add `--production` for a real (not `unlisted`) run — this also switches
+Add `--production` for a real (not `unlisted`) run. This also switches
 YouTube auth to fail loudly instead of hanging if `token.json` ever needs
-re-authentication, since that would otherwise hang a headless CI runner
-indefinitely.
+re-authentication (important for a headless CI runner), and — if
+`scheduling.enabled` is true in `config.json` — routes the upload through
+the scheduler (see Scheduling above) instead of publishing immediately.
 
 Autonomous mode (Gemini picks the topic and writes the script, no input
 file) is also supported — see `main.py`'s `run` subcommand.
@@ -187,8 +265,12 @@ file) is also supported — see `main.py`'s `run` subcommand.
 
 ```text
 you-never-knew-automation/
-├── main.py                    — orchestrator, chains every pipeline stage
-├── config.json / config.example.json
+├── main.py                    — orchestrator, chains every pipeline stage;
+│                                 Stage H computes the scheduling publish
+│                                 time (if enabled) before uploading
+├── config.json / config.example.json — includes a "scheduling":
+│                                 {"enabled": bool, "cadence_hours": int}
+│                                 block controlling the behavior above
 ├── requirements.txt
 ├── .env                       — LOCAL ONLY, gitignored
 ├── credentials.json           — Google OAuth desktop app credential
@@ -201,9 +283,13 @@ you-never-knew-automation/
 │   │                             time)/category (for analytics grouping),
 │   │                             live_published_at (actual YouTube go-live
 │   │                             time, confirmed + cached by analytics.py
-│   │                             the first time a video is seen public) and,
-│   │                             once a video clears 48h from THAT
-│   │                             timestamp, a performance block
+│   │                             the first time a video is seen public),
+│   │                             scheduled_publish_at (set when a video is
+│   │                             uploaded via the scheduler, read back by
+│   │                             scheduling.py on the next run to anchor
+│   │                             the following video), and, once a video
+│   │                             clears 48h from live_published_at, a
+│   │                             performance block
 │   ├── usage_log.json         — self-tracked API call counts (Jamendo/
 │   │                             Gemini/YouTube/Kokoro/Pexels/Pixabay),
 │   │                             written by engines/usage_tracker.py,
@@ -211,7 +297,9 @@ you-never-knew-automation/
 │   └── playlists.json         — legacy, not actively used
 ├── engines/
 │   ├── topic_engine.py        — duplicate checking, reserve/complete/release
-│   ├── numbering.py           — fact number assignment, state recording
+│   ├── numbering.py           — fact number assignment, state recording,
+│   │                             get_latest_video_record() (used by
+│   │                             scheduling.py to find the anchor video)
 │   ├── script_engine.py       — parses human-written script text files
 │   ├── gemini.py              — autonomous topic + script generation,
 │   │                             accepts an optional performance-context
@@ -219,6 +307,16 @@ you-never-knew-automation/
 │   ├── analytics.py           — 48h+ YouTube Analytics capture per video,
 │   │                             builds the retention-by-category digest
 │   │                             fed into gemini.py's topic prompt
+│   ├── scheduling.py          — compute_next_publish_at(): decides the
+│   │                             next video's status.publishAt so it lands
+│   │                             cadence_hours after the latest scheduled/
+│   │                             live video's real anchor time on YouTube
+│   │                             (cross-checked live, not trusted from the
+│   │                             local DB alone). Raises
+│   │                             SchedulingDriftError if local state and
+│   │                             YouTube's real state disagree, rather
+│   │                             than scheduling on top of a wrong
+│   │                             assumption. See Scheduling above.
 │   ├── kokoro.py               — narration (TTS), local/offline via
 │   │                             Kokoro-82M, no API key or char limit,
 │   │                             logs a self-tracked "videos narrated"
@@ -249,16 +347,29 @@ you-never-knew-automation/
 │   ├── usage_tracker.py       — writes database/usage_log.json;
 │   │                             log_call(service, fact_number=...)
 │   │                             correlates calls to the video that made them
-│   └── youtube.py              — upload, playlist management, retry logic,
-│                                  OAuth scopes (upload + Analytics readonly)
+│   └── youtube.py              — upload (with optional publish_at for
+│                                  scheduling), get_video_status() (real
+│                                  Data API status/snippet lookup, used by
+│                                  scheduling.py to verify local state),
+│                                  playlist management, retry logic, OAuth
+│                                  scopes (upload + Analytics readonly)
 ├── test_assets/                — sample scripts
 ├── work/Fact_NNN_slug/          — per-video working directory
 └── .github/workflows/
-    └── daily-video.yml
+    └── daily-video.yml         — only workflow_dispatch is declared; the
+                                   daily trigger comes from cron-job.org
+                                   calling that endpoint on a schedule, not
+                                   from a schedule: block in this file —
+                                   see Trigger above
 ```
 
 ## Known limitations (accepted, not bugs to chase)
 
+- **A production run with scheduling enabled never publishes instantly
+  live, even on a completely empty backlog.** `compute_next_publish_at()`
+  always returns `now + cadence_hours` at minimum — see Scheduling above.
+  Intentional (protects against a slow pipeline run leaving a same-day
+  gap), but worth knowing if the buffer is ever deliberately drained.
 - **WordNet categorization** now scans every non-stopword word in the
   topic (not just the first) and has landmark/element/geological-feature
   keyword coverage, so multi-word proper nouns like "The Dead Sea" or
@@ -280,8 +391,7 @@ you-never-knew-automation/
   (Jamendo license filtering) the moment monetization status changes —
   not forgotten, deliberately deferred. Narration is no longer part of
   this concern: Kokoro's weights are Apache-2.0, commercial-use-safe
-  regardless of monetization status — this was the actual motivation
-  for the ElevenLabs swap, not just its 10,000-char/month free-tier cap.
+  regardless of monetization status.
 - **`engines/gemini.py` validates scripts independently** rather than
   reusing `script_engine.parse_script()` — both define the same script
   dict shape but as separate code paths. If that shape ever changes,
@@ -310,6 +420,10 @@ you-never-knew-automation/
   Gemini also stays silent (empty string, no prompt change) until at
   least 3 videos have a captured snapshot, to avoid skewing topic
   choice off one or two data points.
+- **A GitHub Auth header value needs `Bearer <token>` exactly** — an
+  extra colon (`Bearer: <token>`) is invalid and produces a `401` from
+  GitHub's API even though the token itself is fine. Easy to mistype
+  when setting up or rotating the cron-job.org PAT.
 
 ## Future work — Shorts "Related Video" (End Screen)
 
@@ -338,5 +452,6 @@ The project originally started as a smaller starter architecture — publish
 an existing test MP4 first, then layer in voice/footage/captions/render/
 topic-generation/automation one stage at a time (V0.1 through V0.6). That
 sequencing is why the engine files are separated the way they are. All of
-those stages are now built; this section is kept only as historical
-context for why the architecture looks the way it does.
+those stages are now built, including full unattended daily automation;
+this section is kept only as historical context for why the architecture
+looks the way it does.

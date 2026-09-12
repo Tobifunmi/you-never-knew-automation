@@ -1,53 +1,71 @@
 # MASTER CONTINUATION PROMPT — "You Never Knew" Automated YouTube Shorts Factory
 
-Use this as full context in a new conversation. Reflects the actual
-verified state of the project as of **28 Aug 2026, later same day**
-(a follow-up session on top of the version committed earlier that
-day). Several things below were only discovered to be wrong (not just
-undone) by reading real files/logs/commit history directly, so treat
-this as ground truth over any older summary, including any earlier
-version of this same document (an earlier version is committed at
-`MASTER_CONTINUATION_PROMPT.md` in the automation repo root — this
-document supersedes it; consider re-committing this version over it).
+Use this as full context in a new conversation. Reflects the verified state of
+the project as of **12 Sep 2026**. This version supersedes the previous
+`MASTER_CONTINUATION_PROMPT.md` (dated 28 Aug 2026, committed in the automation
+repo root) — that document is now out of date in several important ways
+described below. Consider re-committing this version over it.
 
-GitHub username: **Tobifunmi** (capitalized — the automation repo's
-remote previously pointed at the old lowercase `tobifunmi` URL and
-GitHub silently redirected; worth confirming both repos' remotes use
-the current casing rather than relying on a redirect indefinitely).
-Automation repo: `github.com/Tobifunmi/you-never-knew-automation`
-(public). Dashboard repo: `github.com/Tobifunmi/you-never-knew-dashboard`
-(public). Live dashboard: `https://you-never-knew.netlify.app/`.
+**Important gap to flag honestly**: there is a documentation hole between
+28 Aug 2026 (the previous document's date) and 12 Sep 2026 (this one). A
+real-time scheduling feature (`engines/scheduling.py`, `config.json`'s
+`scheduling` block, and `publish_at` support in `engines/youtube.py` and
+`main.py`) exists live in the repo and is clearly well-built and battle-tested
+— but it was discovered by reading the actual repo code directly in this
+session, not by anything said in this conversation or the 28 Aug document.
+Some other session in between must have built it. Treat the live code as
+ground truth over any assumption either document makes about what's "not yet
+built."
 
-Local dev machine: Windows 10/11, PowerShell, two separate local repo
-folders — `C:\Users\user\Documents\You Never Knew` (automation) and
+GitHub username: **Tobifunmi** (capitalized). Automation repo:
+`github.com/Tobifunmi/you-never-knew-automation` (public). Dashboard repo:
+`github.com/Tobifunmi/you-never-knew-dashboard` (public). Live dashboard:
+`https://you-never-knew.netlify.app/`.
+
+Local dev machine: Windows 10/11, PowerShell, two separate local repo folders
+— `C:\Users\user\Documents\You Never Knew` (automation) and
 `C:\Users\user\Documents\You Never Knew - Dashboard` (dashboard).
 
-**How code changes reach these repos**: this assistant has no push
-credentials to either repo. All code changes are delivered as
-`git format-patch` files, downloaded from the chat, applied locally via
-`git am <file>.patch`, then `git push origin main` by the user. Expect
-this pattern to continue in any follow-up conversation.
+**How code changes reach the repo**: this assistant has no push credentials.
+Historically, changes were delivered as `git format-patch` files, applied
+locally via `git am`, then pushed by the user. As of this session, this
+assistant can also **read** the public repo directly (`raw.githubusercontent.com`,
+`api.github.com` are reachable) to verify real code before proposing changes —
+worth doing before writing any patch, per the project's long-standing
+"verify against actual files before treating something as done or broken"
+principle. Still no write/push access.
 
 ---
 
 ## 1. What this project is
 
-A fully automated production and publishing pipeline for the YouTube
-channel **You Never Knew** — "5 Facts You Didn't Know About [Topic]"
-YouTube Shorts. Topic selection, script writing, narration, footage,
-captions, rendering, background music, metadata, YouTube upload,
-playlist assignment, database recording, 48h+ performance tracking, and
-failure notification all run on GitHub Actions (when triggered — see
-§9 on cron status). Runs locally on Windows for development/testing —
-recent runs (facts 187, 188) were confirmed to have been local runs,
-not GitHub Actions runs, despite earlier being described in
-conversation as run "through GitHub" (§4b, resolved).
+A fully automated production and publishing pipeline for the YouTube channel
+**You Never Knew** — "5 Facts You Didn't Know About [Topic]" YouTube Shorts.
+Topic selection, script writing, narration, footage, captions, rendering,
+background music, metadata, YouTube upload, scheduling, playlist assignment,
+database recording, 48h+ performance tracking, and failure notification all
+run on GitHub Actions, triggered on a daily schedule via **cron-job.org**
+(not GitHub's own `schedule:` cron — see §4d for why). Can still be run
+locally on Windows for development/testing.
 
-**17 videos successfully produced so far** (`database/videos.json`,
-fact numbers 173–189), all currently `unlisted` (test/dev mode — the
-channel has not gone to production/public posting yet). Fact 189
-("Bicycles") failed once at the background-music stage due to a
-transient Jamendo issue, was retried, and succeeded — see §4c.
+**As of 12 Sep 2026 (verified via YouTube Studio screenshot)**: the channel
+is live and posting publicly on a real cadence. Most recently confirmed
+state:
+- Fact 192 ("Chewing Gum") — public, published Sep 12, 460 views
+- Fact 191 ("Popcorn") — public, published Sep 11, 11 views
+- Fact 190 ("Bicycles") — public, published Sep 10, 346 views
+- Fact 188 ("Stonehenge") — public, published Sep 8, 35 views
+- Fact 187 ("Solar Eclipses") — public, published Sep 7, 342 views
+- Fact 193 ("Quicksand") — **scheduled**, Sep 13, private/pending
+- Fact 194 ("Pistol Shrimp") — **scheduled**, Sep 14, private/pending, still processing to HD at time of screenshot
+
+The channel had 17 unlisted test videos (facts 173–189) as of the 28 Aug
+document; it has since gone public and progressed to at least fact 194. The
+full history of facts 189–192 (when exactly the switch to public/production
+happened, what if anything went wrong along the way) is **not documented
+anywhere in this conversation or the prior master prompt** — a real gap.
+`database/videos.json` and `usage_log.json` in the repo are the source of
+truth if that history is ever needed.
 
 ---
 
@@ -55,732 +73,380 @@ transient Jamendo issue, was retried, and succeeded — see §4c.
 
 | Stage | Status |
 |---|---|
-| YouTube publisher (OAuth, upload, playlists, DB recording) | ✅ Done |
-| Narration — Kokoro-82M (local/offline, no API key, no char cap) | ✅ Done — swapped from ElevenLabs |
+| YouTube publisher (OAuth, upload, scheduling, playlists, DB recording) | ✅ Done, live in production |
+| Scheduling (`engines/scheduling.py`, real `status.publishAt`) | ✅ Done, live — see §4g. Maintains a rolling one-video-ahead buffer: each run schedules the next video `cadence_hours` (24h) after the latest scheduled/live video's real anchor time on YouTube, cross-checked against local DB to catch drift |
+| Narration — Kokoro-82M (local/offline, no API key, no char cap) | ✅ Done |
 | Footage (Pixabay → Pexels waterfall) | ✅ Done |
 | Captions (local Whisper, burned-in ASS) | ✅ Done |
 | Render (FFmpeg, 1080×1920) | ✅ Done |
-| Background music (Jamendo, loops short tracks, blocklist-aware) | ✅ Done — `+`-encoding bug fixed and confirmed pushed (§4c/§6 item 20); Fact 189 retried and succeeded on retry, confirming the original failure was transient (§4c(b)) |
+| Background music (Jamendo, loops short tracks, blocklist-aware) | ✅ Done — `+`-encoding bug fixed (§6 item 20) |
 | Topic engine + fact numbering | ✅ Done |
-| Autonomous topic/script generation (Gemini) | ✅ Done, audited |
-| 48h YouTube Analytics feedback loop (Stage A0, feeds topic selection) | ✅ Done — **gating logic corrected, confirmed pushed, see §4a** |
-| Category-guessing fix (WordNet: scans every word, not just the first) | ✅ Done — verified 0/13 fall to default (was 6/13) |
-| API usage dashboard: live quotas, call/video correlation, hyperlinks | ✅ Done |
-| Kokoro dashboard card (self-tracked "videos narrated" count) | ✅ Done, confirmed — `usage_log.json` now has a populated `kokoro` key and the dashboard reflects it correctly |
-| Full unattended automation (GitHub Actions) | ⚠️ Cron set to **daily**, deliberately left commented out — `workflow_dispatch` (manual button) only, until the unpublished-video backlog clears. Explicitly re-confirmed this session: **do not uncomment yet.** |
-| Email failure notifications (Gmail SMTP) | ⚠️ Still unresolved — the `WinError 10060` from Fact 189's first attempt hasn't recurred since (Fact 189's retry succeeded, so no failure email was needed), so there's no fresh data either way. User's stance: revisit only if it happens again. Not actively being chased. |
-| Playlist/record ordering bug | ✅ Fixed (historical) |
-| CI secret name mismatch (`TOKEN_JSON` vs `YOUTUBE_TOKEN_JSON`) | ✅ Fixed |
-| Persistent Jamendo track blocklist | ✅ Done, in active use, currently tiny (1 track) |
+| Autonomous topic/script generation (Gemini) | ✅ Done |
+| 48h YouTube Analytics feedback loop (Stage A0) | ✅ Done, gated on real live-publish time (§4a) |
+| Category-guessing fix (WordNet, scans every word) | ✅ Done |
+| API usage dashboard (Netlify) | ✅ Done |
+| Kokoro dashboard card | ✅ Done |
+| Full unattended automation trigger | ✅ **Live** — cron-job.org calls the GitHub Actions `workflow_dispatch` API on a schedule (§4d). GitHub's own `schedule:` block in `daily-video.yml` remains commented out/unused by design. |
+| YouTube OAuth token stability | ✅ Fixed this session — app moved from "Testing" to "In production" in Google Auth Platform, eliminating the 7-day forced refresh-token expiry (§4e) |
+| Secret leak in local git history | ✅ Resolved this session, `.gitignore` hardened (§4f) |
+| Email failure notifications (Gmail SMTP) | ⚠️ Still unresolved as of 28 Aug (`WinError 10060`, local network-level). Status since then unknown — not discussed this session. |
 | Shorts "Related video" End Screen | 🔜 Deliberately deferred |
-| Google AI Plus/Pro student offer | ℹ️ Researched, concluded **not needed** — see §8b |
-| **Local-vs-GitHub-Actions provenance of recent videos** | ✅ Resolved — see §4b. It was a local run; the user misspoke earlier in referring to it as a GitHub Actions run. |
+| Playlist/record ordering bug | ✅ Fixed (historical) |
 
 ---
 
-## 3. Pipeline stages, actual execution order (`main.py` `run_pipeline()`)
+## 3. Pipeline stages, actual execution order (`main.py :: run_pipeline()`)
 
-0. **Config load** — `config.json`. Key fields: `starting_fact_number:
-   172`, `title_template: "Fact {fact_number}: 5 Facts You Didn't Know
-   About {topic}"`, `youtube.privacy_status: "unlisted"`,
-   `youtube.category_id: "27"` (Education), `youtube.auto_create_playlists:
-   true`.
-1. **Stage A0 — 48h+ performance capture.** `engines/analytics.py ::
-   update_performance_log(publisher)` runs FIRST, before topic
-   selection. Scans `database/videos.json` for any video with a
-   `youtube_id` that does not yet have a `performance` block, pulls
-   cumulative views/likes/comments/averageViewPercentage/
-   estimatedMinutesWatched via the **YouTube Analytics API**, writes it
-   back into that video's record. Walks the WHOLE list each run. Once
-   ≥3 videos have captured performance, `build_performance_context()`
-   produces a retention-by-category digest fed into the next step.
-   Never raises. Requires the `yt-analytics.readonly` OAuth scope.
-   `YouTubePublisher` is instantiated and authenticated at this early
-   point specifically so this step can reuse the same OAuth session.
+Verified directly from the live `main.py` this session.
 
-   **Eligibility gating, corrected this session (see §4a for the full
-   story):** a video only becomes eligible for the 48h check once
-   `analytics.py` has confirmed via the YouTube Data API that its real
-   `status.privacyStatus` is `"public"` — not merely that some amount
-   of wall-clock time has passed since the pipeline's own upload call
-   returned. The 48h window itself is measured from YouTube's own
-   `snippet.publishedAt` (the actual go-live moment), cached on the
-   record as `live_published_at` the first time a video is confirmed
-   public, not from `published_at` (upload-completion time, captured
-   by `main.py` immediately after `upload_video()` returns). This
-   matters for scheduled uploads — a video can sit private/scheduled
-   for well over 48h after upload before real viewers can see it.
+0. **Config load** — `config.json`. Key fields: `starting_fact_number: 172`,
+   `title_template: "Fact {fact_number}: 5 Facts You Didn't Know About {topic}"`,
+   `youtube.privacy_status: "unlisted"` (fallback only — see step 10 below for
+   what actually governs privacy), `youtube.category_id: "27"` (Education),
+   `youtube.auto_create_playlists: true`, and **`scheduling: {"enabled": true,
+   "cadence_hours": 24}`**.
+1. **Stage A0 — 48h+ performance capture.** Runs first, before topic
+   selection, using the same authenticated `YouTubePublisher` instance reused
+   throughout the run. Never fatal. A video only becomes eligible once
+   `analytics.py` confirms via the Data API it's really `public` — the 48h
+   window is measured from YouTube's real `snippet.publishedAt`
+   (`live_published_at`), not upload-completion time (see §4a).
+2. **Stage A/B — Topic + script ingestion.** Manual (script file) or
+   autonomous (`gemini.get_unique_topic(performance_context=...)` +
+   `gemini.generate_script()`). Fact number assigned, topic reserved.
+3. **Stage C — Narration.** `engines/kokoro.py`, local/offline.
+4. **Transcription + timeline** — local Whisper, `build_segment_timeline()`.
+5. **Stage D — Footage.** Pixabay → Pexels → broad-topic fallback → generic
+   last resort. Raises `FootageError` on failure (not `SystemExit` — that was
+   a historical bug, see §6 item 3).
+6. **Stage E — Captions file** (ASS).
+7. **Stage F — Render.** Normalize → concatenate → background music →
+   burn in captions. Can raise `MusicError` and abort here.
+8. **Stage G — Metadata.** Title/description/tags, WordNet-based playlist
+   categorization.
+9. **Stage H — Compute scheduling, then upload.**
+   ```python
+   scheduling_enabled = production and config.get("scheduling", {}).get("enabled", False)
+   publish_at = None
+   if scheduling_enabled:
+       publish_at = scheduling.compute_next_publish_at(publisher, config)
 
-   **Still-true zero-view nuance (verified 28 Aug, unchanged by the
-   above fix):** a video with genuinely zero real views (unlisted,
-   never watched by anyone but the uploader) gets `rows: []` back from
-   the Analytics API. The code treats this the same as "not eligible
-   yet" — `performance` stays `None`, and the video gets silently
-   re-attempted on every subsequent run, indefinitely, harmlessly. This
-   is why fact 185 (Neon Signs, 1 self-view) got a captured snapshot
-   while fact 186 (Machu Picchu, same age bracket, apparently 0 views)
-   still showed `performance: None` after multiple later runs.
-   Practical consequence: while the channel stays in unlisted/no-real-
-   audience test mode, most videos may never accumulate a captured
-   snapshot, which also delays the ≥3-videos threshold for the Gemini
-   performance digest ever activating. Should resolve naturally once
-   videos go public and get real views.
-2. **Stage A/B — Topic + script ingestion.** Manual or autonomous
-   (`gemini.get_unique_topic(performance_context=...)` +
-   `gemini.generate_script()`). `numbering.get_next_fact_number()`
-   assigns the fact number. `topic_engine.reserve_topic()`.
-3. **Stage C — Narration.** `engines/kokoro.py :: generate_narration()`
-   — see §4 for full detail. Local/offline, no API key. Logs a
-   self-tracked "videos narrated" count on success only (no credit
-   spent on a failed run, so nothing to log on failure).
-4. **Transcription** — local Whisper, free regardless of narration
-   source.
-5. **Timeline** — `timeline.build_segment_timeline()`.
-6. **Stage D — Footage.** Pixabay specific → Pexels specific → Pixabay
-   broad topic fallback → Pexels broad topic fallback → generic
-   "nature landscape"/"scenery" (no relevance check, last resort).
-   Every Pexels/Pixabay search call is logged via
-   `usage_tracker.log_call(..., fact_number=video_id)`.
-7. **Stage E — Captions file** (ASS).
-8. **Stage F — Render.** Normalize → concatenate → background music
-   fetch/mix → burn in captions. **Background music fetch
-   (`music.fetch_and_download_background_track`) can raise
-   `MusicError` and abort the whole run here — see §4c for a real
-   instance of this on Fact 189.**
-9. **Stage G — Metadata.** Title/description/tags, WordNet-based
-   playlist categorization — see §7 for the full rewrite detail.
-10. **Stage H — Upload.** `unlisted` unless `--production`.
-    `published_at` captured immediately after upload
-    (`datetime.now(timezone.utc)`, approximated) — this is upload-
-    completion time, kept for record-keeping, distinct from
-    `live_published_at` (see step 1 above).
-11. **Record + complete topic.** Runs immediately after upload
-    succeeds, before the playlist step (deliberate, load-bearing
-    ordering — see §6 item 1).
-12. **Stage I — Playlist.** Isolated `try/except`, never re-raises —
-    video is already safely recorded regardless of playlist outcome.
-13. **Failure path**: outer `except Exception`. Attempts to send a
-    detailed failure email (Gmail SMTP) — **currently unreliable, see
-    §4c**. Releases topic reservation only if it was actually reserved.
+   privacy_status = "private" if scheduling_enabled else ("public" if production else "unlisted")
+   ```
+   - **Local dev run, no `--production`**: always `unlisted`, immediate,
+     never scheduled.
+   - **Production run, scheduling enabled (current real config)**: always
+     `private` + a real `status.publishAt` 24h after the latest
+     scheduled/live video's true anchor time (see §4g for the exact
+     algorithm). **This applies even to a completely empty backlog** —
+     there is no code path today that publishes a production video
+     instantly live; every production upload goes through the scheduler.
+   - `publish_at`, when set, forces `effective_privacy = "private"`
+     regardless of what was passed in, inside `youtube.py`'s
+     `upload_video()` — YouTube itself requires this.
+10. **Record + complete topic.** Runs immediately after upload, before
+    playlist logic (load-bearing ordering, fixes the historical Fact 174
+    near-data-loss bug — see §6 item 1). `numbering.record_video_state()`
+    stores `state` as `"scheduled"` / `"published"` / `"uploaded"`
+    depending on the branch above, plus `scheduled_publish_at` (read back
+    by `scheduling.py` on the next run).
+11. **Stage I — Playlist.** Isolated `try/except`, never re-raises — a
+    playlist failure sends its own failure email but never touches the
+    already-saved upload record.
+12. **Failure path** — outer `except Exception`. Sends a failure email
+    (Gmail SMTP — currently unreliable, see §6 item 21), releases the topic
+    reservation only if it was actually reserved.
 
 ---
 
-## 4. Narration engine: ElevenLabs → Kokoro-82M (prior session, unchanged)
+## 4. Detailed history, chronological
 
-**Motivation, with real numbers.** ElevenLabs' free tier is 10,000
-characters/month. Actual narration length observed: ~1,676 chars/video.
-That's ~6 videos/month max — already tight at the prior 2x/week cadence
-(~8-9/month) and a hard blocker for daily posting (~30/month needs
-~50,000 chars/month, 5x over free tier). Kokoro-82M
-(github.com/hexgrad/kokoro) is Apache-2.0-licensed, runs entirely
-locally on CPU, no API key, no character limit. Its permissive license
-also independently closes a licensing gap: ElevenLabs' free tier is
-non-commercial-use only, which would've needed revisiting the moment
-the channel monetizes — with Kokoro that's now moot for narration.
+### 4a. Analytics 48h-gating fix (historical, ~28 Aug session)
+`analytics.py`'s eligibility check now confirms via the YouTube Data API that
+a video's real `status.privacyStatus` is `"public"` before starting its 48h
+clock, and anchors that clock on YouTube's own `snippet.publishedAt`
+(cached as `live_published_at`) rather than the pipeline's own
+upload-completion timestamp. Matters precisely because scheduled videos
+(§4g) can sit private for a long time after upload before going live.
+Confirmed applied and pushed (commit `db1d1af`).
 
-**Interface preserved on purpose.** `engines/kokoro.py::generate_narration(script,
-output_path) -> dict` matches `elevenlabs.py`'s exact signature and
-return shape (`NarrationError` too), so nothing downstream changed
-except `main.py`'s narration file extension (`.mp3` → `.wav` — Kokoro
-outputs WAV natively via `soundfile`, no reason to add an unnecessary
-transcode step).
+### 4b. Local-vs-GitHub-Actions provenance (historical, resolved 28 Aug; reconfirmed this session)
+Earlier local runs (facts 187, 188) had been mis-described as "through
+GitHub" but were actually local (`narration_path` showed Windows paths, not
+Actions runner paths). This session went further: a **real GitHub Actions
+run was triggered and completed via the cron-job.org dispatch call**
+(§4d), which is the first fully confirmed end-to-end Actions execution
+in this project's history — a genuine milestone, not just a corrected
+misstatement anymore.
 
-**Real API confirmed by reading the actual installed package**:
-`KPipeline(lang_code='a')`, called as `pipeline(text, voice=...,
-speed=..., split_pattern='\n+')`, yields a generator of `Result`
-objects with `.graphemes`/`.phonemes`/`.audio` (a `torch.FloatTensor`,
-converted to numpy before concatenation). Default `split_pattern` is
-`r'\n+'`, so `build_narration_text()` deliberately joins hook/fact-
-narrations/ending with `\n\n` (not spaces) — chunks generation
-naturally at those boundaries rather than sending one long unbroken
-block through the model. A small (~250ms, `KOKORO_PAUSE_SECONDS`-
-configurable) silence gap is inserted between concatenated chunks so
-the stitching doesn't sound abrupt.
+### 4c. Fact 189 ("Bicycles") Jamendo failure + fix (historical, 28 Aug session)
+Failed once on a `MusicError` (no loopable Jamendo track found), retried
+successfully. Root cause found and fixed: `engines/music.py`'s `VIBE_MAP`
+joined multi-tag searches with a literal `+`, which `requests` percent-encodes
+to `%2B`, causing Jamendo to search for one bogus literal tag instead of two
+real tags — every "Tier 1" topic-specific search had silently been returning
+zero results since the tag system was introduced. Fixed: switched to
+space-joined tags (`requests` correctly encodes a raw space as `+` on the
+wire, matching Jamendo's expected format). Confirmed applied and pushed.
 
-**Voice**: defaults to `"am_adam"` (American English male — picked by
-name-coincidence with the ElevenLabs "Adam" voice this replaces, not a
-rigorous audition), overridable via `KOKORO_VOICE_ID` env var.
-`KOKORO_SPEED` also configurable, defaults to `1.0`.
+### 4d. Switch to cron-job.org as the scheduling trigger (this session)
+**Why**: GitHub Actions' own `schedule:` cron trigger has a known reliability
+problem (delays, skipped runs on low-activity repos) and — separately — had
+never been confirmed to actually fire successfully at all for this project
+(§4b). Rather than fight GitHub's scheduler, the fix was to leave
+`daily-video.yml`'s `schedule:` block commented out (as it already was) and
+instead have an external service call the **`workflow_dispatch` REST API**
+on a schedule — functionally identical to clicking "Run workflow" by hand,
+every day, automatically.
 
-**Setup requirements** (real, not automatic):
-- `espeak-ng` **system package** (not pip-installable). Windows: `.msi`
-  from the espeak-ng GitHub releases page. CI: `apt-get install
-  espeak-ng`, added to `daily-video.yml` alongside the existing
-  `ffmpeg` install.
-- Python 3.9–3.12 specifically for Kokoro (the repo's CI already uses
-  3.11, compatible).
-- First run downloads ~327MB of model weights from Hugging Face —
-  needs real internet access the first time only; cached afterward at
-  `~/.cache/huggingface`. CI caches this directory across runs via
-  `actions/cache`, keyed on `hashFiles('requirements.txt')`.
+**Setup**: cron-job.org job "You Never Knew daily trigger" —
+- URL: `https://api.github.com/repos/Tobifunmi/you-never-knew-automation/actions/workflows/daily-video.yml/dispatches`
+- Method: `POST`
+- Headers: `Authorization: Bearer <fine-grained GitHub PAT>` (no colon after
+  "Bearer" — this was an early mistake that caused a 401, see below),
+  `Accept: application/vnd.github+json`, `X-GitHub-Api-Version: 2022-11-28`,
+  `Content-Type: application/json`
+- Body: `{"ref": "main"}`
+- Schedule: daily, timezone Africa/Lagos
+- The GitHub PAT is fine-grained, scoped to just this repo, with **Actions:
+  Read and write** permission. It lives only in cron-job.org's job config —
+  never committed anywhere. **No expiration date was recorded in this
+  conversation — worth checking/rotating before it lapses.**
 
-**Real-world result, confirmed by the user**: ran successfully on the
-first real local attempt (`python main.py run`, no `--production`),
-completed the full pipeline including a successful `unlisted` upload,
-and the user's direct assessment of the narration was **"it sounded
-the same."** Multiple further successful narrations since (facts 187,
-188, and — up through Stage C — fact 189).
+**Debugging history worth remembering**:
+- First test run failed `401 Unauthorized` — the Authorization header value
+  had been entered as `Bearer: github_pat_...` (colon after "Bearer"), which
+  GitHub can't parse as a valid token. Fixed by removing the colon (the
+  header **key** field already supplies `Authorization:` — the **value**
+  field should be exactly `Bearer <token>`, space only, no colon).
+- After that fix, the dispatch call succeeded and Actions genuinely started
+  a run — confirming this mechanism works.
 
-**`elevenlabs.py` was NOT deleted** — kept as a one-import/one-filename
-rollback path if Kokoro's quality doesn't hold up at scale. It's also
-no longer checked by either usage dashboard.
+`daily-video.yml` itself was **not modified** for any of this — it still
+only declares `workflow_dispatch:` as its trigger; cron-job.org calling that
+endpoint is indistinguishable to GitHub from a human clicking the button.
 
-**Dashboard follow-up**: the ElevenLabs live-quota card was replaced
-with a Kokoro card in both `check_usage.py` (local) and
-`netlify/functions/usage.js` + `index.html` (live). Kokoro has no
-external API/account, so this isn't a live quota check — it just
-reads a self-tracked "N videos narrated" count from
-`usage_log.json["kokoro"]`, added via a
-`usage_tracker.log_call("kokoro", fact_number=...)` call at the end of
-`generate_narration()` (success-only).
+### 4e. YouTube OAuth refresh token expiry incident (this session)
+The first real end-to-end Actions run (triggered via cron-job.org) failed
+with `google.auth.exceptions.RefreshError: invalid_grant: Token has been
+expired or revoked`. A local re-run of `python main.py run` failed
+**identically** — confirming the refresh token itself was dead, not
+something specific to the Actions environment.
 
-**Verified timing gotcha (confirmed this follow-up session by reading
-actual commit timestamps, not assumed):** the `log_call("kokoro", ...)`
-tracking line landed in commit `1184ab6` at **2026-08-28 08:52:10 UTC**
-("Update dashboard: swap ElevenLabs card for Kokoro, track narration
-count"). Both of the Kokoro videos already produced by that point —
-Fact 187 (`published_at` 00:56:57 UTC) and Fact 188 (`published_at`
-01:12:33 UTC) — predate that commit. So even though Kokoro narration
-had already genuinely succeeded twice, the dashboard correctly showed
-"No videos narrated yet" — there was nothing to fix; the count simply
-hadn't had a qualifying run yet. **Confirm on the next chat whether a
-run since 08:52 UTC has populated the count** (Fact 189's narration
-Stage C did complete successfully before the later Jamendo failure —
-see §4c — so if `usage_log.json`'s `kokoro` key is still absent after
-that, something regressed and is worth investigating fresh, since the
-timing excuse no longer applies).
+**Root cause**: the Google Cloud OAuth consent screen (now called "Google
+Auth Platform" in the Cloud Console UI) was in **Testing** publishing
+status. Google forcibly expires refresh tokens after 7 days for apps in
+that state, regardless of use.
 
----
+**Fix applied**:
+1. Deleted the local stale `token.json` (simply re-running without deleting
+   it first doesn't help — `youtube.py`'s `authenticate()` calls
+   `creds.refresh()` on the existing file before ever falling through to a
+   fresh interactive login, so a dead token crashes instead of triggering
+   re-auth).
+2. Ran `python main.py run` locally with no token file present, which
+   correctly forced a fresh interactive browser login and produced a new
+   `token.json`.
+3. Copied its contents into the `YOUTUBE_TOKEN_JSON` GitHub secret,
+   replacing the old value.
+4. Separately, in Google Cloud Console → **Google Auth Platform → Audience**,
+   confirmed Publishing status now reads **"In production"** (with a
+   "Back to testing" button present, meaning it had already been switched at
+   some point — possibly during an earlier, undocumented attempt at Google's
+   verification process, evidenced by a "Branding verification issues" panel
+   that referenced an unresolved domain-ownership check for
+   `https://you-never-knew.netlify.app/`).
 
-## 4a. Analytics 48h-gating fix — THIS session
+**Decision made**: leave Publishing status as "In production" — this alone
+fixes the 7-day forced expiry, since that only applies to apps in Testing.
+**Do not pursue full Google verification (CASA security assessment)** for
+the `youtube.upload` restricted scope — that process is built for real
+third-party companies distributing an app publicly, not proportionate for a
+solo automation project, and was correctly abandoned mid-flow (the
+"Branding verification issues" panel was closed via Cancel rather than
+continuing either resolution path).
 
-**The bug.** `analytics.py`'s eligibility check compared `now -
-published_at` (upload-completion time, set by `main.py` right after
-`upload_video()` returns) against the 48h threshold. For an instant
-`public`/`unlisted` upload (the pipeline's only mode today — see §4c
-note on scheduling not yet existing) this is effectively identical to
-the real go-live time, so it never caused an observed problem yet —
-but it would silently start the clock on a scheduled video's upload
-time rather than its actual public time, capturing a meaningless
-snapshot (or repeatedly attempting a video nobody could watch yet) the
-moment scheduling is ever added.
+**Ongoing note**: User type is "External," under the 100-user cap, so a
+Google "unverified app" warning screen still appears at login time — expected
+and harmless for a personal-use app; click "Advanced" → "Go to [app] (unsafe)"
+to proceed on any future manual re-auth. Being "In production" itself should
+prevent the 7-day expiry from recurring; the manual re-auth pattern for a
+Testing-mode app is no longer expected to be a routine chore.
 
-**The fix** (`engines/analytics.py`, delivered as a `git am` patch,
-confirmed applied and pushed by the user):
-- Before counting a video eligible, `update_performance_log()` now
-  calls a new `_get_live_publish_info(youtube, video_id)` helper,
-  which queries `youtube.videos().list(part="status,snippet",
-  id=video_id)` (the YouTube **Data** API, reusing the same
-  `publisher.youtube` client already authenticated for the upload
-  scope — no new scope needed).
-- If `status.privacyStatus != "public"`, the video is skipped this run
-  — genuinely not live yet, regardless of upload age.
-- Once confirmed `public`, `snippet.publishedAt` (YouTube's own record
-  of the actual go-live moment) is cached on the video's record as a
-  new field, `live_published_at`, and used for the 48h window from
-  then on. This means the extra Data API read call only happens once
-  per video (the first time it's checked after going public) — cheap.
-- `published_at` (upload-completion time) is left untouched everywhere
-  else in the codebase; only the analytics eligibility check now
-  trusts `live_published_at` instead.
-- Currently a practical no-op in production (the pipeline has no
-  scheduling feature yet — `privacy_status` is only ever `"public"` or
-  `"unlisted"`, set immediately at upload), but means the moment
-  scheduled publishing IS added, performance tracking will already be
-  correct instead of silently wrong.
+### 4f. Local git history secret leak (this session)
+While cleaning up the dead token file, `token.json` had been renamed to
+`token.json.bak` and **committed** (with real, if by-then-expired, OAuth
+client ID/secret/refresh token inside) in a local-only commit that hadn't
+yet reached GitHub. A later commit deleted the file, but `git push` was
+correctly rejected by **GitHub push protection** (GH013), since the secret
+was still readable in the earlier commit's history even though a later
+commit removed it.
 
-**Status**: patch applied via `git am` and pushed by the user,
-confirmed. Live on `main` as of commit `db1d1af` ("analytics: gate 48h
-performance check on actual live-publish time, not upload time").
+**Fix**: since none of the offending commits had reached GitHub yet,
+history was safely rewritten locally:
+1. `git log origin/main..HEAD --oneline` to identify the unpushed commits.
+2. `git reset --soft origin/main` — rewound the branch to match GitHub
+   while keeping all real file changes staged on disk, erasing the
+   problem commits from history without losing any work.
+3. Added `token.json`, `token.json.bak`, and the OAuth
+   `credentials.json`/`client_secret*.json` filename to `.gitignore`.
+4. Recommitted and pushed cleanly.
 
----
+Since the push was rejected before ever reaching GitHub, the secret was
+never actually exposed publicly — no credential rotation was necessary
+purely because of this incident (separately, the refresh token itself was
+already dead per §4e).
 
-## 4b. Local-vs-GitHub-Actions provenance — RESOLVED
+### 4g. Scheduling engine — `engines/scheduling.py` (discovered this session, not built in this conversation)
+Full module read directly from the live repo. Not present in the 28 Aug
+document, which explicitly listed "Scheduled/timed YouTube publishing" as
+**not built yet**. Must have been added in an undocumented session between
+28 Aug and this one.
 
-**Resolved.** The user confirmed directly: the run that produced Facts
-187 and 188 (and was earlier described in conversation as "one run
-through GitHub") was in fact a **local** run — the user misspoke
-earlier, not a pipeline bug or a workflow silently failing. The
-`workflow_dispatch` / GitHub Actions path itself remains untested
-recently as far as this document's evidence goes; the local-vs-Actions
-*mystery* specifically is closed, but that doesn't by itself confirm
-Actions currently works end-to-end — just that these particular
-records were never claiming to be an Actions run in the first place.
-Original reasoning preserved below for context.
+**What it does** (`compute_next_publish_at(publisher, config)`):
+1. Reads `cadence_hours` from `config.json` (currently `24`).
+2. Looks up the latest local video record
+   (`numbering.get_latest_video_record()`). If there's no record or no real
+   `youtube_id` yet (fresh channel / only unlisted test uploads so far),
+   returns `now + cadence_hours` — **note: still schedules, does NOT publish
+   immediately**, even on a completely empty backlog.
+3. Otherwise, calls `publisher.get_video_status(youtube_id)` — a real Data
+   API lookup — rather than trusting the local database alone. If YouTube
+   has no record of it at all, raises `SchedulingDriftError` rather than
+   silently guessing.
+4. Determines an anchor time:
+   - If the latest video is currently `private` with a real `publishAt` set
+     → anchor = that `publishAt`.
+   - If it's already `public` → anchor = its real `snippet.publishedAt`.
+   - Otherwise (unlisted, or manually un-scheduled in Studio) → anchor =
+     `now`.
+5. Cross-checks the locally recorded `scheduled_publish_at` against what
+   YouTube actually reports; if they disagree by more than 60 seconds
+   (e.g. a manual Studio edit happened out-of-band), raises
+   `SchedulingDriftError` rather than scheduling on top of a wrong
+   assumption — deliberately named after the exact class of bug that once
+   caused a historical fact-numbering collision (facts 175–184, referenced
+   in the module's own docstring, not otherwise detailed in either master
+   prompt).
+6. Returns `max(anchor, now) + cadence_hours` as the next video's
+   `publishAt`.
 
-`database/videos.json`'s `narration_path` field reveals which machine
-actually ran a given pipeline invocation:
-- Facts 178, 179, 180, 184 show real GitHub Actions runner paths
-  (`/home/runner/work/you-never-knew-automation/you-never-knew-
-  automation/work/Fact_NNN_.../narration.mp3`).
-- Facts 181, 182, 183, 185, 186, 187, 188 all show **Windows local
-  paths** (`C:\Users\user\Documents\You Never Knew\work\Fact_NNN_...\
-  narration.{mp3,wav}`).
+**Net effect / design intent** (from the module's own docstring): keeps a
+rolling one-video-ahead buffer at all times, so a daily cron trigger is
+safe even if the pipeline run itself is slow, and there's no scenario where
+the channel goes a day without a queued video **once the buffer already has
+something in it**. It explicitly does *not* implement "publish live
+immediately if the queue is empty" — every production run schedules,
+period, as long as `scheduling.enabled` is true in config. This was flagged
+to the user as a real behavior gap versus one way they described their
+expectations, but turned out not to matter for the actual state of the
+channel (which already had Fact 193 live/anchored when this was checked) —
+**worth remembering if the buffer ever genuinely empties out in the
+future**, since the current code will still schedule 24h out rather than
+publish instantly in that case.
 
-Facts 187 and 188 in particular were produced **today** (28 Aug), with
-`published_at` timestamps (00:56:57 UTC and 01:12:33 UTC) that line up
-closely with a cluster of `usage_log.json` activity across gemini,
-pixabay, pexels, youtube_upload, and youtube_analytics — all
-consistent with a real, complete pipeline run — but the local Windows
-path on both records means that run happened on the user's own
-machine (`python main.py run` / `python main.py run --production`
-locally), not via the GitHub Actions `workflow_dispatch` button, even
-though the user described it in conversation as "one run through
-GitHub." Likely explanation: the user ran the pipeline locally and
-then manually committed/pushed the updated `database/*.json` files —
-which is a legitimate way to work, but is NOT the same thing as
-verifying the unattended GitHub Actions path actually works end-to-
-end. **Worth explicitly asking, in any follow-up, whether the
-`workflow_dispatch` button has ever actually been clicked and
-succeeded**, since that's the real prerequisite before ever
-uncommenting the daily cron (§10).
-
----
-
-## 4c. Fact 189 ("Bicycles") — failed once, retried successfully, THIS session
-
-Full run log (local, `python main.py run`, no `--production`) supplied
-by the user:
-
-1. Stage A0 succeeded — captured 48h+ performance for 2 videos (this
-   is the corrected live-publish-time logic from §4a working as
-   intended, on a local run).
-2. Stage A/B succeeded — Gemini picked "Bicycles" as Fact 189's topic,
-   topic reserved.
-3. Stage C (Kokoro narration) succeeded — 100.67s, 1565 chars. (Per
-   §4's open item: check whether this run's `usage_log.json` now has a
-   `kokoro` key, since it ran after the 08:52 UTC tracking-code
-   commit.)
-4. Whisper transcription + timeline: succeeded (no output logged, but
-   no failure either).
-5. Stage D (footage): succeeded, 5/5 downloaded.
-6. Stage E (captions): succeeded.
-7. Stage F, background music (`music.fetch_and_download_background_
-   track`): **FAILED.** `MusicError: No Jamendo track >= 15.0s found
-   for tags 'cinematic+ambient' or fallback 'cinematic' — nothing
-   usable even with looping.`
-8. Failure-email attempt: **also failed** —
-   `notifications: FAILED to send failure email: [WinError 10060] A
-   connection attempt failed because the connected party did not
-   properly respond after a period of time, or established connection
-   failed because connected host has failed to respond.` This is a
-   local network/firewall-level SMTP connection timeout (port 465,
-   `smtp.gmail.com`), not a code bug — looks like something on the
-   user's Windows machine (firewall, ISP, VPN) is currently blocking
-   that outbound connection. **User's explicit decision: not
-   investigating unless it happens again** (Fact 189's retry succeeded
-   with no failure to email, so there's no fresh data either way).
-   Still worth remembering it means failures during unattended runs
-   currently would NOT be reliably reported, if that ever becomes
-   relevant again.
-9. Pipeline correctly released the "Bicycles" topic reservation for
-   retry and exited cleanly (no partial/corrupt state left behind —
-   the existing failure-path design, from historical bug fix §6 item
-   4, worked as intended here).
-10. **Retried, this session, after the analysis below** — completed
-    successfully end-to-end, including upload. Fact 189 is now a real
-    published (unlisted) video, bringing the total to 17 (§1).
-
-**Two separate things came out of investigating the Jamendo failure:**
-
-**(a) A genuine, real bug, found and fixed — `VIBE_MAP`'s `+`-joined
-tags were being silently mis-encoded.** `engines/music.py`'s
-`VIBE_MAP` used a literal `+` as the multi-tag separator (e.g.
-`"cinematic+ambient"`), matching Jamendo's documented URL format for
-multi-value params. But that string is passed through `requests`'
-`params=` dict, which percent-encodes a literal `+` character to
-`%2B` (to disambiguate it from an encoded space). Jamendo decodes
-`%2B` back to a literal `+` and searches for one tag literally named
-`"cinematic+ambient"` — which doesn't exist — instead of the two tags
-`cinematic` and `ambient`. Verified directly in a Python REPL:
-
-```python
->>> requests.Request('GET', url, params={'tags': 'cinematic+ambient'}).prepare().url
-'...?tags=cinematic%2Bambient'          # broken — one bogus literal tag
->>> requests.Request('GET', url, params={'tags': 'cinematic ambient'}).prepare().url
-'...?tags=cinematic+ambient'            # correct — matches Jamendo's own doc examples
-```
-
-**Net effect**: every "Tier 1" topic-specific Jamendo search
-(`history`, `space`, `science`, `tech`, `nature`, `crime`, and
-`default`, all two-word tag combos in `VIBE_MAP`) has been silently
-returning zero results since the tag system was introduced — not a
-crash, just quietly falling through every single time to the generic
-single-tag `"cinematic"` fallback, regardless of the video's actual
-topic/vibe. **Fixed**: `VIBE_MAP` values changed from `+`-joined to
-space-joined (e.g. `"cinematic ambient"`), which `requests` correctly
-encodes to a raw `+` on the wire — exactly the format Jamendo expects.
-Delivered as a `git am` patch (commit message: "music: fix Jamendo
-multi-tag search silently matching nothing"). **Also documented in
-`README.md`'s Known Limitations section** (worth remembering as a
-general gotcha for any future multi-value API param, not just this one
-call site) and in the `music.py` structure comment in the repo tree.
-**Confirmed applied and pushed by the user** — live on `main`.
-
-**(b) The original failure did not recur on retry — confirmed
-transient.** The user retried the Fact 189 ("Bicycles") run and it
-completed successfully end-to-end (narration through upload). This
-confirms the working theory from earlier: the fallback-tier failure
-(plain `"cinematic"`, unaffected by the `+`-encoding bug) was a one-off
-Jamendo-side hiccup, not a deeper code issue. **User's explicit
-decision: not investigating further unless it happens again** — if the
-same `MusicError` recurs on a future run, that's the point at which
-it's worth real investigation (e.g. logging the raw Jamendo API
-response body on a `MusicError`, checking Jamendo's status page). Until
-then, treat it as resolved.
+**Verified working, 12 Sep**: YouTube Studio screenshot confirms exactly
+two videos currently sitting in the scheduled buffer (Fact 193 → Sep 13,
+Fact 194 → Sep 14), consistent with two consecutive daily cron-job.org
+triggers having each correctly scheduled 24h past the prior anchor.
 
 ---
 
 ## 5. Repo structure — `you-never-knew-automation`
 
+Reflects the live repo as read directly this session (`main.py`,
+`engines/youtube.py`, `engines/scheduling.py`, `config.json` verified
+firsthand; the rest carried over from the 28 Aug document and not
+re-verified this session — flagged accordingly).
+
 ```text
 you-never-knew-automation/
-├── main.py                       — orchestrator; Stage A0 (analytics) runs
-│                                    first; imports engines.kokoro (not
-│                                    engines.elevenlabs) for narration
-├── config.json / config.example.json
-├── requirements.txt               — google-api-python-client,
-│                                    google-auth-httplib2, google-auth-oauthlib,
-│                                    python-dotenv, google-genai, faster-whisper,
+├── main.py                       — orchestrator. Stage A0 (analytics) runs
+│                                    first. Stage H now computes scheduling
+│                                    before upload — see §3 step 9, §4g.
+│                                    VERIFIED LIVE this session.
+├── config.json                   — VERIFIED LIVE this session. Now includes
+│                                    a "scheduling": {"enabled": true,
+│                                    "cadence_hours": 24} block not present
+│                                    in the 28 Aug document.
+├── config.example.json
+├── requirements.txt               — google-api-python-client, google-auth-
+│                                    httplib2, google-auth-oauthlib, python-
+│                                    dotenv, google-genai, faster-whisper,
 │                                    nltk, kokoro>=0.9.4, soundfile, numpy
-├── MASTER_CONTINUATION_PROMPT.md  — an earlier version of this exact document,
-│                                    committed into the repo by the user;
-│                                    THIS document (from this follow-up
-│                                    session) is more current — consider
-│                                    re-committing it over the checked-in one
+│                                    (not re-verified this session)
+├── MASTER_CONTINUATION_PROMPT.md  — the 28 Aug version is committed here;
+│                                    THIS document supersedes it
 ├── .env                           — LOCAL ONLY, gitignored
-├── credentials.json               — Google OAuth desktop app credential
+├── credentials.json               — Google OAuth desktop app credential,
+│                                    gitignored (confirm this filename is
+│                                    actually in .gitignore — see §4f, this
+│                                    was tightened this session)
 ├── token.json                     — gitignored, restored from GitHub Secret
-│                                    YOUTUBE_TOKEN_JSON in CI
+│                                    YOUTUBE_TOKEN_JSON in CI. token.json.bak
+│                                    also now explicitly gitignored (§4f).
 ├── database/
 │   ├── topics.json
-│   ├── videos.json                — 16 successful records (fact 173–188) +
-│   │                                 1 failed/released attempt (fact 189,
-│   │                                 "Bicycles", not recorded as a video
-│   │                                 since it failed before Stage H upload);
-│   │                                 includes music_track_id/name,
-│   │                                 published_at (upload-completion time),
-│   │                                 live_published_at (actual YouTube
-│   │                                 go-live time, NEW this session — see
-│   │                                 §4a), category, and (once 48h+ past
-│   │                                 live_published_at AND actually has
-│   │                                 ≥1 real view) performance +
-│   │                                 performance_captured_at
+│   ├── videos.json                — not re-read this session; last verified
+│                                    state (28 Aug) was 16 successful records
+│                                    + 1 released attempt. Current true count
+│                                    is at least 194 fact numbers deep with a
+│                                    mix of published/scheduled states — see
+│                                    §1. Re-read this file directly for the
+│                                    real current picture rather than
+│                                    trusting either master prompt's count.
 │   ├── playlists.json             — legacy, unused
-│   ├── usage_log.json             — self-tracked API call counts, COMMITTED
-│   │                                 (not gitignored). Keys as of this
-│   │                                 session: gemini, jamendo, youtube_upload
-│   │                                 + 4 other youtube_* operation keys,
-│   │                                 elevenlabs (2 calls, videos [185,186] —
-│   │                                 the last two ElevenLabs-narrated videos
-│   │                                 before the Kokoro swap), pixabay, pexels,
-│   │                                 youtube_analytics. No "kokoro" key
-│   │                                 confirmed populated yet as of this
-│   │                                 write-up — check on next run (§4).
-│   └── music_blocklist.json       — permanent Jamendo track exclusion list,
-│                                     in active use, currently 1 entry
+│   ├── usage_log.json             — self-tracked API call counts, committed
+│   └── music_blocklist.json       — Jamendo track exclusion list
 ├── engines/
 │   ├── topic_engine.py
-│   ├── numbering.py                — idempotent record_video_state();
-│   │                                  next_fact_number in videos.json is
-│   │                                  only a fallback SEED, not
-│   │                                  authoritative — the real next number
-│   │                                  is derived by scanning existing
-│   │                                  topics/videos, so seeing this field
-│   │                                  "stuck" at an old value is normal,
-│   │                                  not a bug
+│   ├── numbering.py                — record_video_state(),
+│   │                                  get_latest_video_record() (the latter
+│   │                                  confirmed in use by scheduling.py,
+│   │                                  §4g, not independently re-read)
 │   ├── script_engine.py
-│   ├── gemini.py                   — get_unique_topic()/
-│   │                                  generate_candidate_topic() accept
-│   │                                  performance_context
-│   ├── analytics.py                — 48h+ performance capture, retention
-│   │                                  digest builder — gating logic
-│   │                                  corrected THIS session, see §4a
-│   ├── kokoro.py                   — CURRENT narration engine. Local/offline
-│   │                                  via Kokoro-82M. Logs a self-tracked
-│   │                                  "videos narrated" count (success-only).
-│   │                                  Requires the espeak-ng SYSTEM package.
-│   ├── elevenlabs.py                — PREVIOUS narration engine. No longer
-│   │                                  imported by main.py, no longer checked
-│   │                                  by either dashboard. Kept as an easy
-│   │                                  rollback path.
+│   ├── gemini.py
+│   ├── analytics.py                — 48h gating on live_published_at, §4a
+│   ├── scheduling.py                — VERIFIED LIVE this session, full
+│   │                                  detail in §4g. compute_next_publish_at(),
+│   │                                  SchedulingDriftError.
+│   ├── kokoro.py                   — current narration engine
+│   ├── elevenlabs.py                — previous engine, kept as rollback,
+│                                     unused
 │   ├── captions.py
 │   ├── timeline.py
-│   ├── footage.py                  — Pixabay/Pexels calls logged to
-│   │                                  usage_tracker with fact_number
+│   ├── footage.py
 │   ├── renderer.py
-│   ├── metadata.py                 — REWRITTEN prior session — see §7
-│   ├── music.py                     — Jamendo fetch + mix, usage_tracker +
-│   │                                  blocklist wired in; VIBE_MAP tags
-│   │                                  fixed THIS session to be space-
-│   │                                  separated, not "+"-joined — see §4c
-│   ├── notifications.py             — Gmail SMTP failure emails; failing
-│   │                                  locally as of THIS session (WinError
-│   │                                  10060, connection timeout) — see §4c,
-│   │                                  not yet diagnosed further
-│   ├── usage_tracker.py             — log_call(service, fact_number=...)
-│   └── youtube.py                   — SCOPES includes yt-analytics.readonly;
-│                                       credentials exposed for analytics.py
-│                                       reuse; publisher.youtube (Data API v3
-│                                       client) reused by analytics.py's new
-│                                       live-status check (§4a)
-├── check_usage.py                  — local dashboard script. Kokoro card
-│                                      (not live-checked, self-tracked count
-│                                      only) replaces the old ElevenLabs
-│                                      live-quota check. Pexels/Pixabay
-│                                      checks send a random cache-busting
-│                                      query param + Cache-Control: no-cache
-│                                      — see §6 item 18.
-├── blocklist_track.py              — standalone: blocklist a Jamendo track
-├── rerun_footage.py / rerun_footage_wombats.py — standalone historical re-runs
+│   ├── metadata.py                 — WordNet category-guessing fix, §6/§7
+│   ├── music.py                     — Jamendo, VIBE_MAP fix §4c/§6 item 20
+│   ├── notifications.py             — Gmail SMTP failure emails; local
+│                                     WinError 10060 as of 28 Aug, status
+│                                     since unknown
+│   ├── usage_tracker.py
+│   └── youtube.py                   — VERIFIED LIVE this session.
+│                                     SCOPES = [youtube, yt-analytics.readonly].
+│                                     upload_video(..., publish_at=None) —
+│                                     passing publish_at forces
+│                                     privacyStatus="private" regardless of
+│                                     the privacy_status arg (YouTube
+│                                     requirement). get_video_status(video_id)
+│                                     — real Data API status+snippet lookup,
+│                                     used by scheduling.py.
+├── check_usage.py                  — local dashboard script
+├── blocklist_track.py
+├── rerun_footage.py / rerun_footage_wombats.py
 ├── playwright_login.py / related_video.py — Related Video prototype, SHELVED
-├── README.md                       — kept in sync THIS session too, see §11
+├── README.md
 └── .github/workflows/
-    └── daily-video.yml             — see §9, §10
+    └── daily-video.yml             — VERIFIED LIVE this session (see below).
+                                       schedule: block still commented out —
+                                       intentionally unused now that
+                                       cron-job.org drives triggers (§4d),
+                                       not because it's broken.
 ```
 
----
-
-## 5b. Repo structure — `you-never-knew-dashboard` (separate repo)
-
-```text
-you-never-knew-dashboard/
-├── index.html                     — renders cards generically from whatever
-│                                     the function returns; no ElevenLabs-
-│                                     specific markup existed here to begin
-│                                     with, so no change was needed for the
-│                                     Kokoro swap
-├── netlify.toml
-└── netlify/
-    └── functions/
-        └── usage.js               — checkElevenLabs() REMOVED entirely
-                                       (along with the now-dead maskKey()
-                                       helper it alone used); replaced with
-                                       checkKokoro(log), a simple synchronous
-                                       function (not async — no network
-                                       call) reading the self-tracked count.
-                                       checkPexels()/checkPixabay() send a
-                                       random cache-busting query param +
-                                       Cache-Control: no-cache — see §6 item 18.
-```
-
-Netlify env vars (separate credential store from GitHub Secrets):
-`PEXELS_API_KEY`, `PIXABAY_API_KEY`, `GITHUB_REPO=Tobifunmi/you-never-knew-automation`.
-`ELEVENLABS_API_KEY` is still set in Netlify (harmless, unused — nothing
-reads it anymore).
-
-`usage.js` fetches `database/usage_log.json` fresh from
-`raw.githubusercontent.com` on every request — genuinely live on every
-page reload.
-
----
-
-## 6. Bug history — chronological, all fixed/resolved unless noted
-
-*(Items 1–19 preserved from the prior version of this document —
-unchanged. Item 20 new this session.)*
-
-1. **Fact 174 near-data-loss bug.** Playlist step used to run before
-   `record_video_state()`. Fixed: record+complete-topic now runs
-   immediately after upload, before playlist logic.
-2. **Narrow exception handling** — broadened to `except Exception`.
-3. **Footage failures used `raise SystemExit`** — fixed to
-   `raise FootageError`.
-4. **Stage A/B sat outside the pipeline's `try` block** — fixed,
-   guarded by a `topic_reserved` flag. (Seen working correctly again
-   this session on the Fact 189 failure — topic cleanly released.)
-5. **Wombats (Fact 174) footage repetition** — pre-`exclude_ids` fix,
-   re-run locally.
-6. **Pangolins (Fact 175) duplicate/bad-footage uploads** — same root
-   cause as #5, resolved.
-7. **Jamendo hard duration requirement caused failures** — fixed:
-   prefers full-length, falls back to longest ≥15s + loops. (Note:
-   this is the "loopable ≥15s" tier logic that Fact 189 still failed
-   to clear on BOTH tag tiers — see §4c; not a regression of this fix,
-   a separate issue.)
-8. **`daily-video.yml`'s cron claimed fixed but wasn't** — verified
-   false by reading the real file. **As of the prior session it is
-   deliberately commented out again**, by repeated explicit
-   instruction. Don't treat either "on" or "off" as permanent without
-   re-checking. (Unchanged this session — still commented out. See
-   also §4b's open question about whether Actions has ever actually
-   run successfully at all.)
-9. **`daily-video.yml`'s commit-back step never included
-   `usage_log.json`** — fixed, plus the `.gitignore` exclusion reversed.
-10. **Dashboard repo folder structure wrong on first deploy** — fixed.
-11. **Statue of Liberty (Fact 180) — real YouTube Content ID claim.**
-    Resolved manually (re-recorded with different music, re-uploaded).
-    Structural fix: `music.py` now records `track_id`/`track_name` per
-    video, plus a persistent blocklist.
-12. **Jamendo transient failure with misleading error message** —
-    fixed: checks `headers.status`, raises Jamendo's real error. (This
-    is why Fact 189's failure surfaced as a clear, specific
-    `MusicError` rather than a generic/misleading one.)
-13. **Category-guessing defaulted 46% of videos to "Amazing Facts"** —
-    see §7.
-14. **YouTube Analytics OAuth scope missing** — `invalid_scope`
-    RefreshError. Root cause: YouTube Analytics API not enabled in
-    Google Cloud Console (separate from YouTube Data API v3). Fixed:
-    enabled it, fresh `token.json` re-auth.
-15. **CI secret name mismatch** — workflow read `secrets.TOKEN_JSON`,
-    the actually-created secret was `YOUTUBE_TOKEN_JSON`. Fixed:
-    workflow now reads `secrets.YOUTUBE_TOKEN_JSON`.
-16. **ElevenLabs dashboard card stuck on HTTP 401 after key rotation**
-    despite the key testing valid via direct curl. Root cause: invisible
-    whitespace from a Netlify UI copy-paste. Fixed by re-pasting
-    cleanly; a defensive `.trim()` was added at the time but has since
-    been **removed entirely along with the rest of the ElevenLabs check**
-    once the narration engine swapped to Kokoro (item 19 below).
-17. **YouTube Data API dashboard card text overflowing its card
-    boundary** — redundant embedded URLs in status text, no wrap
-    handling. Fixed: removed redundant URLs, added
-    `overflow-wrap: break-word` CSS safety net.
-18. **Pexels dashboard "used" quota frozen at exactly 562** across
-    multiple page reloads, despite self-tracked real usage climbing
-    9→18 calls in the same window — a near-identical *symptom* to item
-    16 (ElevenLabs 401) but a **genuinely different root cause**, worth
-    not conflating: this was NOT a key mismatch. The check always sent
-    the identical query (`"nature"`, `per_page=1`). Confirmed root
-    cause empirically: Pexels was serving a cached response for that
-    repeated identical query, including frozen rate-limit headers from
-    whenever that response was first cached. **Verified fixed** by the
-    user directly: after adding a random cache-busting query param +
-    `Cache-Control: no-cache` and reloading twice, the number moved
-    from 562 → 102 and the reset date jumped forward to a fresh
-    monthly cycle (2026-08-25 → 2026-09-19), confirming it's now
-    reading real live data. The same defensive fix was applied to
-    Pixabay's check too, pre-emptively.
-19. **ElevenLabs replaced with Kokoro-82M as the narration engine** —
-    see §4 for full detail. Not a "bug" exactly, but listed here for
-    chronological completeness since it triggered cascading dashboard
-    changes (items above).
-20. **Jamendo `VIBE_MAP` multi-tag searches silently broken by
-    `requests`' `+`-encoding behavior, since the tag system was
-    introduced.** Full detail in §4c(a). Fixed by switching `VIBE_MAP`
-    from `+`-joined to space-joined tag strings. **Confirmed applied
-    and pushed.** Fact 189 retried successfully afterward, which also
-    confirms the original fallback-tier failure was a one-off, not a
-    second bug (§4c(b)).
-21. **DEFERRED, not investigating unless it recurs — Gmail SMTP
-    failure notifications timing out locally.** `[WinError 10060]` on
-    the Fact 189 failure — see §4c item 8. Likely local firewall/ISP/
-    VPN blocking outbound port 465, not a code issue. Explicit user
-    call: only revisit if it happens again.
-
----
-
-## 7. Category-guessing fix (`engines/metadata.py`, prior session,
-   unchanged this session — preserved for completeness)
-
-**The bug**: `_wordnet_category()` only ever checked the topic's FIRST
-word — broke on articles ("The Dead Sea") and on topics where the
-category-bearing word wasn't first ("Giant's Causeway"). Verified:
-6/13 (46%) were defaulting to "Amazing Facts" before the fix.
-
-**The fix**: scans every non-stopword word, left to right, trying each
-against `HYPERNYM_CATEGORY_MAP`. Added stopword list, landmark/
-geological/chemistry keyword coverage, new hypernym mappings
-(`chemical_element.n.01`, `road.n.01`, `sculpture.n.01`), and an
-explicit `"bermuda triangle"` keyword override.
-
-**Verified**: 0/13 fall to default post-fix. Spot-checks (Great Wall
-of China, Eiffel Tower, Roman Colosseum, etc.) all resolve correctly.
-
-**Accepted residual limitation**: single ambiguous words can still
-misresolve (e.g. "Chess" → Nature Facts via a WordNet plant sense).
-Not fixed — unlikely as a real topic, not worth a new category for one
-word.
-
-**This fix only affects future videos** — the 6 pre-existing "Amazing
-Facts" entries were not retroactively reclassified, neither in
-`videos.json` nor on YouTube's actual playlists. A backfill script was
-offered but not requested/built.
-
----
-
-## 8. Deliberately deferred work
-
-**Shorts "Related Video" (End Screen).** No public API for Studio's
-End Screen setting. Decision made: always link to the immediately-
-previous fact's video. Mechanism undecided — a Playwright/Studio
-browser-automation prototype exists but was explicitly shelved before
-a working headed run. Simpler alternative not yet built: a link in the
-video description instead. Do not resume without explicit direction.
-
-**Zack D Films-style production skill.** Explored via Higgsfield MCP
-for a separate, more elaborate 3D-animated short-form pipeline;
-stalled at a Higgsfield billing barrier. Not connected to the You
-Never Knew pipeline — separate effort, separate status.
-
-**Scheduled/timed YouTube publishing.** Not built yet — `privacy_status`
-today is only ever `"public"` or `"unlisted"`, set immediately at
-upload, with no `status.publishAt` support in `engines/youtube.py`'s
-`upload_video()`. §4a's analytics fix was done proactively so that
-whenever this DOES get built, the 48h performance tracking will
-already measure from the real go-live time rather than upload time.
-
-## 8b. Google AI Plus/Pro student offer — researched, not adopted
-
-The user asked whether access to Google's student AI subscription
-offer (region-dependent: AI Plus outside the US, AI Pro for US
-students) would help this pipeline. Conclusion, reached by research
-rather than assumption:
-
-- **AI Plus** (what a Nigeria-based student would get) bundles more
-  usage in Google's own consumer apps (Gemini chat, Gmail/Docs/Sheets,
-  storage) — it does NOT include any Google Cloud credit or elevated
-  AI Studio quota. The pipeline's `GEMINI_API_KEY` calls (via the
-  `google-genai` SDK) are on a completely separate quota system from
-  the consumer app subscription, so AI Plus would change nothing about
-  the pipeline.
-- **AI Pro** (US-only for students) DOES bundle a real, if modest,
-  $10/month Google Cloud credit applicable to Gemini API billing, plus
-  higher AI Studio playground rate limits — but only after explicitly
-  enabling Cloud Billing on the project (which also flips the key from
-  free-tier to paid-tier pricing/limits). Assessed as low-value at
-  current/planned request volume (2x/week → daily, one Gemini call
-  cycle per video) — the free tier's request-based limits aren't
-  remotely close to being the bottleneck for this pipeline.
-- **Net conclusion**: not pursued. The narration cost/limit problem
-  this prompted the broader conversation into was real, but was
-  actually solved by the Kokoro swap (§4), not by a Google subscription
-  of any tier.
-
----
-
-## 9. Credentials / environment variables / GitHub Secrets
-
-**Automation repo** — local `.env` + GitHub Secrets: `GEMINI_API_KEY`
-(model: `GEMINI_MODEL` env var, defaults to `gemini-3.6-flash`, free
-tier), `PEXELS_API_KEY`, `PIXABAY_API_KEY`, `JAMENDO_CLIENT_ID`,
-`GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD`. **`ELEVENLABS_API_KEY` /
-`ELEVENLABS_VOICE_ID` are no longer required** — left as GitHub
-Secrets harmlessly (removed from the pipeline execution step's `env:`
-block in the workflow, but the secrets themselves weren't deleted).
-`KOKORO_VOICE_ID` / `KOKORO_SPEED` / `KOKORO_PAUSE_SECONDS` are
-optional overrides with sane defaults, not required to be set anywhere.
-
-YouTube OAuth: `credentials.json` (never committed) + `token.json`
-restored in CI from the **`YOUTUBE_TOKEN_JSON`** GitHub Secret (must
-carry BOTH the upload scope AND `yt-analytics.readonly`). No new scope
-was needed for §4a's live-status check — it reuses the same Data API
-client (`publisher.youtube`) already authenticated for uploads.
-
-**Dashboard repo (Netlify)** — separate store: `PEXELS_API_KEY`,
-`PIXABAY_API_KEY`, `GITHUB_REPO=Tobifunmi/you-never-knew-automation`.
-`ELEVENLABS_API_KEY` still present but unused. When rotating any key,
-paste carefully — a copy-paste whitespace issue caused a real,
-hard-to-diagnose 401 earlier (see §6 item 16) before the ElevenLabs
-check was removed entirely.
-
-**Gmail SMTP App Password** — presumably still valid (unchanged this
-session), but the connection itself is currently timing out locally
-(§6 item 21) — worth checking this credential is still valid too, once
-the network-level issue is ruled out or fixed, just to be thorough.
-
----
-
-## 10. `daily-video.yml` — current real state (verified, not assumed)
+**`daily-video.yml`, current real content** (verified this session,
+unchanged from the 28 Aug document except for context around its trigger):
 
 ```yaml
 on:
@@ -791,150 +457,221 @@ on:
   workflow_dispatch:
 ```
 
-**Deliberately commented out**, by explicit repeated instruction: "I'll
-change the cron to daily, but still keep it commented out until I'm
-ready. I still have unpublished videos for now." Do not enable without
-being asked. Only `workflow_dispatch` currently triggers a run — and
-per §4b, it's not even confirmed that button has been successfully
-clicked recently; the most recent videos' `narration_path` values
-point to local runs instead.
-
-Steps, in order: checkout → setup Python 3.11 → install ffmpeg AND
-espeak-ng (single combined step) → install pip deps → cache Hugging
-Face model weights (`actions/cache`, path `~/.cache/huggingface`,
-keyed on `hashFiles('requirements.txt')`) → download WordNet corpus →
-restore `topics.json`/`videos.json`/`token.json` from Secrets → run
-`python main.py run --production` with secrets injected as env vars
-(no longer includes ELEVENLABS_API_KEY/ELEVENLABS_VOICE_ID) →
-commit-back step (`if: always()`) — `git add database/topics.json
-database/videos.json database/usage_log.json`, commit, push, all with
-`|| true`.
-
-**Daily-cadence feasibility check performed previously** (before the
-schedule was changed from Mon/Thu to daily): Pexels ~4.5 calls/video →
-~135/month at daily cadence against a 25,000/month limit, trivial.
-Pixabay has no monthly cap (rolling 60s window only). YouTube Data API
-~1,750 units/video against 10,000/day budget → ~17.5%/day, comfortable.
-Gemini's request-based free tier is nowhere close to being a
-constraint at 2-3 calls/day. **Jamendo is the one honest asterisk**: no
-published official quota exists; the only evidence is empirical.
-**Fact 189's failure this session is a small additional data point
-here** — not proof of a quota problem (more likely a one-off
-catalog/rate hiccup per §4c(b)), but worth folding into the "watch the
-dashboard closely for the first couple of weeks after cron is ever
-actually enabled" plan.
+Steps: checkout → setup Python 3.11 → install ffmpeg + espeak-ng → install
+pip deps → cache Hugging Face model weights (keyed on
+`hashFiles('requirements.txt')`) → download WordNet corpus → restore
+`topics.json`/`videos.json`/`token.json` from Secrets → run
+`python main.py run --production` (unconditional — every triggered run is a
+real production attempt) → commit-back step (`if: always()`), commits
+`database/topics.json`, `database/videos.json`, `database/usage_log.json`.
 
 ---
 
-## 11. Documentation state
+## 5b. Repo structure — `you-never-knew-dashboard` (separate repo, not touched this session)
 
-`README.md` in the automation repo has been kept current across
-multiple sessions — most recently (THIS session) updated to add: the
-live-publish-time analytics gating explanation (§4a) in the Analytics
-Feedback Loop section and the `videos.json` field list, and the
-Jamendo `+`-encoding bug + fix (§4c(a)) in the `music.py` structure
-comment and a new Known Limitations entry. Delivered as a `git am`
-patch; **confirmed applied and pushed by the user.**
+```text
+you-never-knew-dashboard/
+├── index.html
+├── netlify.toml
+└── netlify/
+    └── functions/
+        └── usage.js               — checkKokoro(log) reads the self-tracked
+                                       count; checkPexels()/checkPixabay()
+                                       use cache-busting params (§6 item 18)
+```
 
-**A committed copy of an earlier version of this exact document**
-lives at `/MASTER_CONTINUATION_PROMPT.md` in the automation repo root
-(added by the user, not automatically kept in sync). It predates this
-entire follow-up session's work (§4a, §4c, README updates) — this
-document is the current one; consider replacing the committed file
-with this version so the repo's own copy doesn't mislead a future
-session that reads it directly instead of being handed this prompt.
+Netlify env vars: `PEXELS_API_KEY`, `PIXABAY_API_KEY`,
+`GITHUB_REPO=Tobifunmi/you-never-knew-automation`. `ELEVENLABS_API_KEY` still
+present but unused. `usage.js` fetches `database/usage_log.json` fresh from
+`raw.githubusercontent.com` on every page load.
 
 ---
 
-## 12. Working style / operating principles
+## 6. Bug history — chronological, all fixed/resolved unless noted
 
-Each of these has concretely prevented or caught a real problem in
-this project's actual history:
+*(Items 1–21 preserved from the 28 Aug document, condensed. Items 22–24 new
+this session.)*
+
+1. Fact 174 near-data-loss bug — record-before-playlist ordering fix.
+2. Narrow exception handling broadened to `except Exception`.
+3. Footage failures used `raise SystemExit` — fixed to `raise FootageError`.
+4. Stage A/B sat outside the pipeline's `try` block — fixed with a
+   `topic_reserved` flag.
+5–6. Wombats/Pangolins footage repetition — `exclude_ids` fix.
+7. Jamendo hard duration requirement — prefers full-length, falls back to
+   longest ≥15s + loops.
+8. `daily-video.yml`'s cron claimed fixed but wasn't — verified false by
+   reading the real file, repeatedly. **This pattern (claims about the
+   workflow file's state not matching reality) recurred conceptually again
+   this session** — always re-read the file directly rather than trusting a
+   prior summary.
+9. Commit-back step missing `usage_log.json` — fixed.
+10. Dashboard repo folder structure wrong on first deploy — fixed.
+11. Statue of Liberty (Fact 180) Content ID claim — resolved manually,
+    structural fix: per-video track_id/name + persistent blocklist.
+12. Jamendo transient failure with misleading error message — fixed.
+13. Category-guessing defaulted 46% of videos to "Amazing Facts" — see §7
+    in the 28 Aug document (WordNet scan-every-word fix, verified 0/13
+    fall to default post-fix).
+14. YouTube Analytics OAuth scope missing (`invalid_scope`) — fixed by
+    enabling the YouTube Analytics API in Cloud Console + fresh re-auth.
+15. CI secret name mismatch (`TOKEN_JSON` vs `YOUTUBE_TOKEN_JSON`) — fixed.
+16. ElevenLabs dashboard 401 from invisible copy-paste whitespace — fixed
+    (moot now, ElevenLabs check removed entirely).
+17. YouTube Data API dashboard card text overflow — fixed.
+18. Pexels dashboard quota frozen due to a cached identical query — fixed
+    with cache-busting param + `Cache-Control: no-cache`. Same fix
+    pre-emptively applied to Pixabay.
+19. ElevenLabs → Kokoro-82M narration engine swap.
+20. Jamendo `VIBE_MAP` `+`-encoding bug — see §4c. Fixed, confirmed pushed.
+21. **DEFERRED, not investigating unless it recurs** — Gmail SMTP failure
+    notifications timing out locally (`WinError 10060`), likely a local
+    firewall/ISP/VPN issue. Status since 28 Aug unknown.
+22. **NEW, this session** — cron-job.org Authorization header 401: value
+    was entered as `Bearer: <token>` (extra colon) instead of `Bearer
+    <token>`. Fixed.
+23. **NEW, this session** — YouTube OAuth refresh token expiry due to
+    Testing publishing status (7-day forced expiry). Fixed by moving to
+    "In production" status + fresh re-auth. Full detail §4e.
+24. **NEW, this session** — `token.json.bak` briefly entered local git
+    history with real (if dead) credentials inside; caught by GitHub push
+    protection before ever reaching GitHub. Resolved via `git reset --soft`
+    + hardened `.gitignore`, no rotation needed. Full detail §4f.
+
+---
+
+## 7. Category-guessing fix (`engines/metadata.py`, historical, unchanged)
+
+`_wordnet_category()` previously only checked a topic's first word, causing
+46% (6/13) of videos to default to "Amazing Facts." Fixed to scan every
+non-stopword word left to right against `HYPERNYM_CATEGORY_MAP`, with added
+landmark/geological/chemistry keyword coverage and an explicit "bermuda
+triangle" override. Verified 0/13 fall to default post-fix. Residual known
+limitation: single ambiguous words can still misresolve (e.g. "Chess" via a
+WordNet plant sense) — accepted, not worth a fix for one-off cases. This fix
+was **not retroactive** — the 6 pre-existing "Amazing Facts" entries were
+never reclassified.
+
+---
+
+## 8. Deliberately deferred work
+
+- **Shorts "Related Video" End Screen.** No public API for Studio's End
+  Screen setting. Decision: always link to the immediately-previous fact's
+  video; mechanism undecided (a shelved Playwright prototype exists). Do
+  not resume without explicit direction.
+- **Zack D Films-style production skill** (via Higgsfield MCP) — separate
+  effort, stalled at a billing barrier, unrelated to this pipeline.
+- **Google AI Plus/Pro student offer** — researched and explicitly not
+  adopted; neither tier would have changed anything about this pipeline's
+  actual constraints (the narration cost problem was solved by the Kokoro
+  swap instead, §4 in the 28 Aug document).
+- **Full Google OAuth verification (CASA)** for the `youtube.upload`
+  restricted scope — considered and explicitly abandoned this session
+  (§4e). "In production" publishing status was sufficient to fix the actual
+  problem (7-day token expiry) without the disproportionate cost of full
+  verification.
+
+---
+
+## 9. Credentials / environment variables / secrets — full current picture
+
+**Automation repo — GitHub Secrets**: `GEMINI_API_KEY`, `PEXELS_API_KEY`,
+`PIXABAY_API_KEY`, `JAMENDO_CLIENT_ID`, `GMAIL_ADDRESS`,
+`GMAIL_APP_PASSWORD`, **`YOUTUBE_TOKEN_JSON`** (rotated this session — see
+§4e; must carry both the upload scope and `yt-analytics.readonly`).
+`ELEVENLABS_API_KEY`/`ELEVENLABS_VOICE_ID` present but unused.
+
+**Local `.env` / files**: `credentials.json` (OAuth Desktop app client,
+never committed), `token.json` (gitignored, mirrors `YOUTUBE_TOKEN_JSON`).
+
+**cron-job.org job config (external to both repos)**: a fine-grained GitHub
+PAT scoped to just `you-never-knew-automation` with Actions: Read and write,
+stored only in the cron-job.org job's Authorization header. **No expiry
+date recorded — worth checking/setting a reminder to rotate.**
+
+**Google Cloud / Google Auth Platform**: project `you-never-knew-1`.
+Publishing status: **In production** (moved from Testing this session, §4e).
+User type: External, under the 100-user cap. An "unverified app" warning
+screen still appears on manual re-auth — expected, click through via
+"Advanced."
+
+**Dashboard repo (Netlify)** — separate secret store: `PEXELS_API_KEY`,
+`PIXABAY_API_KEY`, `GITHUB_REPO=Tobifunmi/you-never-knew-automation`.
+
+**Gmail SMTP App Password** — presumably still valid; the connection itself
+was timing out locally as of 28 Aug (§6 item 21), status since then unknown.
+
+---
+
+## 10. Daily cadence feasibility (carried over from 28 Aug document, not re-verified)
+
+Pexels ~4.5 calls/video → ~135/month at daily cadence against a 25,000/month
+limit. Pixabay has no monthly cap (rolling 60s window only). YouTube Data
+API ~1,750 units/video against 10,000/day → ~17.5%/day. Gemini's free tier
+nowhere close to constrained at 2-3 calls/day. Jamendo has no published
+official quota — the only evidence is empirical; worth watching the
+dashboard if failures recur.
+
+---
+
+## 11. Working style / operating principles
+
+Carried forward, reinforced again this session:
 
 - **Verify against actual files/logs/commit history before treating
-  something as done OR as broken.** Recurred twice more this session:
-  the Kokoro-dashboard-still-showing-zero question was answered by
-  reading real commit timestamps (`git log`) and comparing them
-  against `published_at` on the actual video records — not assumed to
-  be a bug. Conversely, the Jamendo `+`-encoding issue was confirmed
-  as a REAL bug by actually running `requests.Request(...).prepare().url`
-  locally and observing the mis-encoding directly, not by pattern-
-  matching the error message to a guess.
-- **Don't conflate similar-looking symptoms with the same root
-  cause.** Recurred again this session: Fact 189's Jamendo failure
-  produced two candidate explanations (the `+`-encoding bug, and a
-  possible transient Jamendo-side issue) that were kept explicitly
-  separate rather than assumed to be one and the same — the encoding
-  bug explains why Tier 1 always fails, but does NOT by itself explain
-  why the Tier 2 fallback (unaffected by that bug) also failed
-  tonight.
-- **No manual overrides for anything unattended.** Fixes are either
-  genuinely automated or explicitly flagged as needing a one-time
-  human step (Playwright login, a fresh OAuth re-auth for a new scope,
-  installing `espeak-ng` locally) — never a silent assumption someone
-  will intervene during a scheduled run.
-- **Prefer free/offline over paid/AI where genuinely sufficient** —
-  established via the Kokoro swap, WordNet-over-AI-classification, and
-  SMTP-over-OAuth precedents.
-- **Be honest about what was and wasn't actually verified**, including
-  patch application status: this document explicitly distinguishes
-  "patch delivered" from "confirmed applied and pushed" for each
-  change rather than assuming success. All three of this session's
-  patches (analytics.py, music.py, README.md) are now confirmed
-  applied and pushed.
-- **Take an explicit user decision not to chase something further at
-  face value, and reflect it accurately rather than re-flagging it as
-  still-urgent.** Both the SMTP timeout and the "what if Jamendo fails
-  again" question got an explicit "only if it recurs" from the user —
-  this document marks both as deliberately deferred, not as open bugs
-  needing attention next session.
-- **Isolate failure domains.** A failure in one stage should never
-  retroactively invalidate work that already genuinely succeeded —
-  Fact 189's Kokoro narration, footage, and captions all genuinely
-  completed before the music-stage failure, and nothing about that
-  failure calls those earlier stages into question.
-- **Accept known, narrow, low-probability limitations rather than
-  over-engineering fixes** — but always name them explicitly (§7 fix
-  detail, §3 step 1's zero-view analytics nuance, §10's Jamendo
-  asterisk, §4c(b)'s "probably transient, retry first" call).
-- **When infrastructure changes what's true, go back and fix the
-  earlier advice that's now wrong** — done again this session:
-  updating the README's Analytics section and field list now that
-  `live_published_at` exists, rather than leaving the old
-  `published_at`-only description silently stale.
-- **Patches, not direct pushes, from this assistant.** No push
-  credentials to either repo — all code changes are delivered as `git
-  format-patch` files, applied locally via `git am <file>.patch` then
-  `git push origin main` by the user. Expect this pattern to continue.
+  something as done or broken.** This session: read `main.py`,
+  `engines/youtube.py`, `engines/scheduling.py`, and `config.json` directly
+  from the public repo rather than trusting either master prompt's
+  description of what scheduling support did or didn't exist — and found
+  the 28 Aug document was flatly wrong about it (listed as "not built yet"
+  when it was, in fact, live).
+- **Don't conflate similar-looking symptoms with the same root cause.**
+  This session: the cron-job.org 401 (malformed header) and the later
+  `invalid_grant` token expiry were two genuinely separate problems that
+  happened to surface back-to-back — treated separately rather than
+  assumed to be the same misconfiguration.
+- **A push-protection rejection is a save, not an obstacle** — GitHub
+  correctly blocked a leaked secret from ever reaching the remote; the
+  right response was rewriting local history, not using GitHub's "allow
+  this secret" override link.
+- **Prefer the proportionate fix over the maximal one.** Moving to "In
+  production" publishing status solved the real problem (7-day token
+  expiry); pursuing full Google verification would have been substantial
+  unnecessary effort for a solo project and was correctly abandoned
+  mid-flow.
+- **No manual overrides for anything unattended** — the scheduling buffer
+  (§4g) exists specifically so a daily cron trigger never depends on a
+  human noticing an empty queue in time.
+- **Patches (or now, direct guidance) — never assume push access.** This
+  assistant gained the ability to *read* the public repo directly this
+  session, which is new and worth continuing to use for verification, but
+  still cannot write to it.
+- **Be honest about documentation gaps rather than papering over them** —
+  this document explicitly flags the undocumented scheduling-engine build
+  and the undocumented facts-189-to-192 history rather than pretending
+  continuity that doesn't exist.
 
 ---
 
-## 13. Where things stand — prior open items, now resolved
+## 12. Open items for the next session
 
-All six open items from the previous version of this document were
-checked off in a single follow-up:
-
-1. **Both pending patches (music.py's Jamendo fix, README update)** —
-   confirmed applied via `git am` and pushed. All three of this
-   session's patches (analytics.py, music.py, README.md) are now live
-   on `main`.
-2. **Fact 189 ("Bicycles") retry** — ran successfully. Confirms the
-   original Jamendo fallback-tier failure was transient, not a deeper
-   bug (§4c(b)).
-3. **Gmail SMTP `WinError 10060`** — explicit user call: not
-   investigating unless it recurs. Hasn't recurred (no failure to
-   email since the successful retry). Deliberately deferred, not
-   actively tracked.
-4. **Local-vs-Actions provenance** — resolved. Confirmed a
-   misstatement earlier in conversation, not a real ambiguity: the run
-   was local, described inaccurately as "through GitHub" at the time.
-5. **`usage_log.json`'s `kokoro` key** — confirmed present and the
-   dashboard now reflects it correctly.
-6. **Daily cron** — explicit "don't uncomment yet," reconfirmed.
-   Backlog-clearing is still the stated condition before revisiting
-   this.
-
-**No new open items as of this document.** The project is in a
-settled, fully-resolved state at this checkpoint — any follow-up
-conversation can treat everything above as current ground truth
-without a pending-verification list to work through first.
+1. **cron-job.org PAT expiry** — no expiration date was recorded when it
+   was created this session; check it and set a rotation reminder before it
+   silently lapses and breaks the daily trigger.
+2. **`database/videos.json` / `usage_log.json`** haven't been re-read this
+   session — worth doing at the start of any follow-up to get the real
+   current fact count, full 189→194 history, and confirm the `kokoro` usage
+   count and any other dashboard figures are still behaving as expected.
+3. **Gmail SMTP failure notifications** — still unresolved as of 28 Aug,
+   not discussed this session. If a pipeline failure happens now (post
+   cron-job.org, post scheduling), it's worth confirming whether a failure
+   email would actually arrive.
+4. **Who/what built the scheduling engine** — not a blocking question, but
+   if a future session finds other undocumented changes in the repo, the
+   same "verify the live code first" approach that surfaced this one should
+   be applied again rather than assuming either master prompt is complete.
+5. **Confirm `.gitignore` coverage** is actually correct now (§4f) — worth
+   a quick `git status` sanity check on the local machine next time it's
+   touched, to make sure `token.json`/`token.json.bak`/`credentials.json`
+   are all genuinely ignored and not just missed this time.
