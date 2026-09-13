@@ -408,7 +408,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1413591",
       "music_track_name": "The Epic",
-      "live_published_at": "2026-09-11T23:00:34Z"
+      "live_published_at": "2026-09-11T23:00:34Z",
+      "performance": {
+        "views": 431,
+        "likes": 11,
+        "comments": 0,
+        "averageViewPercentage": 57.36,
+        "estimatedMinutesWatched": 289
+      },
+      "performance_captured_at": "2026-09-13T23:02:31.555642+00:00"
     },
     {
       "fact_number": 193,
@@ -441,7 +449,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_194_pistol_shrimp/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1568720",
-      "music_track_name": "Entering"
+      "music_track_name": "Entering",
+      "live_published_at": "2026-09-13T23:00:36Z"
     },
     {
       "fact_number": 195,
@@ -458,6 +467,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:843407",
       "music_track_name": "the end of the innocence"
+    },
+    {
+      "fact_number": 196,
+      "topic": "Rogue Waves",
+      "state": "playlist_added",
+      "youtube_id": "HiyXwmfdShI",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 196: 5 Facts You Didn't Know About Rogue Waves",
+      "category": "Amazing Facts",
+      "published_at": "2026-09-13T23:11:24.451776+00:00",
+      "scheduled_publish_at": "2026-09-15T23:00:00Z",
+      "narration_duration_seconds": 119.08,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_196_rogue_waves/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1439448",
+      "music_track_name": "Swansong"
     }
   ],
   "next_fact_number": 191
