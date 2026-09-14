@@ -433,7 +433,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095113",
       "music_track_name": "Call me Helen",
-      "live_published_at": "2026-09-12T23:00:08Z"
+      "live_published_at": "2026-09-12T23:00:08Z",
+      "performance": {
+        "views": 27,
+        "likes": 1,
+        "comments": 0,
+        "averageViewPercentage": 36.33,
+        "estimatedMinutesWatched": 10
+      },
+      "performance_captured_at": "2026-09-14T23:03:23.141049+00:00"
     },
     {
       "fact_number": 194,
@@ -466,7 +474,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_195_sinkholes/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:843407",
-      "music_track_name": "the end of the innocence"
+      "music_track_name": "the end of the innocence",
+      "live_published_at": "2026-09-14T23:00:35Z"
     },
     {
       "fact_number": 196,
