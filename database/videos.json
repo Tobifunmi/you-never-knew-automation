@@ -492,6 +492,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1439448",
       "music_track_name": "Swansong"
+    },
+    {
+      "fact_number": 197,
+      "topic": "Tardigrades",
+      "state": "playlist_added",
+      "youtube_id": "dHz1AudrE4E",
+      "playlist_id": "PLOOM2rEPGwC0",
+      "title": "Fact 197: 5 Facts You Didn't Know About Tardigrades",
+      "category": "Nature Facts",
+      "published_at": "2026-09-15T06:48:06.144092+00:00",
+      "scheduled_publish_at": "2026-09-16T23:00:00Z",
+      "narration_duration_seconds": 116.83,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_197_tardigrades/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095109",
+      "music_track_name": "Eternal Affection"
     }
   ],
   "next_fact_number": 191
