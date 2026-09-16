@@ -483,7 +483,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:843407",
       "music_track_name": "the end of the innocence",
-      "live_published_at": "2026-09-14T23:00:35Z"
+      "live_published_at": "2026-09-14T23:00:35Z",
+      "performance": {
+        "views": 947,
+        "likes": 27,
+        "comments": 0,
+        "averageViewPercentage": 56.99999999999999,
+        "estimatedMinutesWatched": 615
+      },
+      "performance_captured_at": "2026-09-16T23:02:12.136051+00:00"
     },
     {
       "fact_number": 196,
@@ -516,7 +524,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_197_tardigrades/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095109",
-      "music_track_name": "Eternal Affection"
+      "music_track_name": "Eternal Affection",
+      "live_published_at": "2026-09-16T23:00:28Z"
     },
     {
       "fact_number": 198,
@@ -533,6 +542,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1426518",
       "music_track_name": "Incandescent"
+    },
+    {
+      "fact_number": 199,
+      "topic": "Matches",
+      "state": "playlist_added",
+      "youtube_id": "-8dpJel5E4w",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 199: 5 Facts You Didn't Know About Matches",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-09-16T23:07:24.717592+00:00",
+      "scheduled_publish_at": "2026-09-18T23:00:00Z",
+      "narration_duration_seconds": 116.2,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_199_matches/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1568720",
+      "music_track_name": "Entering"
     }
   ],
   "next_fact_number": 191
