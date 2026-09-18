@@ -533,7 +533,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095109",
       "music_track_name": "Eternal Affection",
-      "live_published_at": "2026-09-16T23:00:28Z"
+      "live_published_at": "2026-09-16T23:00:28Z",
+      "performance": {
+        "views": 4,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 59.85,
+        "estimatedMinutesWatched": 1
+      },
+      "performance_captured_at": "2026-09-18T23:02:29.928936+00:00"
     },
     {
       "fact_number": 198,
@@ -566,7 +574,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_199_matches/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1568720",
-      "music_track_name": "Entering"
+      "music_track_name": "Entering",
+      "live_published_at": "2026-09-18T23:00:36Z"
     },
     {
       "fact_number": 200,
@@ -583,6 +592,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1195819",
       "music_track_name": "The crossroads of change"
+    },
+    {
+      "fact_number": 201,
+      "topic": "Traffic Lights",
+      "state": "playlist_added",
+      "youtube_id": "ZusD4oFWtXQ",
+      "playlist_id": "PLOOM2rEPGwC0",
+      "title": "Fact 201: 5 Facts You Didn't Know About Traffic Lights",
+      "category": "Nature Facts",
+      "published_at": "2026-09-18T23:06:57.667284+00:00",
+      "scheduled_publish_at": "2026-09-20T23:00:00Z",
+      "narration_duration_seconds": 119.35,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_201_traffic_lights/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1738418",
+      "music_track_name": "Epic Cinematic"
     }
   ],
   "next_fact_number": 191
