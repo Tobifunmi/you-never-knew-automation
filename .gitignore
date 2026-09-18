@@ -24,4 +24,9 @@ work/
 .DS_Store
 Thumbs.db
 
+#Local Dashboard
 usage_dashboard.html
+
+#AI Agent
+.agents/
+skills-lock.json
