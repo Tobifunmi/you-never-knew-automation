@@ -558,7 +558,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1426518",
       "music_track_name": "Incandescent",
-      "live_published_at": "2026-09-17T23:00:31Z"
+      "live_published_at": "2026-09-17T23:00:31Z",
+      "performance": {
+        "views": 64,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 44.81,
+        "estimatedMinutesWatched": 14
+      },
+      "performance_captured_at": "2026-09-19T23:02:30.131006+00:00"
     },
     {
       "fact_number": 199,
@@ -591,7 +599,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_200_vending_machines/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1195819",
-      "music_track_name": "The crossroads of change"
+      "music_track_name": "The crossroads of change",
+      "live_published_at": "2026-09-19T23:00:14Z"
     },
     {
       "fact_number": 201,
