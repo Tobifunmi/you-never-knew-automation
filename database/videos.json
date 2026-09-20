@@ -617,6 +617,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1738418",
       "music_track_name": "Epic Cinematic"
+    },
+    {
+      "fact_number": 202,
+      "topic": "Barcodes",
+      "state": "playlist_added",
+      "youtube_id": "TV_k-emHIbg",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 202: 5 Facts You Didn't Know About Barcodes",
+      "category": "Amazing Facts",
+      "published_at": "2026-09-20T05:20:13.502662+00:00",
+      "scheduled_publish_at": "2026-09-21T23:00:00Z",
+      "narration_duration_seconds": 96.85,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_202_barcodes/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095114",
+      "music_track_name": "Best Route to a Dream"
     }
   ],
   "next_fact_number": 191
