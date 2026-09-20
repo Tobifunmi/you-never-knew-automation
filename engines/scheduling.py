@@ -19,16 +19,34 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 
 from . import numbering
+from .youtube import VideoStatusCheckError
 
 
 class SchedulingDriftError(Exception):
     """
-    Raised when the local database's idea of the most recently
-    scheduled video disagrees with what YouTube itself reports. Better
-    to stop the run and surface this loudly than silently schedule the
-    next video on top of a wrong assumption — this is exactly the
-    failure mode that caused the original Fact 175-184 numbering
-    collision (§ MASTER_CONTINUATION_PROMPT.md).
+    Raised when YouTube positively confirms the local database's idea
+    of the most recently scheduled video is wrong — either the video
+    no longer exists there at all, or its real publishAt disagrees
+    with what we last recorded. Better to stop the run and surface
+    this loudly than silently schedule the next video on top of a
+    wrong assumption — this is exactly the failure mode that caused
+    the original Fact 175-184 numbering collision (§ MASTER_CONTINUATION_PROMPT.md).
+
+    Means: go check YouTube Studio by hand — something really changed
+    out-of-band (video removed/flagged, or a manual Studio edit).
+    """
+
+
+class SchedulingStatusCheckError(Exception):
+    """
+    Raised when compute_next_publish_at() couldn't verify the most
+    recently scheduled video's real YouTube status because the status
+    check itself failed (auth, quota, transient network/server error)
+    — distinct from SchedulingDriftError, which means YouTube
+    positively confirmed something is wrong.
+
+    Means: retry, or check credentials/quota — NOT "a video was
+    removed."
     """
 
 
@@ -63,12 +81,19 @@ def compute_next_publish_at(publisher, config) -> str:
         # videos were unlisted test runs with no real youtube_id).
         return _to_iso_z(now + timedelta(hours=cadence_hours))
 
-    remote = publisher.get_video_status(record["youtube_id"])
+    try:
+        remote = publisher.get_video_status(record["youtube_id"])
+    except VideoStatusCheckError as e:
+        raise SchedulingStatusCheckError(
+            f"Could not verify fact {record.get('fact_number')}'s "
+            f"(youtube_id={record['youtube_id']}) status on YouTube: {e}"
+        ) from e
+
     if remote is None:
         raise SchedulingDriftError(
             f"Fact {record.get('fact_number')} (youtube_id={record['youtube_id']}) "
-            "is in the local database but YouTube has no record of it (or the "
-            "status check failed). Refusing to schedule blindly off local data alone."
+            "is in the local database but YouTube confirms it no longer exists. "
+            "Refusing to schedule blindly off local data alone."
         )
 
     real_privacy = remote["status"].get("privacyStatus")

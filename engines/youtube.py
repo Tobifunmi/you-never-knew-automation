@@ -24,6 +24,15 @@ YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
 
 
+class VideoStatusCheckError(Exception):
+    """
+    Raised by get_video_status() when the Data API call itself failed
+    (auth, quota, transient network/server error) — as opposed to a
+    normal 200 response confirming the video genuinely doesn't exist.
+    Callers must not treat this the same as "video not found".
+    """
+
+
 class YouTubePublisher:
     def __init__(
         self,
@@ -162,8 +171,11 @@ class YouTubePublisher:
     def get_video_status(self, video_id: str) -> Optional[dict]:
         """
         Raw `status` + `snippet` for a single video via the Data API.
-        Returns None if the video doesn't exist or the lookup fails, so
-        callers can use a plain `if status:` check.
+        Returns None only when the video genuinely doesn't exist — a
+        normal API response with no matching items. Raises
+        VideoStatusCheckError if the lookup call itself fails, so
+        callers can react differently to "confirmed absent" vs.
+        "couldn't check".
 
         Used by engines/scheduling.py to verify the local database's
         idea of the most recently scheduled video against what YouTube
@@ -186,8 +198,9 @@ class YouTubePublisher:
                 id=video_id,
             ).execute()
         except HttpError as e:
-            print(f"youtube: status check failed for {video_id}: {e}")
-            return None
+            raise VideoStatusCheckError(
+                f"YouTube status check failed for video_id={video_id}: {e}"
+            ) from e
 
         items = response.get("items", [])
         if not items:
