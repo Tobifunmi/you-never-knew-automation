@@ -27,6 +27,7 @@ Monitor Credit Usage Here - https://you-never-knew.netlify.app/
 | Autonomous topic/script generation (Gemini) | ✅ Done |
 | 48h YouTube Analytics feedback loop (feeds topic selection) | ✅ Done |
 | Real YouTube scheduling (`status.publishAt`, one-video-ahead buffer) | ✅ Done |
+| Scheduling error handling (confirmed-missing vs. status-check-failed distinction) | ✅ Done |
 | API usage dashboard (live quotas, call/video correlation, self-tracked counts) | ✅ Done |
 | Full unattended automation | ✅ **Live** — see Trigger below |
 | Shorts "Related video" End Screen automation | 🔜 Future work — see below |
@@ -43,7 +44,13 @@ in `config.json` uploads its video as **private with a real
    `now + cadence_hours`.
 2. Otherwise, it doesn't trust the local database alone — it calls
    `publisher.get_video_status()` to ask YouTube directly what that video's
-   real `privacyStatus` currently is.
+   real `privacyStatus` currently is. That call now distinguishes two
+   genuinely different failure modes (see "Error handling" below): a
+   confirmed-absent video (`get_video_status()` returns `None`) vs. the
+   status check itself failing (`VideoStatusCheckError`, e.g. auth/quota/
+   network) — these used to be conflated into the same `None` result,
+   which made a real removed video indistinguishable from a transient API
+   hiccup until someone dug through the traceback by hand.
 3. Anchors on whichever of these is true: the video's real `publishAt` (if
    it's still scheduled/private), its real `snippet.publishedAt` (if it's
    already gone public), or `now` (if it's unlisted or was manually
@@ -54,6 +61,26 @@ in `config.json` uploads its video as **private with a real
    scheduling the next video on top of a stale assumption.
 5. Returns `max(anchor, now) + cadence_hours` (currently 24h) as the next
    `publishAt`.
+
+### Error handling: confirmed-missing vs. couldn't-check
+
+`compute_next_publish_at()` raises one of two distinct exceptions, so the
+failure email tells you which situation you're in without needing to open
+the traceback:
+
+- **`SchedulingDriftError`** — YouTube *positively confirmed* something is
+  wrong: either the anchor video genuinely no longer exists there, or its
+  real `publishAt` disagrees with what's locally recorded. Read: go check
+  Studio, something really changed (removed/flagged video, or a manual
+  edit).
+- **`SchedulingStatusCheckError`** — the status check call itself failed
+  (`engines/youtube.py`'s `get_video_status()` raised `VideoStatusCheckError`
+  — an `HttpError` from auth, quota, or a transient network/server issue).
+  Read: retry, or check credentials/quota — **not** "a video was removed."
+
+`get_video_status()` itself only returns `None` on a genuine confirmed-absent
+API response (a 200 with an empty `items` list); any `HttpError` during the
+call is re-raised as `VideoStatusCheckError` rather than silently swallowed.
 
 **Net effect**: the channel always keeps roughly one video scheduled ahead
 of whatever's currently live, so a daily trigger never depends on a human
@@ -69,6 +96,40 @@ instantly live. If the buffer is ever deliberately drained to zero and you
 want the very next video to go live immediately instead of waiting a full
 cadence period, that would need a small explicit change to this logic; it
 doesn't happen automatically today.
+
+## Recovering from a flagged/removed video
+
+YouTube emails a copyright/policy notice when a published or scheduled
+video gets flagged. The manual recovery (download the flagged video, swap
+the background music, reupload) produces a **new video ID** — which is
+exactly what breaks `compute_next_publish_at()`'s anchor, since the local
+`database/videos.json` record still points at the old, now-gone ID and the
+next scheduling run will raise `SchedulingDriftError` (see above).
+
+After reuploading, hand-correct that fact's entry in `database/videos.json`
+before the next run:
+
+1. **`youtube_id`** — update to the new video's ID.
+2. **`state`** — set to whatever this file uses for "scheduled, not yet
+   live" (e.g. `"scheduled"`) if the reupload is scheduled rather than
+   already public — a leftover pipeline-completion state like
+   `"playlist_added"` misrepresents how the video actually got published.
+3. **`published_at`** — clear to `null` if the video isn't live yet; the
+   old value is the *deleted* video's publish time and will otherwise
+   confuse Stage A0's 48h analytics gate (§ Analytics feedback loop).
+4. **`scheduled_publish_at`** — set to match whatever the reupload is
+   actually scheduled for in Studio (exact minute/second — the drift
+   check's tolerance is only 60 seconds).
+5. Manually re-add the video to the correct playlist and re-apply the
+   pipeline's title/description/tags in Studio if you want it to match the
+   rest of the channel's metadata conventions — none of that carries over
+   from a manual reupload.
+
+No separate automated monitoring (e.g. a daily status-sweep workflow) is
+planned for catching this proactively — YouTube's own flag-notification
+email already serves that purpose, and Gmail delivery of the pipeline's own
+failure emails has been confirmed working, so the existing "run fails loudly,
+check email" loop is considered sufficient.
 
 ## Analytics feedback loop
 
@@ -313,10 +374,14 @@ you-never-knew-automation/
 │   │                             live video's real anchor time on YouTube
 │   │                             (cross-checked live, not trusted from the
 │   │                             local DB alone). Raises
-│   │                             SchedulingDriftError if local state and
-│   │                             YouTube's real state disagree, rather
-│   │                             than scheduling on top of a wrong
-│   │                             assumption. See Scheduling above.
+│   │                             SchedulingDriftError if YouTube confirms
+│   │                             local state is wrong (video gone, or a
+│   │                             real publishAt mismatch), or
+│   │                             SchedulingStatusCheckError if the status
+│   │                             check call itself failed (auth/quota/
+│   │                             network) — kept distinct so a failure
+│   │                             email says which one happened. See
+│   │                             Scheduling above.
 │   ├── kokoro.py               — narration (TTS), local/offline via
 │   │                             Kokoro-82M, no API key or char limit,
 │   │                             logs a self-tracked "videos narrated"
@@ -350,9 +415,12 @@ you-never-knew-automation/
 │   └── youtube.py              — upload (with optional publish_at for
 │                                  scheduling), get_video_status() (real
 │                                  Data API status/snippet lookup, used by
-│                                  scheduling.py to verify local state),
-│                                  playlist management, retry logic, OAuth
-│                                  scopes (upload + Analytics readonly)
+│                                  scheduling.py to verify local state;
+│                                  returns None only on a confirmed-absent
+│                                  video, raises VideoStatusCheckError if
+│                                  the API call itself fails), playlist
+│                                  management, retry logic, OAuth scopes
+│                                  (upload + Analytics readonly)
 ├── test_assets/                — sample scripts
 ├── work/Fact_NNN_slug/          — per-video working directory
 └── .github/workflows/

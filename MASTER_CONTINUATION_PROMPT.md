@@ -1,21 +1,23 @@
 # MASTER CONTINUATION PROMPT — "You Never Knew" Automated YouTube Shorts Factory
 
 Use this as full context in a new conversation. Reflects the verified state of
-the project as of **12 Sep 2026**. This version supersedes the previous
-`MASTER_CONTINUATION_PROMPT.md` (dated 28 Aug 2026, committed in the automation
-repo root) — that document is now out of date in several important ways
-described below. Consider re-committing this version over it.
+the project as of **20 Sep 2026**. This version supersedes the previous
+`MASTER_CONTINUATION_PROMPT.md` (dated 12 Sep 2026, committed in the automation
+repo root) — that document is now out of date in the ways described below.
+Consider re-committing this version over it.
 
-**Important gap to flag honestly**: there is a documentation hole between
-28 Aug 2026 (the previous document's date) and 12 Sep 2026 (this one). A
-real-time scheduling feature (`engines/scheduling.py`, `config.json`'s
-`scheduling` block, and `publish_at` support in `engines/youtube.py` and
-`main.py`) exists live in the repo and is clearly well-built and battle-tested
-— but it was discovered by reading the actual repo code directly in this
-session, not by anything said in this conversation or the 28 Aug document.
-Some other session in between must have built it. Treat the live code as
-ground truth over any assumption either document makes about what's "not yet
-built."
+**Important gap to flag honestly (this session)**: the 12 Sep document claimed
+this assistant could read the public repo directly via `raw.githubusercontent.com`
+and `api.github.com`. That did **not** hold this session — repeated attempts to
+fetch `engines/scheduling.py`, `engines/youtube.py`, `database/videos.json`, and
+even the repo's own homepage all failed (either the search tool never surfaced
+the raw file URLs, or `web_fetch` refused URLs that hadn't appeared in a prior
+search/fetch result). Every code fix and every diagnosis this session was
+therefore based entirely on **files Tobi pasted directly** into the
+conversation, not on independent repo verification — a meaningfully weaker
+position than the 12 Sep document implies is available. Do not assume
+direct repo read access works until it's actually re-confirmed in a future
+session; ask for pasted file contents by default instead.
 
 GitHub username: **Tobifunmi** (capitalized). Automation repo:
 `github.com/Tobifunmi/you-never-knew-automation` (public). Dashboard repo:
@@ -27,13 +29,10 @@ Local dev machine: Windows 10/11, PowerShell, two separate local repo folders
 `C:\Users\user\Documents\You Never Knew - Dashboard` (dashboard).
 
 **How code changes reach the repo**: this assistant has no push credentials.
-Historically, changes were delivered as `git format-patch` files, applied
-locally via `git am`, then pushed by the user. As of this session, this
-assistant can also **read** the public repo directly (`raw.githubusercontent.com`,
-`api.github.com` are reachable) to verify real code before proposing changes —
-worth doing before writing any patch, per the project's long-standing
-"verify against actual files before treating something as done or broken"
-principle. Still no write/push access.
+Changes are delivered as full replacement file contents (or, where useful,
+`git format-patch`-style diffs) for Tobi to save, commit, and push locally —
+see the gap note above for why "read the repo directly first" can't be relied
+on this session. Still no write/push access.
 
 ---
 
@@ -48,24 +47,25 @@ run on GitHub Actions, triggered on a daily schedule via **cron-job.org**
 (not GitHub's own `schedule:` cron — see §4d for why). Can still be run
 locally on Windows for development/testing.
 
-**As of 12 Sep 2026 (verified via YouTube Studio screenshot)**: the channel
-is live and posting publicly on a real cadence. Most recently confirmed
-state:
-- Fact 192 ("Chewing Gum") — public, published Sep 12, 460 views
-- Fact 191 ("Popcorn") — public, published Sep 11, 11 views
-- Fact 190 ("Bicycles") — public, published Sep 10, 346 views
-- Fact 188 ("Stonehenge") — public, published Sep 8, 35 views
-- Fact 187 ("Solar Eclipses") — public, published Sep 7, 342 views
-- Fact 193 ("Quicksand") — **scheduled**, Sep 13, private/pending
-- Fact 194 ("Pistol Shrimp") — **scheduled**, Sep 14, private/pending, still processing to HD at time of screenshot
+**As of 20 Sep 2026 (verified via YouTube Studio screenshots)**: the channel
+is live and posting publicly on a real daily cadence, now well past fact 194.
+Most recently confirmed state:
+- Fact 200 ("Vending Machines") — public, published Sep 20, 58+ views
+- Fact 199 ("Matches") — public, published Sep 19, 59+ views
+- Fact 198 ("Mirrors") — public, published Sep 18, 158 views
+- Fact 197 ("Tardigrades") — public, published Sep 17, 5 views
+- Fact 196 ("Rogue Waves") — public, published Sep 16, 1,233 views
+- Fact 195 ("Sinkholes") — public, published Sep 15, 1,106 views
+- Fact 201 ("Traffic Lights") — **scheduled**, Sep 21 12:00am Lagos
+  (`2026-09-20T23:00:00Z`) — see §4h, this is a manually-reuploaded
+  replacement video after the original was copyright-flagged
+- Fact 202 ("Barcodes") — **scheduled**, Sep 22, still processing to HD at
+  time of screenshot — first video scheduled by the pipeline after §4h's fix
 
-The channel had 17 unlisted test videos (facts 173–189) as of the 28 Aug
-document; it has since gone public and progressed to at least fact 194. The
-full history of facts 189–192 (when exactly the switch to public/production
-happened, what if anything went wrong along the way) is **not documented
-anywhere in this conversation or the prior master prompt** — a real gap.
-`database/videos.json` and `usage_log.json` in the repo are the source of
-truth if that history is ever needed.
+The full history of facts 189–194 (the transition documented in the 12 Sep
+version of this file) is unchanged from that document. `database/videos.json`
+and `usage_log.json` in the repo remain the source of truth for anything
+beyond what's summarized here.
 
 ---
 
@@ -75,6 +75,7 @@ truth if that history is ever needed.
 |---|---|
 | YouTube publisher (OAuth, upload, scheduling, playlists, DB recording) | ✅ Done, live in production |
 | Scheduling (`engines/scheduling.py`, real `status.publishAt`) | ✅ Done, live — see §4g. Maintains a rolling one-video-ahead buffer: each run schedules the next video `cadence_hours` (24h) after the latest scheduled/live video's real anchor time on YouTube, cross-checked against local DB to catch drift |
+| Scheduling error-handling split (`SchedulingDriftError` vs `SchedulingStatusCheckError`) | ✅ Done this session — see §4h |
 | Narration — Kokoro-82M (local/offline, no API key, no char cap) | ✅ Done |
 | Footage (Pixabay → Pexels waterfall) | ✅ Done |
 | Captions (local Whisper, burned-in ASS) | ✅ Done |
@@ -89,7 +90,7 @@ truth if that history is ever needed.
 | Full unattended automation trigger | ✅ **Live** — cron-job.org calls the GitHub Actions `workflow_dispatch` API on a schedule (§4d). GitHub's own `schedule:` block in `daily-video.yml` remains commented out/unused by design. |
 | YouTube OAuth token stability | ✅ Fixed this session — app moved from "Testing" to "In production" in Google Auth Platform, eliminating the 7-day forced refresh-token expiry (§4e) |
 | Secret leak in local git history | ✅ Resolved this session, `.gitignore` hardened (§4f) |
-| Email failure notifications (Gmail SMTP) | ⚠️ Still unresolved as of 28 Aug (`WinError 10060`, local network-level). Status since then unknown — not discussed this session. |
+| Email failure notifications (Gmail SMTP) | ✅ Confirmed working this session — the original Stage H `SchedulingDriftError` failure email is what alerted Tobi to the fact 201 incident (§4h) in the first place. Prior `WinError 10060` concern appears resolved/moot. |
 | Shorts "Related video" End Screen | 🔜 Deliberately deferred |
 | Playlist/record ordering bug | ✅ Fixed (historical) |
 
@@ -312,8 +313,14 @@ document, which explicitly listed "Scheduled/timed YouTube publishing" as
    immediately**, even on a completely empty backlog.
 3. Otherwise, calls `publisher.get_video_status(youtube_id)` — a real Data
    API lookup — rather than trusting the local database alone. If YouTube
-   has no record of it at all, raises `SchedulingDriftError` rather than
-   silently guessing.
+   confirms it has no record of it at all, raises `SchedulingDriftError`
+   rather than silently guessing. **As of §4h (this session)**: if the
+   status-check call itself fails (auth/quota/network — an `HttpError`),
+   `get_video_status()` now raises `VideoStatusCheckError` instead of
+   silently returning `None`, and `compute_next_publish_at()` re-raises
+   that as `SchedulingStatusCheckError` — kept distinct from
+   `SchedulingDriftError` so a failure email says which situation
+   happened without anyone having to dig through the traceback.
 4. Determines an anchor time:
    - If the latest video is currently `private` with a real `publishAt` set
      → anchor = that `publishAt`.
@@ -350,14 +357,88 @@ two videos currently sitting in the scheduled buffer (Fact 193 → Sep 13,
 Fact 194 → Sep 14), consistent with two consecutive daily cron-job.org
 triggers having each correctly scheduled 24h past the prior anchor.
 
+### 4h. Fact 201 copyright flag + scheduling error-handling fix (this session, 20 Sep 2026)
+
+**Trigger**: Actions run #24 (`35474877075`, manually triggered 23:00 UTC)
+failed at Stage H on fact 202 ("Barcodes") with:
+
+```
+SchedulingDriftError: Fact 201 (youtube_id=ZusD4oFWtXQ) is in the local
+database but YouTube has no record of it (or the status check failed).
+```
+
+**Root cause, confirmed by Tobi**: fact 201's video ("Traffic Lights") had
+been copyright-flagged and removed by YouTube. This is a recurring recovery
+pattern for this channel: YouTube emails Tobi on a flag, he downloads the
+flagged video, swaps the background music, and reuploads — which produces a
+**new video ID**, breaking the local DB's `youtube_id` reference for that
+fact and tripping `SchedulingDriftError` on the next scheduling run. This is
+not a code bug; it's a real gap between "video replaced out-of-band" and
+"the database that assumes only the pipeline itself uploads things."
+
+**Immediate fix (manual DB correction)**: after Tobi reuploaded and
+rescheduled fact 201 for Sep 21 12:00am Lagos (`2026-09-20T23:00:00Z`) and
+re-added it to its playlist in Studio, fact 201's `database/videos.json`
+record was hand-corrected:
+- `youtube_id`: `ZusD4oFWtXQ` → `48AfQX9VBIU`
+- `state`: `"playlist_added"` → `"scheduled"` (the reupload went through
+  Studio, not the pipeline's own Stage I, so a pipeline-completion state
+  was inaccurate)
+- `published_at`: the stale Sep 18 timestamp (from the deleted video) →
+  `null` (not live yet)
+- `scheduled_publish_at`: left as `2026-09-20T23:00:00Z`, confirmed against
+  the real Studio-scheduled time
+
+Committed and pushed; the next run succeeded — fact 202 scheduled cleanly
+for `2026-09-21T23:00:00Z` (Sep 22), matching the cadence math exactly and
+confirming the anchor logic works correctly once the local record is
+accurate.
+
+**Structural fix (code change, applied this session)**: `get_video_status()`
+in `engines/youtube.py` was catching every `HttpError` and returning `None`
+either way, so `compute_next_publish_at()` couldn't tell "YouTube confirms
+this video doesn't exist" apart from "the API call itself broke" (auth
+expiry, quota exhaustion, a transient 5xx) — both produced the exact same
+`SchedulingDriftError`, which is why this incident needed manual digging to
+diagnose instead of being self-evident from the failure email. Fixed:
+- `engines/youtube.py`: new `VideoStatusCheckError` exception.
+  `get_video_status()` now returns `None` **only** on a genuine
+  confirmed-absent response (a 200 with empty `items`); any `HttpError`
+  during the call is re-raised as `VideoStatusCheckError` instead of
+  silently swallowed and logged via `print()`.
+- `engines/scheduling.py`: new `SchedulingStatusCheckError` exception,
+  imported alongside `VideoStatusCheckError` from `.youtube`.
+  `compute_next_publish_at()` catches `VideoStatusCheckError` and re-raises
+  it as `SchedulingStatusCheckError`; `SchedulingDriftError` now means
+  exclusively "YouTube positively confirmed something is wrong" (video
+  missing, or a real `publishAt` mismatch).
+
+Both updated files were produced as full replacement content (not a
+`git am` patch — see the repo-read-access gap noted at the top of this
+document) for Tobi to save, commit, and push locally. **Not yet
+independently re-verified against the live repo** — confirm on next
+session that both files actually landed on `main` as intended.
+
+**Decision made**: no separate daily sanity-sweep workflow for
+proactively catching flagged/removed videos. YouTube's own copyright-flag
+email already provides that alert, and Gmail delivery of the pipeline's own
+failure emails is now confirmed working (this incident is the proof — see
+the status table above). The existing "run fails loudly with a distinct
+error → check email → fix the DB record" loop is considered sufficient;
+building a redundant sweep was explicitly declined as unnecessary.
+
 ---
 
 ## 5. Repo structure — `you-never-knew-automation`
 
-Reflects the live repo as read directly this session (`main.py`,
+Reflects the live repo as read directly during the 12 Sep session (`main.py`,
 `engines/youtube.py`, `engines/scheduling.py`, `config.json` verified
-firsthand; the rest carried over from the 28 Aug document and not
-re-verified this session — flagged accordingly).
+firsthand then). Not independently re-verified this session — see the
+repo-read-access gap noted at the top of this document. `engines/youtube.py`
+and `engines/scheduling.py`'s entries below reflect the §4h changes as
+written and handed to Tobi, not as re-confirmed live in the repo. The rest
+carried over from the 28 Aug document and never independently verified at
+all — flagged accordingly.
 
 ```text
 you-never-knew-automation/
@@ -407,9 +488,15 @@ you-never-knew-automation/
 │   ├── script_engine.py
 │   ├── gemini.py
 │   ├── analytics.py                — 48h gating on live_published_at, §4a
-│   ├── scheduling.py                — VERIFIED LIVE this session, full
-│   │                                  detail in §4g. compute_next_publish_at(),
-│   │                                  SchedulingDriftError.
+│   ├── scheduling.py                — verified live 12 Sep, updated §4h
+│   │                                  this session (not independently
+│   │                                  re-verified — see repo-read gap).
+│   │                                  compute_next_publish_at(),
+│   │                                  SchedulingDriftError (YouTube
+│   │                                  confirmed something's wrong),
+│   │                                  SchedulingStatusCheckError (the
+│   │                                  status-check call itself failed —
+│   │                                  new, §4h).
 │   ├── kokoro.py                   — current narration engine
 │   ├── elevenlabs.py                — previous engine, kept as rollback,
 │                                     unused
@@ -419,11 +506,14 @@ you-never-knew-automation/
 │   ├── renderer.py
 │   ├── metadata.py                 — WordNet category-guessing fix, §6/§7
 │   ├── music.py                     — Jamendo, VIBE_MAP fix §4c/§6 item 20
-│   ├── notifications.py             — Gmail SMTP failure emails; local
-│                                     WinError 10060 as of 28 Aug, status
-│                                     since unknown
+│   ├── notifications.py             — Gmail SMTP failure emails; confirmed
+│                                     working this session (§4h) — prior
+│                                     WinError 10060 concern appears
+│                                     resolved/moot
 │   ├── usage_tracker.py
-│   └── youtube.py                   — VERIFIED LIVE this session.
+│   └── youtube.py                   — verified live 12 Sep, updated §4h
+│                                     this session (not independently
+│                                     re-verified — see repo-read gap).
 │                                     SCOPES = [youtube, yt-analytics.readonly].
 │                                     upload_video(..., publish_at=None) —
 │                                     passing publish_at forces
@@ -431,7 +521,10 @@ you-never-knew-automation/
 │                                     the privacy_status arg (YouTube
 │                                     requirement). get_video_status(video_id)
 │                                     — real Data API status+snippet lookup,
-│                                     used by scheduling.py.
+│                                     used by scheduling.py; now returns
+│                                     None ONLY on confirmed-absent, raises
+│                                     new VideoStatusCheckError if the API
+│                                     call itself fails (§4h).
 ├── check_usage.py                  — local dashboard script
 ├── blocklist_track.py
 ├── rerun_footage.py / rerun_footage_wombats.py
@@ -599,8 +692,10 @@ screen still appears on manual re-auth — expected, click through via
 **Dashboard repo (Netlify)** — separate secret store: `PEXELS_API_KEY`,
 `PIXABAY_API_KEY`, `GITHUB_REPO=Tobifunmi/you-never-knew-automation`.
 
-**Gmail SMTP App Password** — presumably still valid; the connection itself
-was timing out locally as of 28 Aug (§6 item 21), status since then unknown.
+**Gmail SMTP App Password** — confirmed working this session (§4h): the
+Stage H failure email for fact 202's `SchedulingDriftError` is what surfaced
+the fact 201 incident. The `WinError 10060` local timeout noted as of 28 Aug
+appears resolved or was never a factor for the Actions-run path specifically.
 
 ---
 
@@ -643,35 +738,76 @@ Carried forward, reinforced again this session:
 - **No manual overrides for anything unattended** — the scheduling buffer
   (§4g) exists specifically so a daily cron trigger never depends on a
   human noticing an empty queue in time.
-- **Patches (or now, direct guidance) — never assume push access.** This
-  assistant gained the ability to *read* the public repo directly this
-  session, which is new and worth continuing to use for verification, but
-  still cannot write to it.
+- **Patches (or direct guidance) — never assume push access.** Still no
+  write access as of 20 Sep. The 12 Sep session's direct-repo-read ability
+  did NOT reproducibly work in the 20 Sep session (see the gap note at the
+  top of this document) — don't assume it works without re-confirming;
+  default to asking for pasted file contents.
 - **Be honest about documentation gaps rather than papering over them** —
-  this document explicitly flags the undocumented scheduling-engine build
-  and the undocumented facts-189-to-192 history rather than pretending
-  continuity that doesn't exist.
+  this document explicitly flags the undocumented scheduling-engine build,
+  the undocumented facts-189-to-192 history, and (new, 20 Sep) the
+  repo-read-access regression, rather than pretending continuity that
+  doesn't exist.
+
+**Added 20 Sep session:**
+
+- **Distinguish "confirmed wrong" from "couldn't check" in error types,
+  not just in prose.** §4h's `SchedulingStatusCheckError` split exists
+  because the original `SchedulingDriftError` conflated a positively
+  confirmed problem (video removed) with an uncertain one (API call
+  failed) — the fix was a new exception class, not a better log message,
+  so the distinction survives into whatever reads the failure email.
+- **A working failure-notification path is worth confirming, not just
+  building once.** This session's Gmail SMTP email (§4h) is what turned an
+  otherwise-silent copyright removal into something caught the same day —
+  validates why §12's now-closed "confirm failure email arrives" item
+  mattered.
+- **When manual, out-of-band recovery is a known recurring pattern (Tobi's
+  download → swap music → reupload flow), document the DB-record-repair
+  steps as a runbook** (README's new "Recovering from a flagged/removed
+  video" section) rather than re-deriving them from scratch next time it
+  happens.
 
 ---
 
 ## 12. Open items for the next session
 
-1. **cron-job.org PAT expiry** — no expiration date was recorded when it
-   was created this session; check it and set a rotation reminder before it
-   silently lapses and breaks the daily trigger.
-2. **`database/videos.json` / `usage_log.json`** haven't been re-read this
-   session — worth doing at the start of any follow-up to get the real
-   current fact count, full 189→194 history, and confirm the `kokoro` usage
-   count and any other dashboard figures are still behaving as expected.
-3. **Gmail SMTP failure notifications** — still unresolved as of 28 Aug,
-   not discussed this session. If a pipeline failure happens now (post
-   cron-job.org, post scheduling), it's worth confirming whether a failure
-   email would actually arrive.
-4. **Who/what built the scheduling engine** — not a blocking question, but
-   if a future session finds other undocumented changes in the repo, the
-   same "verify the live code first" approach that surfaced this one should
-   be applied again rather than assuming either master prompt is complete.
-5. **Confirm `.gitignore` coverage** is actually correct now (§4f) — worth
-   a quick `git status` sanity check on the local machine next time it's
-   touched, to make sure `token.json`/`token.json.bak`/`credentials.json`
-   are all genuinely ignored and not just missed this time.
+**Carried over, still open:**
+
+1. **cron-job.org PAT expiry** — still no expiration date recorded; check it
+   and set a rotation reminder before it silently lapses and breaks the
+   daily trigger.
+2. **`database/videos.json` / `usage_log.json`** — spot-checked this session
+   only for facts 195–202 via §4h; a full re-read for the complete
+   189→202 history and `kokoro`/other usage-log figures still hasn't
+   happened.
+3. **Who/what built the scheduling engine** — still unresolved, still not
+   blocking. If a future session finds other undocumented changes, apply
+   the same "verify real files before trusting a description" approach.
+4. **Confirm `.gitignore` coverage** (§4f) — still not re-checked with a
+   fresh `git status` on the local machine.
+
+**Resolved this session (20 Sep):**
+
+- ~~Gmail SMTP failure notifications~~ — confirmed working, §4h.
+
+**New this session (20 Sep):**
+
+5. **Confirm §4h's two file replacements actually landed on `main`.** Tobi
+   reported saving/committing/pushing `engines/youtube.py` and
+   `engines/scheduling.py`, but this was never independently re-verified
+   against the live repo (see the repo-read-access gap at the top of this
+   document) — worth a real check next session, either by re-reading the
+   repo (if that access works again) or asking Tobi to re-paste both files.
+- **Re-attempt direct repo read access early next session** to find out
+  whether the 12 Sep session's capability was a fluke, a since-fixed tool
+  issue, or genuinely unavailable now — this materially changes how much
+  can be verified independently versus needing Tobi to paste files.
+- **Watch for a repeat copyright flag.** One flagged video (fact 201,
+  "Traffic Lights") isn't necessarily a pattern, but if it happens again,
+  worth checking whether it's tied to a specific Jamendo track, a specific
+  Pixabay/Pexels clip, or something about the topic itself, rather than
+  treating each one as an isolated fluke.
+- **`README.md`'s new "Recovering from a flagged/removed video" section
+  and the updated Scheduling/error-handling sections** — written this
+  session, not yet confirmed pushed; verify alongside item 5 above.
