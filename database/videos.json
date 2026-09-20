@@ -583,7 +583,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1568720",
       "music_track_name": "Entering",
-      "live_published_at": "2026-09-18T23:00:36Z"
+      "live_published_at": "2026-09-18T23:00:36Z",
+      "performance": {
+        "views": 56,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 62.39,
+        "estimatedMinutesWatched": 49
+      },
+      "performance_captured_at": "2026-09-20T23:02:51.166950+00:00"
     },
     {
       "fact_number": 200,
@@ -616,7 +624,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_201_traffic_lights/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1738418",
-      "music_track_name": "Epic Cinematic"
+      "music_track_name": "Epic Cinematic",
+      "live_published_at": "2026-09-20T23:00:30Z"
     },
     {
       "fact_number": 202,
@@ -633,6 +642,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095114",
       "music_track_name": "Best Route to a Dream"
+    },
+    {
+      "fact_number": 203,
+      "topic": "Lake Natron",
+      "state": "playlist_added",
+      "youtube_id": "QXSC0jDNDpA",
+      "playlist_id": "PLOOM2rEPGwC0",
+      "title": "Fact 203: 5 Facts You Didn't Know About Lake Natron",
+      "category": "Nature Facts",
+      "published_at": "2026-09-20T23:08:53.923610+00:00",
+      "scheduled_publish_at": "2026-09-22T23:00:00Z",
+      "narration_duration_seconds": 102.72,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_203_lake_natron/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095109",
+      "music_track_name": "Eternal Affection"
     }
   ],
   "next_fact_number": 191
