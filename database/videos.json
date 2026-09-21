@@ -608,7 +608,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1195819",
       "music_track_name": "The crossroads of change",
-      "live_published_at": "2026-09-19T23:00:14Z"
+      "live_published_at": "2026-09-19T23:00:14Z",
+      "performance": {
+        "views": 88,
+        "likes": 3,
+        "comments": 0,
+        "averageViewPercentage": 91.45,
+        "estimatedMinutesWatched": 74
+      },
+      "performance_captured_at": "2026-09-21T23:02:31.534356+00:00"
     },
     {
       "fact_number": 201,
@@ -641,7 +649,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_202_barcodes/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095114",
-      "music_track_name": "Best Route to a Dream"
+      "music_track_name": "Best Route to a Dream",
+      "live_published_at": "2026-09-21T23:00:25Z"
     },
     {
       "fact_number": 203,
@@ -658,6 +667,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095109",
       "music_track_name": "Eternal Affection"
+    },
+    {
+      "fact_number": 204,
+      "topic": "Fiber Optics",
+      "state": "playlist_added",
+      "youtube_id": "obCec1rEzAM",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 204: 5 Facts You Didn't Know About Fiber Optics",
+      "category": "Amazing Facts",
+      "published_at": "2026-09-21T23:10:16.193666+00:00",
+      "scheduled_publish_at": "2026-09-23T23:00:00Z",
+      "narration_duration_seconds": 107.65,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_204_fiber_optics/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095104",
+      "music_track_name": "Beats of Heaven"
     }
   ],
   "next_fact_number": 191
