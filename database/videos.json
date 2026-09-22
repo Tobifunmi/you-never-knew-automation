@@ -633,7 +633,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1738418",
       "music_track_name": "Epic Cinematic",
-      "live_published_at": "2026-09-20T23:00:30Z"
+      "live_published_at": "2026-09-20T23:00:30Z",
+      "performance": {
+        "views": 7,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 61.480000000000004,
+        "estimatedMinutesWatched": 2
+      },
+      "performance_captured_at": "2026-09-22T23:02:34.211119+00:00"
     },
     {
       "fact_number": 202,
@@ -666,7 +674,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_203_lake_natron/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095109",
-      "music_track_name": "Eternal Affection"
+      "music_track_name": "Eternal Affection",
+      "live_published_at": "2026-09-22T23:00:28Z"
     },
     {
       "fact_number": 204,
