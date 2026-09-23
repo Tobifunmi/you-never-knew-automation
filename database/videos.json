@@ -692,6 +692,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095104",
       "music_track_name": "Beats of Heaven"
+    },
+    {
+      "fact_number": 205,
+      "topic": "Lasers",
+      "state": "playlist_added",
+      "youtube_id": "XvzKDa2CPoc",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 205: 5 Facts You Didn't Know About Lasers",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-09-23T02:18:10.524348+00:00",
+      "scheduled_publish_at": "2026-09-24T23:00:00Z",
+      "narration_duration_seconds": 100.05,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_205_lasers/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1170916",
+      "music_track_name": "Never Wanted"
     }
   ],
   "next_fact_number": 191
