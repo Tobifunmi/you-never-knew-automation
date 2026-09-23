@@ -658,7 +658,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095114",
       "music_track_name": "Best Route to a Dream",
-      "live_published_at": "2026-09-21T23:00:25Z"
+      "live_published_at": "2026-09-21T23:00:25Z",
+      "performance": {
+        "views": 18,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 57.35,
+        "estimatedMinutesWatched": 12
+      },
+      "performance_captured_at": "2026-09-23T23:02:10.895874+00:00"
     },
     {
       "fact_number": 203,
@@ -691,7 +699,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_204_fiber_optics/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095104",
-      "music_track_name": "Beats of Heaven"
+      "music_track_name": "Beats of Heaven",
+      "live_published_at": "2026-09-23T23:00:36Z"
     },
     {
       "fact_number": 205,
