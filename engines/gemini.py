@@ -115,7 +115,9 @@ def _call_gemini(
         except Exception as e:  # noqa: BLE001 - retry any transient failure
             last_error = e
             if attempt < max_retries:
-                time.sleep(2 * attempt)
+                print(f"  Gemini call failed (attempt {attempt}/{max_retries}): {e}. "
+                      f"Waiting 5 minutes before retrying...")
+                time.sleep(300)
             continue
 
     raise GeminiError(f"Gemini call failed after {max_retries} attempts: {last_error}")
