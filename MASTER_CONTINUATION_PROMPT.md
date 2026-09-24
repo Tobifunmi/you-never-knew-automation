@@ -1,23 +1,25 @@
 # MASTER CONTINUATION PROMPT — "You Never Knew" Automated YouTube Shorts Factory
 
 Use this as full context in a new conversation. Reflects the verified state of
-the project as of **20 Sep 2026**. This version supersedes the previous
-`MASTER_CONTINUATION_PROMPT.md` (dated 12 Sep 2026, committed in the automation
+the project as of **25 Sep 2026**. This version supersedes the previous
+`MASTER_CONTINUATION_PROMPT.md` (dated 20 Sep 2026, committed in the automation
 repo root) — that document is now out of date in the ways described below.
 Consider re-committing this version over it.
 
-**Important gap to flag honestly (this session)**: the 12 Sep document claimed
-this assistant could read the public repo directly via `raw.githubusercontent.com`
-and `api.github.com`. That did **not** hold this session — repeated attempts to
-fetch `engines/scheduling.py`, `engines/youtube.py`, `database/videos.json`, and
-even the repo's own homepage all failed (either the search tool never surfaced
-the raw file URLs, or `web_fetch` refused URLs that hadn't appeared in a prior
-search/fetch result). Every code fix and every diagnosis this session was
-therefore based entirely on **files Tobi pasted directly** into the
-conversation, not on independent repo verification — a meaningfully weaker
-position than the 12 Sep document implies is available. Do not assume
-direct repo read access works until it's actually re-confirmed in a future
-session; ask for pasted file contents by default instead.
+**Repo-read-access gap, updated (25 Sep)**: the 20 Sep document reported that
+direct repo read access did not work and every fix that session was based on
+pasted files. That has now changed — `git clone` of the public repo via the
+sandbox's `bash_tool` (over `https://github.com/...`, `github.com` is an
+allowed domain) **worked cleanly this session**, giving direct read access to
+every file without Tobi needing to paste them. This does not extend to
+`web_fetch` of raw GitHub URLs, which is still constrained to URLs that
+already appeared in a prior search/fetch result. **Push access is still
+unavailable** — no credentials — so code changes this session were still
+delivered as full replacement file contents for Tobi to add/commit/push
+manually (a GitHub token exchange was offered to enable a direct push, but
+Tobi opted to take the file and apply it himself instead). Next session:
+confirm `git clone` read access again before assuming it's reliable
+long-term, but default to attempting it before asking Tobi to paste files.
 
 GitHub username: **Tobifunmi** (capitalized). Automation repo:
 `github.com/Tobifunmi/you-never-knew-automation` (public). Dashboard repo:
@@ -429,6 +431,44 @@ building a redundant sweep was explicitly declined as unnecessary.
 
 ---
 
+### 4i. Gemini 503 pattern and retry backoff hardening (25 Sep)
+
+Three separate `GeminiError: Gemini call failed after 3 attempts: 503
+UNAVAILABLE` failures at Stage A/B (topic ingestion) in five days —
+14 Sep, 19 Sep, and 24 Sep. All three exhausted the old 3-retry/short-sleep
+loop in `engines/gemini.py :: _call_gemini()` before giving up.
+
+**Diagnosis**: not an account-specific or code-level problem. A web search
+this session found active, ongoing reports on Google's own developer
+forums of exactly this "high demand" 503 across Gemini 2.5/3.x models,
+some spanning weeks, with occasional Google-staff acknowledgment of an
+issue on their side — while the public status page shows all-green
+through it. Treated as a known external reliability gap to harden against,
+not something fixable by changing how the topic/script prompts are built.
+
+**Fix applied**: `_call_gemini()`'s retry backoff changed from
+`time.sleep(2 * attempt)` (2s, then 4s — exhausted in ~6 seconds total) to
+a flat `time.sleep(300)` (5 minutes) between every attempt, with a `print()`
+log line on each wait so it's visible in Actions logs. `max_retries` left
+at 3, so worst case is now ~10 minutes before Stage A/B gives up entirely,
+versus ~6 seconds before. This backoff is shared by both
+`generate_candidate_topic()` (topic gen) and `generate_script()` (script
+gen), since both route through `_call_gemini()`.
+
+Delivered as a full replacement `engines/gemini.py` for Tobi to add and
+commit himself (see the repo-read-access note at the top of this document —
+push access still isn't available). **Not yet independently re-verified
+against the live repo** — confirm on next session that the flat 5-minute
+backoff actually landed on `main`.
+
+**Deferred, not built this session**: a fallback model (e.g. dropping to a
+lighter Gemini model on repeated 503s) and not letting a Stage A/B failure
+silently cost a scheduled publish slot (currently: run fails, cron-job.org's
+trigger for that slot is simply missed, and recovery is manual/noticed via
+the failure email). Both flagged as open items — see §12.
+
+---
+
 ## 5. Repo structure — `you-never-knew-automation`
 
 Reflects the live repo as read directly during the 12 Sep session (`main.py`,
@@ -486,7 +526,9 @@ you-never-knew-automation/
 │   │                                  confirmed in use by scheduling.py,
 │   │                                  §4g, not independently re-read)
 │   ├── script_engine.py
-│   ├── gemini.py
+│   ├── gemini.py                    — _call_gemini() retries 3x, flat
+│   │                                  5-min wait between attempts (was
+│   │                                  2s/4s), §4i
 │   ├── analytics.py                — 48h gating on live_published_at, §4a
 │   ├── scheduling.py                — verified live 12 Sep, updated §4h
 │   │                                  this session (not independently
@@ -630,6 +672,13 @@ this session.)*
     history with real (if dead) credentials inside; caught by GitHub push
     protection before ever reaching GitHub. Resolved via `git reset --soft`
     + hardened `.gitignore`, no rotation needed. Full detail §4f.
+25. **NEW, 25 Sep session** — Gemini 503 UNAVAILABLE hit Stage A/B three
+    times in five days, exhausting the old fast retry loop (~6s total).
+    Diagnosed as a known, ongoing Gemini-side reliability issue (not
+    account/code-specific — confirmed via Google developer forum reports).
+    Hardened, not "fixed" (the underlying 503s are outside this repo's
+    control): `_call_gemini()`'s backoff changed to a flat 5-minute wait
+    between attempts. Full detail §4i.
 
 ---
 
@@ -791,23 +840,34 @@ Carried forward, reinforced again this session:
 
 - ~~Gmail SMTP failure notifications~~ — confirmed working, §4h.
 
-**New this session (20 Sep):**
+**Resolved this session (25 Sep):**
 
-5. **Confirm §4h's two file replacements actually landed on `main`.** Tobi
-   reported saving/committing/pushing `engines/youtube.py` and
-   `engines/scheduling.py`, but this was never independently re-verified
-   against the live repo (see the repo-read-access gap at the top of this
-   document) — worth a real check next session, either by re-reading the
-   repo (if that access works again) or asking Tobi to re-paste both files.
-- **Re-attempt direct repo read access early next session** to find out
-  whether the 12 Sep session's capability was a fluke, a since-fixed tool
-  issue, or genuinely unavailable now — this materially changes how much
-  can be verified independently versus needing Tobi to paste files.
+- ~~Re-attempt direct repo read access~~ — `git clone` via `bash_tool`
+  worked cleanly this session; see the updated gap note at the top of this
+  document. Confirmed `git clone` access is usable going forward (pending
+  re-confirmation next session), though push access still isn't.
+- ~~Confirm §4h's two file replacements actually landed on `main`~~ —
+  since read access now works, this can be (and should be) directly
+  re-checked at the start of next session by cloning the repo and reading
+  `engines/youtube.py` / `engines/scheduling.py`, rather than staying an
+  open item indefinitely.
+
+**New this session (25 Sep):**
+
+5. **Confirm the `engines/gemini.py` backoff change (§4i) actually landed
+   on `main`.** Delivered as a full replacement file for Tobi to add and
+   commit himself (push access still unavailable) — verify by cloning the
+   repo and checking `_call_gemini()` uses `time.sleep(300)`.
+6. **Watch whether the 5-minute backoff actually reduces Gemini 503
+   failures**, or whether the underlying demand-spike issue is frequent/
+   long enough that even a 10-minute total retry window isn't sufficient —
+   if 503s keep recurring, the deferred fallback-model and
+   don't-silently-miss-a-publish-slot ideas from §4i should get built.
+7. **`README.md`'s new "Recovering from a flagged/removed video" section
+   and the updated Scheduling/error-handling sections** (written 20 Sep) —
+   still not independently re-verified as pushed; check alongside item 5.
 - **Watch for a repeat copyright flag.** One flagged video (fact 201,
   "Traffic Lights") isn't necessarily a pattern, but if it happens again,
   worth checking whether it's tied to a specific Jamendo track, a specific
   Pixabay/Pexels clip, or something about the topic itself, rather than
   treating each one as an isolated fluke.
-- **`README.md`'s new "Recovering from a flagged/removed video" section
-  and the updated Scheduling/error-handling sections** — written this
-  session, not yet confirmed pushed; verify alongside item 5 above.

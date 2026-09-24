@@ -97,6 +97,25 @@ want the very next video to go live immediately instead of waiting a full
 cadence period, that would need a small explicit change to this logic; it
 doesn't happen automatically today.
 
+## Gemini transient failures (503s) and retry backoff
+
+`engines/gemini.py :: _call_gemini()` is the single low-level entry point
+used by both topic generation (Stage A) and script generation (Stage B).
+It retries up to 3 times on any exception before raising `GeminiError`.
+
+Gemini periodically returns `503 UNAVAILABLE` ("model currently experiencing
+high demand") during genuine demand spikes on Google's side — this has
+recurred multiple times, is reported broadly by other developers, and isn't
+something fixable from this repo. The retry wait between attempts is a flat
+**5 minutes** (`time.sleep(300)`, with a log line on each wait) rather than
+a short exponential backoff, since a brief delay rarely outlasts one of
+these spikes. Worst case, a Stage A/B call now takes up to ~10 minutes to
+fail entirely (two 5-minute gaps across 3 attempts) before the run raises
+`GeminiError` and the whole pipeline run fails loudly (see "Error handling"
+patterns elsewhere in this doc — Stage A/B failures are not currently
+retried at the pipeline/workflow level, only at the individual API-call
+level within `_call_gemini()`).
+
 ## Recovering from a flagged/removed video
 
 YouTube emails a copyright/policy notice when a published or scheduled
@@ -364,7 +383,9 @@ you-never-knew-automation/
 │   ├── script_engine.py       — parses human-written script text files
 │   ├── gemini.py              — autonomous topic + script generation,
 │   │                             accepts an optional performance-context
-│   │                             digest from analytics.py
+│   │                             digest from analytics.py; retries 3x
+│   │                             with a flat 5-min wait between attempts
+│   │                             on transient failures (e.g. 503s)
 │   ├── analytics.py           — 48h+ YouTube Analytics capture per video,
 │   │                             builds the retention-by-category digest
 │   │                             fed into gemini.py's topic prompt
