@@ -708,7 +708,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095104",
       "music_track_name": "Beats of Heaven",
-      "live_published_at": "2026-09-23T23:00:36Z"
+      "live_published_at": "2026-09-23T23:00:36Z",
+      "performance": {
+        "views": 27,
+        "likes": 1,
+        "comments": 0,
+        "averageViewPercentage": 58.24,
+        "estimatedMinutesWatched": 18
+      },
+      "performance_captured_at": "2026-09-25T23:02:27.742598+00:00"
     },
     {
       "fact_number": 205,
@@ -741,7 +749,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_206_aerogel/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:14024",
-      "music_track_name": "Legends"
+      "music_track_name": "Legends",
+      "live_published_at": "2026-09-25T23:00:24Z"
     },
     {
       "fact_number": 207,
@@ -758,6 +767,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1209658",
       "music_track_name": "Flying Over The Golden Peaks"
+    },
+    {
+      "fact_number": 208,
+      "topic": "Ferrofluid",
+      "state": "playlist_added",
+      "youtube_id": "v4Y0EE0EQMY",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 208: 5 Facts You Didn't Know About Ferrofluid",
+      "category": "Amazing Facts",
+      "published_at": "2026-09-25T23:08:51.707979+00:00",
+      "scheduled_publish_at": "2026-09-27T23:00:00Z",
+      "narration_duration_seconds": 97.58,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_208_ferrofluid/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:843407",
+      "music_track_name": "the end of the innocence"
     }
   ],
   "next_fact_number": 191
