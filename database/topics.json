@@ -202,7 +202,8 @@
     "Lasers",
     "Aerogel",
     "3D Printers",
-    "Ferrofluid"
+    "Ferrofluid",
+    "GPS"
   ],
   "reserved": []
 }

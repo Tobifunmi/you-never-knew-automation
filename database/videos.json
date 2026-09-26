@@ -733,7 +733,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1170916",
       "music_track_name": "Never Wanted",
-      "live_published_at": "2026-09-24T23:00:25Z"
+      "live_published_at": "2026-09-24T23:00:25Z",
+      "performance": {
+        "views": 318,
+        "likes": 7,
+        "comments": 0,
+        "averageViewPercentage": 63.1,
+        "estimatedMinutesWatched": 222
+      },
+      "performance_captured_at": "2026-09-26T23:02:14.485797+00:00"
     },
     {
       "fact_number": 206,
@@ -766,7 +774,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_207_3d_printers/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1209658",
-      "music_track_name": "Flying Over The Golden Peaks"
+      "music_track_name": "Flying Over The Golden Peaks",
+      "live_published_at": "2026-09-26T23:00:00Z"
     },
     {
       "fact_number": 208,
@@ -783,6 +792,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:843407",
       "music_track_name": "the end of the innocence"
+    },
+    {
+      "fact_number": 209,
+      "topic": "GPS",
+      "state": "playlist_added",
+      "youtube_id": "HhGaeroMmhg",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 209: 5 Facts You Didn't Know About GPS",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-09-26T23:06:12.930682+00:00",
+      "scheduled_publish_at": "2026-09-28T23:00:00Z",
+      "narration_duration_seconds": 146.15,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_209_gps/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1073219",
+      "music_track_name": "Dj Rostej - Secret Sorrow"
     }
   ],
   "next_fact_number": 191
