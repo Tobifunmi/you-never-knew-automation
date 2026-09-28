@@ -783,7 +783,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1209658",
       "music_track_name": "Flying Over The Golden Peaks",
-      "live_published_at": "2026-09-26T23:00:00Z"
+      "live_published_at": "2026-09-26T23:00:00Z",
+      "performance": {
+        "views": 95,
+        "likes": 4,
+        "comments": 0,
+        "averageViewPercentage": 38.57,
+        "estimatedMinutesWatched": 38
+      },
+      "performance_captured_at": "2026-09-28T23:02:32.164233+00:00"
     },
     {
       "fact_number": 208,
@@ -816,7 +824,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_209_gps/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1073219",
-      "music_track_name": "Dj Rostej - Secret Sorrow"
+      "music_track_name": "Dj Rostej - Secret Sorrow",
+      "live_published_at": "2026-09-28T23:00:07Z"
     },
     {
       "fact_number": 210,
