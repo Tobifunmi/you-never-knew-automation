@@ -1,10 +1,10 @@
 # MASTER CONTINUATION PROMPT — "You Never Knew" Automated YouTube Shorts Factory
 
 Use this as full context in a new conversation. Reflects the verified state of
-the project as of **25 Sep 2026**. This version supersedes the previous
-`MASTER_CONTINUATION_PROMPT.md` (dated 20 Sep 2026, committed in the automation
-repo root) — that document is now out of date in the ways described below.
-Consider re-committing this version over it.
+the project as of **29 Sep 2026**. This version supersedes the previous
+`MASTER_CONTINUATION_PROMPT.md` (dated 25 Sep 2026, committed in the automation
+repo root) — that document is now out of date in the ways described below
+(new §4j, §12 changes). Consider re-committing this version over it.
 
 **Repo-read-access gap, updated (25 Sep)**: the 20 Sep document reported that
 direct repo read access did not work and every fix that session was based on
@@ -17,9 +17,9 @@ already appeared in a prior search/fetch result. **Push access is still
 unavailable** — no credentials — so code changes this session were still
 delivered as full replacement file contents for Tobi to add/commit/push
 manually (a GitHub token exchange was offered to enable a direct push, but
-Tobi opted to take the file and apply it himself instead). Next session:
-confirm `git clone` read access again before assuming it's reliable
-long-term, but default to attempting it before asking Tobi to paste files.
+Tobi opted to take the file and apply it himself instead). **Re-confirmed 29 Sep**: `git clone` and
+`curl` of `raw.githubusercontent.com/.../main/<path>` both worked from
+`bash_tool`. Default to attempting a clone before asking Tobi to paste files.
 
 GitHub username: **Tobifunmi** (capitalized). Automation repo:
 `github.com/Tobifunmi/you-never-knew-automation` (public). Dashboard repo:
@@ -77,7 +77,8 @@ beyond what's summarized here.
 |---|---|
 | YouTube publisher (OAuth, upload, scheduling, playlists, DB recording) | ✅ Done, live in production |
 | Scheduling (`engines/scheduling.py`, real `status.publishAt`) | ✅ Done, live — see §4g. Maintains a rolling one-video-ahead buffer: each run schedules the next video `cadence_hours` (24h) after the latest scheduled/live video's real anchor time on YouTube, cross-checked against local DB to catch drift |
-| Scheduling error-handling split (`SchedulingDriftError` vs `SchedulingStatusCheckError`) | ✅ Done this session — see §4h |
+| Scheduling error-handling split (`SchedulingDriftError` vs `SchedulingStatusCheckError`) | ✅ Done, **verified landed on `main` 29 Sep** — see §4h. Gap found 29 Sep: only `HttpError` was wrapped, so network-level errors (e.g. `SSLEOFError`) bypassed it — see §4j |
+| Network-level retry hardening (`engines/youtube.py`: `get_video_status()` retry loop, `num_retries` on execute/upload chunks) | ✅ Pushed by Tobi and **verified identical to the delivered patch on `main` 29 Sep** — see §4j. Not yet exercised by a real run |
 | Narration — Kokoro-82M (local/offline, no API key, no char cap) | ✅ Done |
 | Footage (Pixabay → Pexels waterfall) | ✅ Done |
 | Captions (local Whisper, burned-in ASS) | ✅ Done |
@@ -429,6 +430,11 @@ the status table above). The existing "run fails loudly with a distinct
 error → check email → fix the DB record" loop is considered sufficient;
 building a redundant sweep was explicitly declined as unnecessary.
 
+**Verified 29 Sep**: both files did land on `main`. `engines/youtube.py`
+defines `VideoStatusCheckError`; `engines/scheduling.py` imports it and
+re-raises it as `SchedulingStatusCheckError`. But the wrapper only caught
+`HttpError` — see §4j for the hole that left.
+
 ---
 
 ### 4i. Gemini 503 pattern and retry backoff hardening (25 Sep)
@@ -466,6 +472,57 @@ lighter Gemini model on repeated 503s) and not letting a Stage A/B failure
 silently cost a scheduled publish slot (currently: run fails, cron-job.org's
 trigger for that slot is simply missed, and recovery is manual/noticed via
 the failure email). Both flagged as open items — see §12.
+
+**Verified 29 Sep**: the flat-backoff change landed on `main`
+(`engines/gemini.py` line ~120 uses `time.sleep(300)`).
+
+---
+
+### 4j. Stage H `SSLEOFError` on fact 211 + network-level retry hardening (28–29 Sep 2026)
+
+**Incident**: Actions run #36495605089 (28 Sep, 23:20 UTC, production) failed
+at Stage H "Computing next scheduled publish time" on fact 211 (topic
+"X-Rays") with a raw `ssl.SSLEOFError: EOF occurred in violation of protocol`,
+raised from `get_video_status()` -> `.execute()` inside
+`scheduling.compute_next_publish_at()`.
+
+**Diagnosis**: transient TLS drop on the runner, not a logic bug. It exposed a
+gap in the §4h fix: `get_video_status()` only caught `HttpError`. `SSLEOFError`
+is an `OSError` subclass, so it escaped the `VideoStatusCheckError` wrapper
+and surfaced as a raw traceback instead of a `SchedulingStatusCheckError`.
+`execute()` defaults to `num_retries=0`, and (as far as we know) the client
+library's built-in retry doesn't cover `SSLEOFError`, so `num_retries` alone
+wouldn't have helped.
+
+**State check (29 Sep, cloned `main`)**: fact 211 was **not** counted anywhere
+that matters. `get_next_fact_number()` derives the number from the highest
+`fact_number` among videos in state published/uploaded/playlist_added/scheduled
+- last record was fact 210 (Sonic Booms), no 211 record - so the re-run reuses
+211. "X-Rays" is in neither `topics.json` `completed` (205) nor `reserved` (0):
+the failure handler released it correctly. The bot's 23:20:20 "update topics
+and videos state" commit is that clean state. Only trace of 211:
+`usage_log.json` lists 211 in the `pixabay`, `pexels`, `kokoro` `videos`
+arrays (deduped; only raw `count` fields inflate on re-run - cosmetic).
+`next_fact_number = 191` is an ignored fallback seed. Note the re-run may pick
+a different topic than X-Rays (Gemini generates a fresh candidate).
+
+**Fix delivered (full replacement `engines/youtube.py`; pushed by Tobi and
+verified byte-identical on `main` 29 Sep)**:
+- `get_video_status()`: 4-attempt loop, waits 15s/30s/45s, retries
+  `ssl.SSLError`/`socket.error`/`ConnectionError`/`TimeoutError`/
+  `httplib2.HttpLib2Error` and HTTP 429/500/502/503/504; other `HttpError`s
+  (401/403/404...) fail immediately. All failure paths end in
+  `VideoStatusCheckError`; `None` still means only "confirmed absent".
+  `.execute(num_retries=3)` added.
+- `upload_video()`: `request.next_chunk(num_retries=5)`.
+- `scheduling.py` unchanged - its `except VideoStatusCheckError` already
+  handles the new behaviour.
+- Only compile-checked, not yet exercised by a live run.
+
+**Not done**: the other `.execute()` calls in `youtube.py` (playlist
+list/create/insert, ~lines 253-295) have no network-error retry and would
+fail the same way on an SSL drop. A missed publish slot after a pipeline
+failure still needs manual re-dispatch (same open item as §4i).
 
 ---
 
@@ -553,9 +610,10 @@ you-never-knew-automation/
 │                                     WinError 10060 concern appears
 │                                     resolved/moot
 │   ├── usage_tracker.py
-│   └── youtube.py                   — verified live 12 Sep, updated §4h
-│                                     this session (not independently
-│                                     re-verified — see repo-read gap).
+│   └── youtube.py                   — verified live 12 Sep; §4h changes
+│                                     verified on `main` 29 Sep; §4j
+│                                     network-retry patch pushed and
+│                                     verified on `main` 29 Sep.
 │                                     SCOPES = [youtube, yt-analytics.readonly].
 │                                     upload_video(..., publish_at=None) —
 │                                     passing publish_at forces
@@ -566,7 +624,9 @@ you-never-knew-automation/
 │                                     used by scheduling.py; now returns
 │                                     None ONLY on confirmed-absent, raises
 │                                     new VideoStatusCheckError if the API
-│                                     call itself fails (§4h).
+│                                     call itself fails (§4h); as of §4j it
+│                                     retries transient network/5xx errors
+│                                     (4 attempts) before raising.
 ├── check_usage.py                  — local dashboard script
 ├── blocklist_track.py
 ├── rerun_footage.py / rerun_footage_wombats.py
@@ -679,6 +739,10 @@ this session.)*
     Hardened, not "fixed" (the underlying 503s are outside this repo's
     control): `_call_gemini()`'s backoff changed to a flat 5-minute wait
     between attempts. Full detail §4i.
+26. **NEW, 28-29 Sep** — Stage H `ssl.SSLEOFError` on fact 211: network-level
+    errors bypassed the `HttpError`-only `VideoStatusCheckError` wrapper,
+    and there was no retry. Patched `youtube.py` with a retry loop; fact 211
+    state verified clean. Full detail §4j.
 
 ---
 
@@ -852,20 +916,34 @@ Carried forward, reinforced again this session:
   `engines/youtube.py` / `engines/scheduling.py`, rather than staying an
   open item indefinitely.
 
-**New this session (25 Sep):**
+**Resolved this session (29 Sep):**
 
-5. **Confirm the `engines/gemini.py` backoff change (§4i) actually landed
-   on `main`.** Delivered as a full replacement file for Tobi to add and
-   commit himself (push access still unavailable) — verify by cloning the
-   repo and checking `_call_gemini()` uses `time.sleep(300)`.
+- ~~Confirm §4h file replacements landed on `main`~~ - verified, §4h.
+- ~~Confirm `engines/gemini.py` backoff (§4i) landed~~ - verified,
+  `time.sleep(300)` present.
+- ~~README "Recovering from a flagged/removed video" section pushed~~ -
+  present in README on `main`.
+
+**New this session (29 Sep):**
+
+A. **Commit this updated MASTER prompt and README**, then re-dispatch the
+   workflow for fact 211 (the §4j `youtube.py` patch is already on `main`).
+   Watch the Actions log for `[get_video_status] attempt` lines — they only
+   appear if a transient failure actually occurs.
+B. **Decide whether to wrap the remaining `.execute()` calls** (playlist
+   list/create/insert) with the same network-retry treatment if SSL/socket
+   drops recur.
+C. **Missed-slot recovery**: the 28 Sep failure cost a publish slot until
+   manual re-dispatch. Consider an automatic single re-dispatch on
+   failure (shared with the Gemini-503 item below).
+
+**Carried from 25 Sep:**
+
 6. **Watch whether the 5-minute backoff actually reduces Gemini 503
    failures**, or whether the underlying demand-spike issue is frequent/
    long enough that even a 10-minute total retry window isn't sufficient —
    if 503s keep recurring, the deferred fallback-model and
    don't-silently-miss-a-publish-slot ideas from §4i should get built.
-7. **`README.md`'s new "Recovering from a flagged/removed video" section
-   and the updated Scheduling/error-handling sections** (written 20 Sep) —
-   still not independently re-verified as pushed; check alongside item 5.
 - **Watch for a repeat copyright flag.** One flagged video (fact 201,
   "Traffic Lights") isn't necessarily a pattern, but if it happens again,
   worth checking whether it's tied to a specific Jamendo track, a specific

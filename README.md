@@ -48,7 +48,7 @@ in `config.json` uploads its video as **private with a real
    genuinely different failure modes (see "Error handling" below): a
    confirmed-absent video (`get_video_status()` returns `None`) vs. the
    status check itself failing (`VideoStatusCheckError`, e.g. auth/quota/
-   network) — these used to be conflated into the same `None` result,
+   network — after retrying transient failures) — these used to be conflated into the same `None` result,
    which made a real removed video indistinguishable from a transient API
    hiccup until someone dug through the traceback by hand.
 3. Anchors on whichever of these is true: the video's real `publishAt` (if
@@ -75,12 +75,17 @@ the traceback:
   edit).
 - **`SchedulingStatusCheckError`** — the status check call itself failed
   (`engines/youtube.py`'s `get_video_status()` raised `VideoStatusCheckError`
-  — an `HttpError` from auth, quota, or a transient network/server issue).
-  Read: retry, or check credentials/quota — **not** "a video was removed."
+  — an `HttpError` from auth or quota, or a network/server issue that
+  persisted through all retries).
+  Read: re-run, or check credentials/quota — **not** "a video was removed."
 
 `get_video_status()` itself only returns `None` on a genuine confirmed-absent
-API response (a 200 with an empty `items` list); any `HttpError` during the
-call is re-raised as `VideoStatusCheckError` rather than silently swallowed.
+API response (a 200 with an empty `items` list). Transient failures —
+network-level errors (SSL/socket/connection drops, e.g. `SSLEOFError`) and
+HTTP 429/5xx — are retried up to 4 times (15s, 30s, 45s waits) before being
+raised as `VideoStatusCheckError`; non-transient `HttpError`s (401/403/404…)
+are raised immediately. Nothing is silently swallowed. Resumable upload
+chunks in `upload_video()` also retry (`next_chunk(num_retries=5)`).
 
 **Net effect**: the channel always keeps roughly one video scheduled ahead
 of whatever's currently live, so a daily trigger never depends on a human
@@ -439,7 +444,8 @@ you-never-knew-automation/
 │                                  scheduling.py to verify local state;
 │                                  returns None only on a confirmed-absent
 │                                  video, raises VideoStatusCheckError if
-│                                  the API call itself fails), playlist
+│                                  the API call itself fails, after retrying
+│                                  transient network/5xx errors), playlist
 │                                  management, retry logic, OAuth scopes
 │                                  (upload + Analytics readonly)
 ├── test_assets/                — sample scripts
