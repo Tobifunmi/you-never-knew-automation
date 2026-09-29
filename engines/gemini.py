@@ -52,13 +52,16 @@ FALLBACK_MODELS = [
     for m in os.environ.get("GEMINI_FALLBACK_MODELS", "gemini-3.8-flash").split(",")
     if m.strip() and m.strip() != MODEL_NAME
 ]
-# Waits between rounds when failures look transient (503 / 429 / 5xx). The
-# repo is public so Actions minutes are free; patience costs nothing, and the
-# rolling publish buffer means a late-finishing run still lands on schedule.
-# Sum = ~32 min. Override the whole schedule with GEMINI_WAIT_SCHEDULE="60,120,...".
+# Waits between rounds when failures look transient (503 / per-minute 429 / 5xx).
+# Actions minutes are free (public repo) and the rolling publish buffer absorbs
+# a late run, BUT on the Gemini free tier every attempt — including ones that
+# come back 503 — appears to count against a small per-model DAILY request cap
+# (20/day on gemini-3.6-flash). So keep the round count modest: a normal video
+# needs ~3 calls, and a fully failed run should not eat the whole day's quota.
+# Sum = ~35 min over 5 rounds. Override with GEMINI_WAIT_SCHEDULE="180,420,...".
 TRANSIENT_WAIT_SCHEDULE = [
     int(x) for x in os.environ.get(
-        "GEMINI_WAIT_SCHEDULE", "60,120,240,300,300,300,300,300"
+        "GEMINI_WAIT_SCHEDULE", "180,420,600,900"
     ).split(",") if x.strip()
 ]
 NON_TRANSIENT_WAIT_SECONDS = 15
@@ -161,6 +164,16 @@ def _call_gemini(
                 last_error = e
                 errors_by_model[model] = e
                 msg = str(e)
+                if ("PerDay" in msg or "per_day" in msg.lower()) and (
+                    "429" in msg or "RESOURCE_EXHAUSTED" in msg
+                ):
+                    # Daily quota is gone; the "retry in 45s" hint in the error
+                    # is misleading for a daily cap. Waiting can't fix it, and
+                    # every further attempt just burns more quota.
+                    dead_models.add(model)
+                    print(f"  Gemini model {model}: DAILY quota exhausted "
+                          f"(resets ~midnight Pacific); skipping it for this call.")
+                    continue
                 if "404" in msg or "NOT_FOUND" in msg:
                     dead_models.add(model)
                     print(f"  Gemini model {model} is unavailable (404); "
