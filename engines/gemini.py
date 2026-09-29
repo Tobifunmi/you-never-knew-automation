@@ -49,7 +49,7 @@ MODEL_NAME = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
 # current. Set GEMINI_FALLBACK_MODELS="" to disable fallbacks entirely.
 FALLBACK_MODELS = [
     m.strip()
-    for m in os.environ.get("GEMINI_FALLBACK_MODELS", "gemini-2.5-flash").split(",")
+    for m in os.environ.get("GEMINI_FALLBACK_MODELS", "gemini-3.8-flash").split(",")
     if m.strip() and m.strip() != MODEL_NAME
 ]
 ROUND_WAIT_SECONDS = 120
@@ -113,11 +113,15 @@ def _call_gemini(
 
     models = [MODEL_NAME] + FALLBACK_MODELS
     last_error = None
+    errors_by_model: dict[str, Exception] = {}  # latest error per model
+    dead_models: set[str] = set()  # 404 / not-found: don't retry these
     for attempt in range(1, max_retries + 1):
         # One pass over the primary model, then each fallback. Separate models
         # have separate capacity, so a 503 spike on one often doesn't hit the
         # next — far more effective than just waiting on the same model.
         for model in models:
+            if model in dead_models:
+                continue
             try:
                 usage_tracker.log_call("gemini")
                 response = client.models.generate_content(
@@ -133,14 +137,28 @@ def _call_gemini(
                 return text
             except Exception as e:  # noqa: BLE001 - retry any transient failure
                 last_error = e
-                print(f"  Gemini call failed on {model} "
-                      f"(round {attempt}/{max_retries}): {e}")
+                errors_by_model[model] = e
+                msg = str(e)
+                if "404" in msg or "NOT_FOUND" in msg:
+                    dead_models.add(model)
+                    print(f"  Gemini model {model} is unavailable (404); "
+                          f"removing it from rotation: {e}")
+                else:
+                    print(f"  Gemini call failed on {model} "
+                          f"(round {attempt}/{max_retries}): {e}")
+        if all(m in dead_models for m in models):
+            break  # nothing left to retry; waiting won't help
         if attempt < max_retries:
             print(f"  All models failed this round. Waiting {ROUND_WAIT_SECONDS}s "
                   f"before the next round...")
             time.sleep(ROUND_WAIT_SECONDS)
 
-    raise GeminiError(f"Gemini call failed after {max_retries} attempts: {last_error}")
+    # Report every model's error, not just the last one — otherwise a dead
+    # fallback's 404 masks the primary's real (e.g. 503) failure.
+    detail = " | ".join(f"{m}: {err}" for m, err in errors_by_model.items())
+    raise GeminiError(
+        f"Gemini call failed after {max_retries} rounds. {detail or last_error}"
+    )
 
 
 # ---------------------------------------------------------------------------
