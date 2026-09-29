@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import os
+import socket
+import ssl
 import time
 from pathlib import Path
 from typing import Optional
@@ -10,6 +12,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+import httplib2
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 
@@ -22,6 +25,18 @@ SCOPES = [
 
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
+
+
+# Network-level failures that are worth retrying (e.g. SSLEOFError, which is an
+# OSError subclass and NOT an HttpError, so it previously bypassed our wrapper).
+TRANSIENT_NET_ERRORS = (
+    ssl.SSLError,
+    socket.error,
+    ConnectionError,
+    TimeoutError,
+    httplib2.HttpLib2Error,
+)
+TRANSIENT_HTTP_STATUSES = (429, 500, 502, 503, 504)
 
 
 class VideoStatusCheckError(Exception):
@@ -164,7 +179,7 @@ class YouTubePublisher:
 
         response = None
         while response is None:
-            _, response = request.next_chunk()
+            _, response = request.next_chunk(num_retries=5)
 
         return response["id"]
 
@@ -191,16 +206,36 @@ class YouTubePublisher:
         if self.youtube is None:
             self.authenticate()
 
-        try:
-            usage_tracker.log_call("youtube_data_status")
-            response = self.youtube.videos().list(
-                part="status,snippet",
-                id=video_id,
-            ).execute()
-        except HttpError as e:
+        attempts = 4
+        response = None
+        last_exc: Optional[Exception] = None
+        for attempt in range(1, attempts + 1):
+            try:
+                usage_tracker.log_call("youtube_data_status")
+                response = self.youtube.videos().list(
+                    part="status,snippet",
+                    id=video_id,
+                ).execute(num_retries=3)
+                break
+            except HttpError as e:
+                if e.resp.status not in TRANSIENT_HTTP_STATUSES:
+                    raise VideoStatusCheckError(
+                        f"YouTube status check failed for video_id={video_id}: {e}"
+                    ) from e
+                last_exc = e
+            except TRANSIENT_NET_ERRORS as e:
+                last_exc = e
+            print(
+                f"[get_video_status] attempt {attempt}/{attempts} failed "
+                f"for {video_id}: {last_exc!r}"
+            )
+            if attempt < attempts:
+                time.sleep(15 * attempt)
+        else:
             raise VideoStatusCheckError(
-                f"YouTube status check failed for video_id={video_id}: {e}"
-            ) from e
+                f"YouTube status check failed for video_id={video_id} "
+                f"after {attempts} attempts: {last_exc!r}"
+            ) from last_exc
 
         items = response.get("items", [])
         if not items:
