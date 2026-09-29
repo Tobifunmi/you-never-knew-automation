@@ -42,6 +42,18 @@ from . import usage_tracker
 
 MODEL_NAME = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
 
+# Tried in order, once each per round, when the primary model is failing
+# (e.g. the recurring 503 "high demand" spikes). Comma-separated env var
+# overrides the default. A model name that doesn't exist just fails fast and
+# the loop moves on, so a stale name here is harmless but useless — keep it
+# current. Set GEMINI_FALLBACK_MODELS="" to disable fallbacks entirely.
+FALLBACK_MODELS = [
+    m.strip()
+    for m in os.environ.get("GEMINI_FALLBACK_MODELS", "gemini-2.5-flash").split(",")
+    if m.strip() and m.strip() != MODEL_NAME
+]
+ROUND_WAIT_SECONDS = 120
+
 _client: Optional["genai.Client"] = None
 
 
@@ -99,26 +111,34 @@ def _call_gemini(
 
     config = types.GenerateContentConfig(**config_kwargs) if config_kwargs else None
 
+    models = [MODEL_NAME] + FALLBACK_MODELS
     last_error = None
     for attempt in range(1, max_retries + 1):
-        try:
-            usage_tracker.log_call("gemini")
-            response = client.models.generate_content(
-                model=MODEL_NAME,
-                contents=prompt,
-                config=config,
-            )
-            text = (response.text or "").strip()
-            if not text:
-                raise GeminiError("Gemini returned an empty response.")
-            return text
-        except Exception as e:  # noqa: BLE001 - retry any transient failure
-            last_error = e
-            if attempt < max_retries:
-                print(f"  Gemini call failed (attempt {attempt}/{max_retries}): {e}. "
-                      f"Waiting 5 minutes before retrying...")
-                time.sleep(300)
-            continue
+        # One pass over the primary model, then each fallback. Separate models
+        # have separate capacity, so a 503 spike on one often doesn't hit the
+        # next — far more effective than just waiting on the same model.
+        for model in models:
+            try:
+                usage_tracker.log_call("gemini")
+                response = client.models.generate_content(
+                    model=model,
+                    contents=prompt,
+                    config=config,
+                )
+                text = (response.text or "").strip()
+                if not text:
+                    raise GeminiError("Gemini returned an empty response.")
+                if model != MODEL_NAME:
+                    print(f"  Gemini: succeeded on fallback model {model}.")
+                return text
+            except Exception as e:  # noqa: BLE001 - retry any transient failure
+                last_error = e
+                print(f"  Gemini call failed on {model} "
+                      f"(round {attempt}/{max_retries}): {e}")
+        if attempt < max_retries:
+            print(f"  All models failed this round. Waiting {ROUND_WAIT_SECONDS}s "
+                  f"before the next round...")
+            time.sleep(ROUND_WAIT_SECONDS)
 
     raise GeminiError(f"Gemini call failed after {max_retries} attempts: {last_error}")
 
