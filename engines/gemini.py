@@ -52,7 +52,25 @@ FALLBACK_MODELS = [
     for m in os.environ.get("GEMINI_FALLBACK_MODELS", "gemini-3.8-flash").split(",")
     if m.strip() and m.strip() != MODEL_NAME
 ]
-ROUND_WAIT_SECONDS = 120
+# Waits between rounds when failures look transient (503 / 429 / 5xx). The
+# repo is public so Actions minutes are free; patience costs nothing, and the
+# rolling publish buffer means a late-finishing run still lands on schedule.
+# Sum = ~32 min. Override the whole schedule with GEMINI_WAIT_SCHEDULE="60,120,...".
+TRANSIENT_WAIT_SCHEDULE = [
+    int(x) for x in os.environ.get(
+        "GEMINI_WAIT_SCHEDULE", "60,120,240,300,300,300,300,300"
+    ).split(",") if x.strip()
+]
+NON_TRANSIENT_WAIT_SECONDS = 15
+TRANSIENT_MARKERS = (
+    "503", "UNAVAILABLE", "429", "RESOURCE_EXHAUSTED",
+    "500", "INTERNAL", "504", "DEADLINE", "overloaded", "high demand",
+)
+
+
+def _is_transient(err: Exception) -> bool:
+    msg = str(err)
+    return any(marker in msg for marker in TRANSIENT_MARKERS)
 
 _client: Optional["genai.Client"] = None
 
@@ -115,10 +133,14 @@ def _call_gemini(
     last_error = None
     errors_by_model: dict[str, Exception] = {}  # latest error per model
     dead_models: set[str] = set()  # 404 / not-found: don't retry these
-    for attempt in range(1, max_retries + 1):
-        # One pass over the primary model, then each fallback. Separate models
-        # have separate capacity, so a 503 spike on one often doesn't hit the
-        # next — far more effective than just waiting on the same model.
+    transient_rounds = 0
+    other_rounds = 0
+    total_rounds = 0
+
+    while True:
+        total_rounds += 1
+        round_had_transient = False
+        # One pass over the primary model, then each fallback.
         for model in models:
             if model in dead_models:
                 continue
@@ -135,7 +157,7 @@ def _call_gemini(
                 if model != MODEL_NAME:
                     print(f"  Gemini: succeeded on fallback model {model}.")
                 return text
-            except Exception as e:  # noqa: BLE001 - retry any transient failure
+            except Exception as e:  # noqa: BLE001
                 last_error = e
                 errors_by_model[model] = e
                 msg = str(e)
@@ -143,21 +165,35 @@ def _call_gemini(
                     dead_models.add(model)
                     print(f"  Gemini model {model} is unavailable (404); "
                           f"removing it from rotation: {e}")
-                else:
-                    print(f"  Gemini call failed on {model} "
-                          f"(round {attempt}/{max_retries}): {e}")
+                    continue
+                if _is_transient(e):
+                    round_had_transient = True
+                print(f"  Gemini call failed on {model}: {e}")
+
         if all(m in dead_models for m in models):
             break  # nothing left to retry; waiting won't help
-        if attempt < max_retries:
-            print(f"  All models failed this round. Waiting {ROUND_WAIT_SECONDS}s "
-                  f"before the next round...")
-            time.sleep(ROUND_WAIT_SECONDS)
 
-    # Report every model's error, not just the last one — otherwise a dead
-    # fallback's 404 masks the primary's real (e.g. 503) failure.
+        if round_had_transient:
+            transient_rounds += 1
+            if transient_rounds > len(TRANSIENT_WAIT_SCHEDULE):
+                break
+            wait = TRANSIENT_WAIT_SCHEDULE[transient_rounds - 1]
+            print(f"  Transient failure on all models (round {transient_rounds}/"
+                  f"{len(TRANSIENT_WAIT_SCHEDULE) + 1}). Waiting {wait}s...")
+        else:
+            other_rounds += 1
+            if other_rounds >= max_retries:
+                break
+            wait = NON_TRANSIENT_WAIT_SECONDS
+            print(f"  Non-transient failure (round {other_rounds}/{max_retries}). "
+                  f"Waiting {wait}s...")
+        time.sleep(wait)
+
+    # Report every model's error, not just the last one.
     detail = " | ".join(f"{m}: {err}" for m, err in errors_by_model.items())
     raise GeminiError(
-        f"Gemini call failed after {max_retries} rounds. {detail or last_error}"
+        f"Gemini call failed after {total_rounds} rounds. "
+        f"{detail or last_error}"
     )
 
 
