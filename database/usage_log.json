@@ -1,8 +1,8 @@
 {
   "gemini": {
-    "count": 93,
+    "count": 99,
     "since": "2026-08-21",
-    "last_call": "2026-09-29 07:49 UTC",
+    "last_call": "2026-09-29 08:01 UTC",
     "videos": []
   },
   "jamendo": {
@@ -123,10 +123,10 @@
     "last_call": "2026-09-28 23:02 UTC"
   },
   "youtube_data_status": {
-    "count": 151,
+    "count": 153,
     "since": "2026-08-28",
     "videos": [],
-    "last_call": "2026-09-29 07:39 UTC"
+    "last_call": "2026-09-29 07:57 UTC"
   },
   "kokoro": {
     "count": 24,
