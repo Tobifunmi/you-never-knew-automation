@@ -58,10 +58,10 @@ FALLBACK_MODELS = [
 # come back 503 — appears to count against a small per-model DAILY request cap
 # (20/day on gemini-3.6-flash). So keep the round count modest: a normal video
 # needs ~3 calls, and a fully failed run should not eat the whole day's quota.
-# Sum = ~35 min over 5 rounds. Override with GEMINI_WAIT_SCHEDULE="180,420,...".
+# Sum = ~50 min over 6 rounds. Override with GEMINI_WAIT_SCHEDULE="180,420,...".
 TRANSIENT_WAIT_SCHEDULE = [
     int(x) for x in os.environ.get(
-        "GEMINI_WAIT_SCHEDULE", "180,420,600,900"
+        "GEMINI_WAIT_SCHEDULE", "180,420,600,900,900"
     ).split(",") if x.strip()
 ]
 NON_TRANSIENT_WAIT_SECONDS = 15

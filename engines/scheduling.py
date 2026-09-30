@@ -61,6 +61,46 @@ def _to_iso_z(dt: datetime) -> str:
     return dt.isoformat().replace("+00:00", "Z")
 
 
+# A public video's real publishedAt can land a few seconds/minutes after its
+# scheduled slot. Without this tolerance, "anchor + 24h" would fall a few
+# seconds past the next slot and get bumped a whole extra day.
+_SLOT_TOLERANCE = timedelta(minutes=30)
+
+
+def _snap_to_slot(earliest: datetime, slot_utc: str) -> datetime:
+    """
+    Returns the first daily slot (HH:MM UTC) at or after `earliest`
+    (allowing _SLOT_TOLERANCE of slack, see above).
+    """
+    hour, minute = (int(x) for x in slot_utc.split(":"))
+    candidate = earliest.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    if candidate < earliest - _SLOT_TOLERANCE:
+        candidate += timedelta(days=1)
+    return candidate
+
+
+def _next_from(anchor: datetime, now: datetime, sched_cfg: dict) -> datetime:
+    """
+    Picks the next publish time.
+
+    With scheduling.slot_utc set (e.g. "23:00" == midnight Lagos), every video
+    lands on that daily slot: the first slot that is at least cadence_hours
+    after the previous video AND at least min_lead_hours from now. So a late
+    run (Gemini outage, retries, manual re-run) snaps back to the normal slot
+    instead of shifting the whole schedule to whenever the run happened to end.
+
+    Without slot_utc, falls back to the original behaviour
+    (max(anchor, now) + cadence_hours).
+    """
+    cadence = timedelta(hours=sched_cfg.get("cadence_hours", 24))
+    slot_utc = sched_cfg.get("slot_utc")
+    if not slot_utc:
+        return max(anchor, now) + cadence
+    min_lead = timedelta(hours=sched_cfg.get("min_lead_hours", 2))
+    earliest = max(anchor + cadence, now + min_lead)
+    return _snap_to_slot(earliest, slot_utc)
+
+
 def compute_next_publish_at(publisher, config) -> str:
     """
     Returns an ISO 8601 UTC timestamp (Zulu-suffixed) for the NEXT
@@ -72,14 +112,15 @@ def compute_next_publish_at(publisher, config) -> str:
     than trusting local state alone for anything that gates a real
     publish action.
     """
-    cadence_hours = config.get("scheduling", {}).get("cadence_hours", 24)
+    sched_cfg = config.get("scheduling", {})
+    cadence_hours = sched_cfg.get("cadence_hours", 24)
     now = datetime.now(timezone.utc)
 
     record = numbering.get_latest_video_record()
     if record is None or not record.get("youtube_id"):
         # Nothing to anchor on yet (fresh channel, or the only prior
         # videos were unlisted test runs with no real youtube_id).
-        return _to_iso_z(now + timedelta(hours=cadence_hours))
+        return _to_iso_z(_next_from(now, now, sched_cfg))
 
     try:
         remote = publisher.get_video_status(record["youtube_id"])
@@ -125,5 +166,4 @@ def compute_next_publish_at(publisher, config) -> str:
                 "drift before scheduling the next video."
             )
 
-    next_time = max(anchor, now) + timedelta(hours=cadence_hours)
-    return _to_iso_z(next_time)
+    return _to_iso_z(_next_from(anchor, now, sched_cfg))
