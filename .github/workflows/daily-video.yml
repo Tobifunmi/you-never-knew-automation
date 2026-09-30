@@ -73,5 +73,13 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add database/topics.json database/videos.json database/usage_log.json || true
-          git commit -m "chore: update topics and videos state [skip ci]" || true
-          git push || true
+          git commit -m "chore: update topics and videos state [skip ci]" || { echo "Nothing to commit."; exit 0; }
+          # Retry with a rebase so a push you made while the run was going
+          # doesn't make this fail silently. Failure is now visible (no "|| true").
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main && git push && exit 0
+            echo "Push attempt $i failed; retrying..."
+            sleep 5
+          done
+          echo "::error::Could not push state files back to the repo"
+          exit 1
