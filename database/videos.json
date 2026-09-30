@@ -808,7 +808,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:843407",
       "music_track_name": "the end of the innocence",
-      "live_published_at": "2026-09-27T23:00:18Z"
+      "live_published_at": "2026-09-27T23:00:18Z",
+      "performance": {
+        "views": 10,
+        "likes": 1,
+        "comments": 0,
+        "averageViewPercentage": 74.52,
+        "estimatedMinutesWatched": 8
+      },
+      "performance_captured_at": "2026-09-30T09:31:01.242534+00:00"
     },
     {
       "fact_number": 209,
@@ -841,7 +849,24 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_210_sonic_booms/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1170916",
-      "music_track_name": "Never Wanted"
+      "music_track_name": "Never Wanted",
+      "live_published_at": "2026-09-29T23:00:22Z"
+    },
+    {
+      "fact_number": 211,
+      "topic": "Liquid Nitrogen",
+      "state": "playlist_added",
+      "youtube_id": "TylZ4MNcS08",
+      "playlist_id": "PLOOM2rEPGwC0",
+      "title": "Fact 211: 5 Facts You Didn't Know About Liquid Nitrogen",
+      "category": "Nature Facts",
+      "published_at": "2026-09-30T10:15:38.663294+00:00",
+      "scheduled_publish_at": "2026-10-01T10:15:30.629563Z",
+      "narration_duration_seconds": 117.67,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_211_liquid_nitrogen/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1372263",
+      "music_track_name": "Dj Rostej - Reverie"
     }
   ],
   "next_fact_number": 191
