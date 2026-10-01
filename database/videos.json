@@ -858,7 +858,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1170916",
       "music_track_name": "Never Wanted",
-      "live_published_at": "2026-09-29T23:00:22Z"
+      "live_published_at": "2026-09-29T23:00:22Z",
+      "performance": {
+        "views": 34,
+        "likes": 2,
+        "comments": 0,
+        "averageViewPercentage": 83.59,
+        "estimatedMinutesWatched": 30
+      },
+      "performance_captured_at": "2026-10-01T23:02:32.382497+00:00"
     },
     {
       "fact_number": 211,
@@ -885,7 +893,8 @@
       "playlist_id": null,
       "title": "Fact 212: 5 Facts You Didn't Know About Dry Ice",
       "scheduled_publish_at": "2026-10-01T23:00:00Z",
-      "related_video_id": null
+      "related_video_id": null,
+      "live_published_at": "2026-10-01T23:00:15Z"
     },
     {
       "fact_number": 213,
@@ -902,6 +911,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1576193",
       "music_track_name": "Slow"
+    },
+    {
+      "fact_number": 214,
+      "topic": "Thermal Imaging",
+      "state": "playlist_added",
+      "youtube_id": "-81DrdRcLw4",
+      "playlist_id": "PLOOM2rEPGwC0",
+      "title": "Fact 214: 5 Facts You Didn't Know About Thermal Imaging",
+      "category": "Nature Facts",
+      "published_at": "2026-10-01T23:08:09.707819+00:00",
+      "scheduled_publish_at": "2026-10-03T23:00:00Z",
+      "narration_duration_seconds": 111.8,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_214_thermal_imaging/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1568720",
+      "music_track_name": "Entering"
     }
   ],
   "next_fact_number": 191
