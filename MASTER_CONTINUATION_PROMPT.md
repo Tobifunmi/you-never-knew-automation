@@ -1,10 +1,14 @@
 # MASTER CONTINUATION PROMPT — "You Never Knew" Automated YouTube Shorts Factory
 
 Use this as full context in a new conversation. Reflects the verified state of
-the project as of **29 Sep 2026**. This version supersedes the previous
-`MASTER_CONTINUATION_PROMPT.md` (dated 25 Sep 2026, committed in the automation
+the project as of **30 Sep 2026**. This version supersedes the previous
+`MASTER_CONTINUATION_PROMPT.md` (dated 29 Sep 2026, committed in the automation
 repo root) — that document is now out of date in the ways described below
-(new §4j, §12 changes). Consider re-committing this version over it.
+(new §4k and §4l, §12 changes). Consider re-committing this version over it.
+
+**Hard project constraint (stated by Tobi, 29 Sep): the Gemini API stays on the
+FREE tier — do not suggest enabling billing/paid tier.** Design around the
+free-tier limits (see §4k).
 
 **Repo-read-access gap, updated (25 Sep)**: the 20 Sep document reported that
 direct repo read access did not work and every fix that session was based on
@@ -78,6 +82,9 @@ beyond what's summarized here.
 | YouTube publisher (OAuth, upload, scheduling, playlists, DB recording) | ✅ Done, live in production |
 | Scheduling (`engines/scheduling.py`, real `status.publishAt`) | ✅ Done, live — see §4g. Maintains a rolling one-video-ahead buffer: each run schedules the next video `cadence_hours` (24h) after the latest scheduled/live video's real anchor time on YouTube, cross-checked against local DB to catch drift |
 | Scheduling error-handling split (`SchedulingDriftError` vs `SchedulingStatusCheckError`) | ✅ Done, **verified landed on `main` 29 Sep** — see §4h. Gap found 29 Sep: only `HttpError` was wrapped, so network-level errors (e.g. `SSLEOFError`) bypassed it — see §4j |
+| Gemini free-tier hardening (fallback model, daily-quota fail-fast, 6-round patient retry) | ✅ Pushed; worked in production on 30 Sep (runs #43, #44) — see §4k |
+| Midnight-slot scheduling (`slot_utc`), late runs snap back to 23:00 UTC | ✅ Pushed; verified by run #44 (fact 212 landed on Oct 2 00:00 Lagos) — see §4l |
+| State-commit workflow step hardened (rebase + retry, loud failure) | ✅ Pushed 30 Sep — see §4l |
 | Network-level retry hardening (`engines/youtube.py`: `get_video_status()` retry loop, `num_retries` on execute/upload chunks) | ✅ Pushed by Tobi and **verified identical to the delivered patch on `main` 29 Sep** — see §4j. Not yet exercised by a real run |
 | Narration — Kokoro-82M (local/offline, no API key, no char cap) | ✅ Done |
 | Footage (Pixabay → Pexels waterfall) | ✅ Done |
@@ -526,6 +533,98 @@ failure still needs manual re-dispatch (same open item as §4i).
 
 ---
 
+### 4k. Gemini free-tier quota, 503 storm, and the final retry design (29–30 Sep 2026)
+
+**Timeline (29 Sep, several failed manual runs):**
+1. 503 UNAVAILABLE on `gemini-3.6-flash` (run 36535666271) — the 5-min flat
+   backoff from §4i did what it was built to do but a demand spike outlasted
+   the ~10-minute window.
+2. Added fallback-model support in `engines/gemini.py`. My first default
+   fallback (`gemini-2.5-flash`) was wrong: Google returned `404 NOT_FOUND —
+   no longer available to new users; use gemini-3.8-flash`. The failure email
+   only showed that 404 because `last_error` was overwritten per attempt,
+   masking the primary's 503 — fixed by reporting every model's own error.
+3. With `gemini-3.8-flash` as fallback, **both models 503'd together**
+   (shared capacity) — more fallbacks are not the answer.
+4. A 9-round patient retry then hit **`429 RESOURCE_EXHAUSTED` with
+   quotaId `GenerateRequestsPerDayPerProjectPerModel-FreeTier`, limit 20**.
+   Key finding: the project is on the **free tier: 20 requests/day per model
+   (RPM 5)**, and failed attempts (including 503s) appear to consume that
+   quota. Repeated manual re-dispatches plus long retry loops burned the
+   day's quota. The "retry in 45s" hint in the 429 body is misleading for a
+   daily cap.
+
+**Final design (in `engines/gemini.py`, pushed):**
+- Models tried in order each round: `GEMINI_MODEL` (default `gemini-3.6-flash`)
+  then `GEMINI_FALLBACK_MODELS` (default `gemini-3.8-flash`; each model has its
+  own daily pool). Log line "succeeded on fallback model X" when used.
+- A **daily-quota 429** (message contains `PerDay`) removes that model from
+  rotation immediately — waiting can't fix it and retries only burn quota. A
+  **404** also drops the model. If every model is dropped the call fails
+  immediately.
+- **Transient errors** (503/UNAVAILABLE, per-minute 429, 5xx, "high demand")
+  use a patient schedule between rounds: `GEMINI_WAIT_SCHEDULE` default
+  `180,420,600,900,900` s = **6 rounds, ~50 min of waiting**. Non-transient
+  errors fail after 3 rounds with 15 s waits.
+- Final `GeminiError` lists each model's latest error.
+- Normal cost is ~2–3 requests/video, so the free tier is ample when nothing
+  is failing; the risk is only retry burn during outages.
+
+**Production evidence (30 Sep):** run #43 (47 min) needed 8 503s across both
+models before succeeding on the last round of the then-5-round schedule
+(hence the 6th round); run #44 (31 min) also succeeded after retries. AI
+Studio Rate Limit page after both: `gemini-3.6-flash` 11/20 RPD,
+`gemini-3.8-flash` 8/20 RPD. Note the 23:00 UTC cron falls in the same Pacific
+quota day as the morning's manual runs, so manual re-runs eat into the cron's
+budget — check the AI Studio Rate Limit page before extra dispatches.
+
+**Untested / notes:** Google's error message recommends the Interactions API
+over `generate_content`; not investigated (see §12).
+
+---
+
+### 4l. Midnight-slot scheduling, fact 211/212, and the lost state commit (30 Sep 2026)
+
+**Problem:** `compute_next_publish_at()` used `max(anchor, now) + 24h`. When
+fact 211 finished late (after fact 210 had already gone public), it was
+scheduled for `now + 24h` = Oct 1 11:15 Lagos instead of the usual 00:00 Lagos
+slot, and would have permanently shifted the daily slot.
+
+**Fix (`engines/scheduling.py`, `config.json`):** new optional
+`scheduling.slot_utc` (currently `"23:00"` = midnight Lagos) and
+`scheduling.min_lead_hours` (currently `2`). Next time = first daily slot at
+or after `max(anchor + cadence_hours, now + min_lead_hours)`, with a
+30-minute tolerance so a public video whose real `publishedAt` is a few
+seconds after its slot doesn't bump the next one a whole day. Without
+`slot_utc` the old behaviour is unchanged. Tested against six mocked
+scenarios (steady state, just-published anchor, off-slot anchor, long-idle
+channel, run inside the min-lead window, legacy config).
+
+**Manual re-alignment done by Tobi:** fact 211 edited in Studio to Oct 1
+00:00 Lagos and `videos.json` `scheduled_publish_at` set to
+`2026-09-30T23:00:00Z` (must match or `SchedulingDriftError`). A follow-up
+run created fact 212 ("Dry Ice", Oct 2 00:00 Lagos) — the intended
+2-videos-queued buffer (211 goes live Oct 1 00:00; 212 queued Oct 2; tonight's
+cron adds 213 for Oct 3).
+
+**Second incident — lost state commit:** run #44 uploaded fact 212 but its
+"Commit Updated State Files" step never landed on `main`: the old step ended
+in `git push || true`, hiding a rejected push (likely because Tobi pushed to
+`main` while the run was going). `videos.json` ended at 211 and `topics.json`
+lacked "Dry Ice", which would have made the next cron reuse fact 212 and the
+Oct 2 slot. Recovered with a one-off `reconcile_212.py` (fact 212, state
+`scheduled`, youtube_id `Ra--YYiOTog`, `scheduled_publish_at
+2026-10-01T23:00:00Z`; cosmetic: `playlist_id` is `None` and state is
+`scheduled` even though the video is in a playlist — harmless, analytics uses
+the Data API's live publish time, not `published_at`).
+**Workflow fix (pushed):** the commit step now does `git pull --rebase
+--autostash origin main && git push` with 3 retries and exits non-zero with
+an `::error::` annotation if it still fails. **Rule of thumb: avoid pushing to
+`main` while a workflow run is in progress**, and after any run confirm the
+bot's "chore: update topics and videos state" commit appeared.
+
+---
+
 ## 5. Repo structure — `you-never-knew-automation`
 
 Reflects the live repo as read directly during the 12 Sep session (`main.py`,
@@ -583,11 +682,16 @@ you-never-knew-automation/
 │   │                                  confirmed in use by scheduling.py,
 │   │                                  §4g, not independently re-read)
 │   ├── script_engine.py
-│   ├── gemini.py                    — _call_gemini() retries 3x, flat
-│   │                                  5-min wait between attempts (was
-│   │                                  2s/4s), §4i
+│   ├── gemini.py                    — _call_gemini(): primary + fallback
+│   │                                  model per round, daily-quota 429
+│   │                                  fails fast, 6 patient rounds
+│   │                                  (180/420/600/900/900 s) on 503s.
+│   │                                  Supersedes the §4i flat backoff — §4k
 │   ├── analytics.py                — 48h gating on live_published_at, §4a
-│   ├── scheduling.py                — verified live 12 Sep, updated §4h
+│   ├── scheduling.py                — snaps to scheduling.slot_utc (23:00
+│   │                                  UTC = midnight Lagos) as of 30 Sep,
+│   │                                  §4l. Earlier: verified live 12 Sep,
+│   │                                  updated §4h
 │   │                                  this session (not independently
 │   │                                  re-verified — see repo-read gap).
 │   │                                  compute_next_publish_at(),
@@ -743,6 +847,16 @@ this session.)*
     errors bypassed the `HttpError`-only `VideoStatusCheckError` wrapper,
     and there was no retry. Patched `youtube.py` with a retry loop; fact 211
     state verified clean. Full detail §4j.
+27. **NEW, 29 Sep** — Gemini free-tier limits: fallback model default was
+    stale (404), both models 503'd together, and long retry loops burned the
+    20-requests/day/model free quota (429 PerDay). Fixed: `gemini-3.8-flash`
+    fallback, daily-quota fail-fast, 6-round patient schedule, per-model
+    error reporting. Tobi's constraint: stay on free tier. Full detail §4k.
+28. **NEW, 30 Sep** — Late run shifted fact 211 to Oct 1 11:15 Lagos
+    (`max(anchor, now) + 24h`); fixed with `slot_utc` snapping. Same day,
+    run #44's state commit silently failed (`git push || true`), leaving fact
+    212 unrecorded; recovered via one-off reconcile script and hardened the
+    commit step. Full detail §4l.
 
 ---
 
@@ -916,34 +1030,45 @@ Carried forward, reinforced again this session:
   `engines/youtube.py` / `engines/scheduling.py`, rather than staying an
   open item indefinitely.
 
-**Resolved this session (29 Sep):**
+**Resolved (29–30 Sep):**
 
-- ~~Confirm §4h file replacements landed on `main`~~ - verified, §4h.
-- ~~Confirm `engines/gemini.py` backoff (§4i) landed~~ - verified,
-  `time.sleep(300)` present.
-- ~~README "Recovering from a flagged/removed video" section pushed~~ -
-  present in README on `main`.
+- ~~Confirm §4h / §4i / §4j file replacements landed on `main`~~ — all verified.
+- ~~README "Recovering from a flagged/removed video" section pushed~~ — present.
+- ~~Gemini fallback model + free-tier quota handling~~ — §4k, worked in prod.
+- ~~Shifted publish slot after a late run~~ — §4l, `slot_utc`.
+- ~~State-commit step silently failing~~ — §4l, hardened.
 
-**New this session (29 Sep):**
+**New (30 Sep):**
 
-A. **Commit this updated MASTER prompt and README**, then re-dispatch the
-   workflow for fact 211 (the §4j `youtube.py` patch is already on `main`).
-   Watch the Actions log for `[get_video_status] attempt` lines — they only
-   appear if a transient failure actually occurs.
-B. **Decide whether to wrap the remaining `.execute()` calls** (playlist
-   list/create/insert) with the same network-retry treatment if SSL/socket
-   drops recur.
-C. **Missed-slot recovery**: the 28 Sep failure cost a publish slot until
-   manual re-dispatch. Consider an automatic single re-dispatch on
-   failure (shared with the Gemini-503 item below).
+A. **Confirm tonight's 23:00 UTC cron run (fact 213) succeeds end to end.**
+   Fact 212 already holds `2026-10-01T23:00:00Z` (Oct 2 00:00 Lagos), so 213
+   should get `scheduled_publish_at` `2026-10-02T23:00:00Z` (Oct 3 00:00
+   Lagos). Also confirm the bot's "chore: update topics and videos state"
+   commit appears on `main` afterwards.
+B. **Missed-slot recovery is still manual** (Gemini outage longer than ~50 min
+   → run fails). The 2-video buffer now absorbs one miss. Idea, not built: a
+   skip-if-already-scheduled-ahead guard at the start of a run (skip when the
+   latest scheduled video is >~2h beyond the normal slot) plus a second daily
+   cron-job.org trigger a few hours later, so a failed run self-heals without
+   ever creating an extra video.
+C. **Topic batching** (not built): one Gemini call generating 10–20 topics
+   into a backlog would remove the topic call from each run's failure path
+   and save ~1 request/video against the free-tier cap.
+D. **Interactions API**: Google's 404 message recommends it over
+   `generate_content`. Not investigated; `generate_content` still works.
+E. **Remaining `.execute()` calls in `youtube.py`** (playlist list/create/
+   insert) still have no network-error retry (carried from §4j).
+F. **Fact 212 record is cosmetically inconsistent** (`state: scheduled`,
+   `playlist_id: None`, though it is in a playlist). Harmless; fix by hand
+   if it ever matters.
+G. **Commit these updated docs** (MASTER prompt + README). Avoid pushing to
+   `main` while a workflow run is in progress.
 
 **Carried from 25 Sep:**
 
-6. **Watch whether the 5-minute backoff actually reduces Gemini 503
-   failures**, or whether the underlying demand-spike issue is frequent/
-   long enough that even a 10-minute total retry window isn't sufficient —
-   if 503s keep recurring, the deferred fallback-model and
-   don't-silently-miss-a-publish-slot ideas from §4i should get built.
+6. ~~Watch whether the 5-minute backoff actually reduces Gemini 503
+   failures~~ — superseded: the 503s outlasted it; see §4k for the current
+   design (fallback model, 6 patient rounds, free-tier-aware).
 - **Watch for a repeat copyright flag.** One flagged video (fact 201,
   "Traffic Lights") isn't necessarily a pattern, but if it happens again,
   worth checking whether it's tied to a specific Jamendo track, a specific

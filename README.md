@@ -40,8 +40,8 @@ in `config.json` uploads its video as **private with a real
 `engines/scheduling.py :: compute_next_publish_at()` decides that timestamp:
 
 1. Looks up the most recently recorded video. If there isn't one yet (a
-   genuinely fresh channel), the next video is scheduled for
-   `now + cadence_hours`.
+   genuinely fresh channel), the next video is scheduled for the first
+   available slot (see step 5).
 2. Otherwise, it doesn't trust the local database alone — it calls
    `publisher.get_video_status()` to ask YouTube directly what that video's
    real `privacyStatus` currently is. That call now distinguishes two
@@ -59,8 +59,21 @@ in `config.json` uploads its video as **private with a real
    YouTube actually reports. A mismatch (e.g. someone manually rescheduled
    the video in Studio) raises `SchedulingDriftError` rather than silently
    scheduling the next video on top of a stale assumption.
-5. Returns `max(anchor, now) + cadence_hours` (currently 24h) as the next
-   `publishAt`.
+5. Picks the next `publishAt`. With `scheduling.slot_utc` set in
+   `config.json` (currently `"23:00"`, i.e. midnight Lagos), the video lands
+   on the **first daily slot at or after `max(anchor + cadence_hours,
+   now + min_lead_hours)`** (`min_lead_hours` is currently 2). A run that
+   finishes late — Gemini outage, retries, a manual re-run — therefore snaps
+   back to the normal midnight slot instead of shifting the whole schedule
+   to whenever it happened to finish. A 30-minute tolerance stops a public
+   video whose real `publishedAt` is a few seconds past its slot from
+   pushing the next one out a whole day. If `slot_utc` is absent, the
+   original behaviour (`max(anchor, now) + cadence_hours`) applies.
+
+**Manual reschedules:** if you change a scheduled video's time in Studio,
+update that fact's `scheduled_publish_at` in `database/videos.json` to the
+same UTC time in the same commit, or the next run raises
+`SchedulingDriftError`.
 
 ### Error handling: confirmed-missing vs. couldn't-check
 
@@ -102,24 +115,40 @@ want the very next video to go live immediately instead of waiting a full
 cadence period, that would need a small explicit change to this logic; it
 doesn't happen automatically today.
 
-## Gemini transient failures (503s) and retry backoff
+## Gemini failures: 503s, free-tier quota, and retries
 
-`engines/gemini.py :: _call_gemini()` is the single low-level entry point
-used by both topic generation (Stage A) and script generation (Stage B).
-It retries up to 3 times on any exception before raising `GeminiError`.
+The project stays on the Gemini **free tier** (a project constraint — do not
+switch to a paid tier). On the free tier each model allows **20 requests per
+day and 5 per minute**, and failed attempts (including 503s) appear to count
+against the daily cap. A normal video needs only ~2–3 requests, so the cap
+is only a problem when retries pile up during an outage.
 
-Gemini periodically returns `503 UNAVAILABLE` ("model currently experiencing
-high demand") during genuine demand spikes on Google's side — this has
-recurred multiple times, is reported broadly by other developers, and isn't
-something fixable from this repo. The retry wait between attempts is a flat
-**5 minutes** (`time.sleep(300)`, with a log line on each wait) rather than
-a short exponential backoff, since a brief delay rarely outlasts one of
-these spikes. Worst case, a Stage A/B call now takes up to ~10 minutes to
-fail entirely (two 5-minute gaps across 3 attempts) before the run raises
-`GeminiError` and the whole pipeline run fails loudly (see "Error handling"
-patterns elsewhere in this doc — Stage A/B failures are not currently
-retried at the pipeline/workflow level, only at the individual API-call
-level within `_call_gemini()`).
+`engines/gemini.py :: _call_gemini()` is the single entry point used by both
+topic generation (Stage A) and script generation (Stage B):
+
+- **Model rotation.** Each round tries the primary model (`GEMINI_MODEL`,
+  default `gemini-3.6-flash`), then the fallbacks (`GEMINI_FALLBACK_MODELS`,
+  comma-separated, default `gemini-3.8-flash`). Each model has its own daily
+  quota. The log notes when a fallback answers. Set the variable to an empty
+  string to disable fallbacks.
+- **Daily quota exhausted (`429 ... PerDay`).** That model is skipped
+  immediately for the rest of the call. Waiting cannot fix a daily cap, and
+  the error's "retry in 45s" hint is misleading in that case.
+- **Model gone (`404`).** The model is dropped from rotation; if every model
+  is dropped the call fails at once.
+- **Transient errors** (503 UNAVAILABLE / "high demand", per-minute 429,
+  5xx) wait between rounds on a patient schedule: `GEMINI_WAIT_SCHEDULE`,
+  default `180,420,600,900,900` seconds — **6 rounds, ~50 minutes of
+  waiting**. Actions minutes are free on this public repo, and the publish
+  buffer absorbs a late run.
+- **Other errors** fail after 3 rounds with 15-second waits.
+- When it finally gives up, the `GeminiError` lists **every model's own
+  latest error**, so a dead fallback's 404 can't mask the primary's 503.
+
+Stage A/B failures are not retried at the workflow level — only inside
+`_call_gemini()`. Because manual re-dispatches spend the same daily quota as
+the scheduled run, check the AI Studio **Rate Limit** page before re-running
+several times in one day.
 
 ## Recovering from a flagged/removed video
 
@@ -256,6 +285,18 @@ doesn't change — cron-job.org is calling the workflow by filename via the
 API, not depending on anything inside the file except that
 `workflow_dispatch:` stays declared.
 
+### State files and the commit step
+
+The workflow's last step ("Commit Updated State Files Back to Repo") commits
+`database/topics.json`, `videos.json` and `usage_log.json` back to `main` with
+the message `chore: update topics and videos state [skip ci]`. It rebases and
+retries the push up to 3 times and **fails visibly** if it still cannot push
+(it used to swallow errors, which once left a finished video unrecorded).
+Avoid pushing to `main` while a run is in progress, and after any run check
+that the bot's state commit appeared. If it didn't, the video exists on
+YouTube but the next run won't know about it — record it by hand before the
+next run.
+
 ## Requirements
 
 - Windows 10/11, PowerShell
@@ -354,7 +395,8 @@ you-never-knew-automation/
 │                                 Stage H computes the scheduling publish
 │                                 time (if enabled) before uploading
 ├── config.json / config.example.json — includes a "scheduling":
-│                                 {"enabled": bool, "cadence_hours": int}
+│                                 {"enabled": bool, "cadence_hours": int,
+│                                  "slot_utc": "HH:MM", "min_lead_hours": int}
 │                                 block controlling the behavior above
 ├── requirements.txt
 ├── .env                       — LOCAL ONLY, gitignored
@@ -388,16 +430,18 @@ you-never-knew-automation/
 │   ├── script_engine.py       — parses human-written script text files
 │   ├── gemini.py              — autonomous topic + script generation,
 │   │                             accepts an optional performance-context
-│   │                             digest from analytics.py; retries 3x
-│   │                             with a flat 5-min wait between attempts
-│   │                             on transient failures (e.g. 503s)
+│   │                             digest from analytics.py; tries a
+│   │                             fallback model each round, skips models
+│   │                             whose daily quota is gone, and retries
+│   │                             503s over ~50 min (see Gemini section)
 │   ├── analytics.py           — 48h+ YouTube Analytics capture per video,
 │   │                             builds the retention-by-category digest
 │   │                             fed into gemini.py's topic prompt
 │   ├── scheduling.py          — compute_next_publish_at(): decides the
 │   │                             next video's status.publishAt so it lands
 │   │                             cadence_hours after the latest scheduled/
-│   │                             live video's real anchor time on YouTube
+│   │                             live video's real anchor time on YouTube,
+│   │                             snapped to the daily slot_utc slot
 │   │                             (cross-checked live, not trusted from the
 │   │                             local DB alone). Raises
 │   │                             SchedulingDriftError if YouTube confirms
@@ -462,7 +506,8 @@ you-never-knew-automation/
 
 - **A production run with scheduling enabled never publishes instantly
   live, even on a completely empty backlog.** `compute_next_publish_at()`
-  always returns `now + cadence_hours` at minimum — see Scheduling above.
+  always schedules at least `min_lead_hours` ahead, on the next daily slot
+  — see Scheduling above.
   Intentional (protects against a slow pipeline run leaving a same-day
   gap), but worth knowing if the buffer is ever deliberately drained.
 - **WordNet categorization** now scans every non-stopword word in the
