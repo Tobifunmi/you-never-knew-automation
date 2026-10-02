@@ -883,7 +883,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1372263",
       "music_track_name": "Dj Rostej - Reverie",
-      "live_published_at": "2026-09-30T23:00:17Z"
+      "live_published_at": "2026-09-30T23:00:17Z",
+      "performance": {
+        "views": 480,
+        "likes": 17,
+        "comments": 0,
+        "averageViewPercentage": 68.91,
+        "estimatedMinutesWatched": 428
+      },
+      "performance_captured_at": "2026-10-02T23:03:05.493506+00:00"
     },
     {
       "fact_number": 212,
@@ -910,7 +918,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_213_microwave_ovens/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1576193",
-      "music_track_name": "Slow"
+      "music_track_name": "Slow",
+      "live_published_at": "2026-10-02T23:00:21Z"
     },
     {
       "fact_number": 214,
@@ -927,6 +936,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1568720",
       "music_track_name": "Entering"
+    },
+    {
+      "fact_number": 215,
+      "topic": "Holograms",
+      "state": "playlist_added",
+      "youtube_id": "MokQwbdyi2Y",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 215: 5 Facts You Didn't Know About Holograms",
+      "category": "Amazing Facts",
+      "published_at": "2026-10-02T23:11:02.996636+00:00",
+      "scheduled_publish_at": "2026-10-04T23:00:00Z",
+      "narration_duration_seconds": 131.65,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_215_holograms/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095109",
+      "music_track_name": "Eternal Affection"
     }
   ],
   "next_fact_number": 191
