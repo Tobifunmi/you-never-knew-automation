@@ -22,7 +22,7 @@ Monitor Credit Usage Here - https://you-never-knew.netlify.app/
 | Footage (Pixabay → Pexels waterfall, relevance-checked, variety-enforced) | ✅ Done |
 | Captions (local Whisper, burned-in ASS) | ✅ Done |
 | Render (FFmpeg, 1080×1920) | ✅ Done |
-| Background music (Jamendo, loops short tracks to fill narration length) | ✅ Done |
+| Background music (Jamendo, loops short tracks to fill narration length, 5-tier search fallback) | ✅ Done |
 | Topic engine + fact numbering | ✅ Done |
 | Autonomous topic/script generation (Gemini) | ✅ Done |
 | 48h YouTube Analytics feedback loop (feeds topic selection) | ✅ Done |
@@ -149,6 +149,46 @@ Stage A/B failures are not retried at the workflow level — only inside
 `_call_gemini()`. Because manual re-dispatches spend the same daily quota as
 the scheduled run, check the AI Studio **Rate Limit** page before re-running
 several times in one day.
+
+## Background music (Jamendo)
+
+`engines/music.py :: fetch_and_download_background_track()` picks a track
+from Jamendo using tags chosen by `get_vibe_tags(topic)` (`VIBE_MAP`;
+`"default"` is `cinematic ambient`). Anything in
+`database/music_blocklist.json` is never selected. Within a result set it
+prefers a track at least as long as the narration, otherwise the longest
+track of 15 s or more (`MIN_LOOPABLE_DURATION`), which `mix_background_music()`
+loops to fill the video.
+
+**Search tiers.** If a search yields nothing usable, the next, looser tier
+runs. The first tier that produces a track wins:
+
+1. Topic tags + `speed=medium`
+2. `cinematic` + `speed=medium`
+3. Topic tags, any speed
+4. `cinematic`, any speed
+5. Last resort: `ambient`, `vocalinstrumental=instrumental`,
+   `order=popularity_month`
+
+Every tier logs how many results Jamendo returned and whether anything was
+usable (`music: tier [...] returned N result(s); ...`). A tier whose API call
+fails is logged and skipped rather than aborting the search. If all five
+tiers come up empty, `MusicError` lists each tier's outcome, so the failure
+email shows whether Jamendo returned nothing or everything was filtered out.
+
+*Why this exists:* on 3 Oct 2026 fact 216 ("LEDs") failed at the music stage
+with the old two-search logic, whose single error message looked identical
+whether Jamendo returned nothing or every result was blocklisted/too short.
+The blocklist held only 7 tracks, so an empty or thin Jamendo response was
+the likely cause, but the logs could not confirm it. The tiers and per-tier
+logging are the fix and the diagnostic.
+
+A failed music stage fails the whole run (no video is uploaded). The failure
+handler releases the reserved topic, so a re-dispatch is safe. Check the
+Gemini quota first (see above), since a re-run spends more requests.
+
+**Blocklisting a track** after a YouTube Content ID claim:
+`python blocklist_track.py <jamendo_id> "reason"`.
 
 ## Recovering from a flagged/removed video
 
@@ -474,6 +514,10 @@ you-never-knew-automation/
 │   │                             word in the topic, not just the first)
 │   ├── music.py               — Jamendo background track fetch + mix,
 │   │                             loops short tracks to fill narration length;
+│   │                             5 search tiers from topic-specific to a
+│   │                             last-resort instrumental search, with
+│   │                             per-tier result-count logging (see
+│   │                             Background music section);
 │   │                             VIBE_MAP tags are space-separated (not
 │   │                             "+"-joined) — requests percent-encodes a
 │   │                             literal "+" in a params value, which

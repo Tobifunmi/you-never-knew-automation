@@ -1,10 +1,11 @@
 # MASTER CONTINUATION PROMPT — "You Never Knew" Automated YouTube Shorts Factory
 
 Use this as full context in a new conversation. Reflects the verified state of
-the project as of **30 Sep 2026**. This version supersedes the previous
-`MASTER_CONTINUATION_PROMPT.md` (dated 29 Sep 2026, committed in the automation
+the project as of **4 Oct 2026**. This version supersedes the previous
+`MASTER_CONTINUATION_PROMPT.md` (dated 30 Sep 2026, committed in the automation
 repo root) — that document is now out of date in the ways described below
-(new §4k and §4l, §12 changes). Consider re-committing this version over it.
+(new §4m, music-engine changes, §12 changes). Consider re-committing this
+version over it.
 
 **Hard project constraint (stated by Tobi, 29 Sep): the Gemini API stays on the
 FREE tier — do not suggest enabling billing/paid tier.** Design around the
@@ -68,6 +69,14 @@ Most recently confirmed state:
 - Fact 202 ("Barcodes") — **scheduled**, Sep 22, still processing to HD at
   time of screenshot — first video scheduled by the pipeline after §4h's fix
 
+**Latest state (from `database/videos.json`, 4 Oct 2026):** the daily cadence
+has been running unattended. Fact 213 ("Microwave Ovens") went live
+`2026-10-02T23:00:21Z` (Oct 3 00:00 Lagos); fact 214 ("Thermal Imaging") went
+live `2026-10-03T23:00:22Z` (Oct 4 00:00 Lagos); fact 215 ("Holograms") is
+scheduled for `2026-10-04T23:00:00Z` (Oct 5 00:00 Lagos). The Oct 3 23:00 UTC
+run for **fact 216 ("LEDs") failed** at the music stage (§4m), so the buffer
+currently holds one scheduled video (215). `videos.json` has 43 records.
+
 The full history of facts 189–194 (the transition documented in the 12 Sep
 version of this file) is unchanged from that document. `database/videos.json`
 and `usage_log.json` in the repo remain the source of truth for anything
@@ -90,7 +99,7 @@ beyond what's summarized here.
 | Footage (Pixabay → Pexels waterfall) | ✅ Done |
 | Captions (local Whisper, burned-in ASS) | ✅ Done |
 | Render (FFmpeg, 1080×1920) | ✅ Done |
-| Background music (Jamendo, loops short tracks, blocklist-aware) | ✅ Done — `+`-encoding bug fixed (§6 item 20) |
+| Background music (Jamendo, loops short tracks, blocklist-aware) | ✅ Done — `+`-encoding bug fixed (§6 item 20). 3 Oct: fact 216 failed with `MusicError`; 5-tier search fallback + per-tier logging **delivered 4 Oct, not yet confirmed pushed or exercised by a live run** — see §4m |
 | Topic engine + fact numbering | ✅ Done |
 | Autonomous topic/script generation (Gemini) | ✅ Done |
 | 48h YouTube Analytics feedback loop (Stage A0) | ✅ Done, gated on real live-publish time (§4a) |
@@ -625,6 +634,52 @@ bot's "chore: update topics and videos state" commit appeared.
 
 ---
 
+### 4m. Jamendo `MusicError` on fact 216 + tiered music search (3–4 Oct 2026)
+
+**Incident**: Actions run #48 (`37160308207`, 3 Oct, 23:15 UTC, production,
+15m21s) failed at "Fetching background music (Jamendo)" for fact 216 (topic
+"LEDs") with `MusicError: No Jamendo track >= 15.0s found for tags 'cinematic
+ambient' or fallback 'cinematic' — nothing usable even with looping.` The run
+reached the music stage, so Gemini topic/script, narration, footage and
+captions had already succeeded. Run logs need a GitHub sign-in, so the raw
+Jamendo response could not be inspected.
+
+**Diagnosis (inferred from code, not confirmed)**: the old logic made two
+searches (topic tags, then `cinematic`), both with `speed=medium`, top 20 by
+`popularity_total`, and raised the same message whether Jamendo returned zero
+results or returned results that were all blocklisted/under 15 s. The blocklist
+held only 7 tracks, so filtering alone is an unlikely cause; an empty or thin
+Jamendo response (transient issue, or the `speed` filter narrowing the
+`cinematic` fallback) is the likeliest. Note the topic ("LEDs") maps to the
+default `cinematic ambient` vibe, so the first search was the generic one.
+
+**Fix delivered 4 Oct (full replacement `engines/music.py`; only the search
+section of `fetch_and_download_background_track()` changed)**:
+- Five tiers, first usable track wins: (1) topic tags + `speed=medium`;
+  (2) `cinematic` + `speed=medium`; (3) topic tags, any speed; (4) `cinematic`,
+  any speed; (5) last resort `ambient`, `vocalinstrumental=instrumental`,
+  `order=popularity_month`.
+- Each tier prints `music: tier [...] returned N result(s); ...`.
+- A tier whose API call raises `MusicError` is logged and skipped, not fatal.
+- If all tiers fail, the `MusicError` lists every tier's outcome.
+- Tested only against mocked Jamendo responses (fallback reaching tier 5; the
+  all-empty case). Not run against the real API (sandbox cannot reach
+  Jamendo). The `vocalinstrumental` parameter name is from memory of
+  Jamendo's v3 docs; if wrong, only tier 5 is affected and the log will say so.
+
+**Status**: delivered to Tobi as a file; push not confirmed. The failed run's
+reserved topic should have been released by the failure handler (not
+verified). Before re-dispatching, check the AI Studio Rate Limit page (§4k) and
+do not push to `main` during a run (§4l).
+
+**Fact 215 music note (resolved 4 Oct)**: `videos.json` recorded fact 215
+("Holograms") with `music_track_id` `jamendo:1095109`, which is also on
+`database/music_blocklist.json`. Tobi has since sorted fact 215 (details not
+given). Whether the blocklist filter ever misbehaved was not established; the
+likeliest explanation is that the track was blocklisted after 215 was made.
+
+---
+
 ## 5. Repo structure — `you-never-knew-automation`
 
 Reflects the live repo as read directly during the 12 Sep session (`main.py`,
@@ -708,7 +763,10 @@ you-never-knew-automation/
 │   ├── footage.py
 │   ├── renderer.py
 │   ├── metadata.py                 — WordNet category-guessing fix, §6/§7
-│   ├── music.py                     — Jamendo, VIBE_MAP fix §4c/§6 item 20
+│   ├── music.py                     — Jamendo, VIBE_MAP fix §4c/§6 item 20.
+│   │                                  4 Oct: 5-tier search fallback with
+│   │                                  per-tier logging (§4m) — delivered,
+│   │                                  push/live run not yet confirmed
 │   ├── notifications.py             — Gmail SMTP failure emails; confirmed
 │                                     working this session (§4h) — prior
 │                                     WinError 10060 concern appears
@@ -857,6 +915,12 @@ this session.)*
     run #44's state commit silently failed (`git push || true`), leaving fact
     212 unrecorded; recovered via one-off reconcile script and hardened the
     commit step. Full detail §4l.
+
+29. **NEW, 3–4 Oct** — Fact 216 ("LEDs") run failed with `MusicError` (no
+    usable Jamendo track from two searches). Error message could not
+    distinguish an empty API response from everything being filtered out.
+    Mitigated with a 5-tier search and per-tier logging; root cause not
+    confirmed. Full detail §4m.
 
 ---
 
@@ -1038,13 +1102,32 @@ Carried forward, reinforced again this session:
 - ~~Shifted publish slot after a late run~~ — §4l, `slot_utc`.
 - ~~State-commit step silently failing~~ — §4l, hardened.
 
+**New (4 Oct) — do these first:**
+
+H. **Recover from the failed fact 216 run.** Buffer holds only fact 215
+   (scheduled `2026-10-04T23:00:00Z`). A successful run before the next slot
+   would add a video for `2026-10-05T23:00:00Z`; a run that finishes late
+   still snaps to a slot via `slot_utc` (§4l). Before re-dispatching: confirm
+   the "LEDs" topic is not stuck in `topics.json` `reserved`, check the AI
+   Studio Rate Limit page, and push the new `engines/music.py` only when no
+   run is in progress.
+I. **Confirm `engines/music.py` landed on `main` and read the tier log lines
+   in the next run** (§4m). If tier logs show 0 results at every tier, the
+   cause is Jamendo/credentials (e.g. `JAMENDO_CLIENT_ID`), not tag choice.
+
+**Resolved (4 Oct):**
+
+- ~~J. Check fact 215's music~~ — Tobi reported on 4 Oct that he has sorted
+  fact 215 (details of what was done were not given; if it was a flag
+  recovery, confirm `videos.json` carries the new `youtube_id` and a matching
+  `scheduled_publish_at`, §4h).
+- ~~A. Confirm the 30 Sep 23:00 UTC cron run (fact 213) succeeds~~ — fact
+  213 is recorded with `scheduled_publish_at` `2026-10-02T23:00:00Z` and went
+  live Oct 3 00:00 Lagos; facts 214 and 215 followed on schedule. (The state
+  commit working for those runs is implied by the records existing on `main`.)
+
 **New (30 Sep):**
 
-A. **Confirm tonight's 23:00 UTC cron run (fact 213) succeeds end to end.**
-   Fact 212 already holds `2026-10-01T23:00:00Z` (Oct 2 00:00 Lagos), so 213
-   should get `scheduled_publish_at` `2026-10-02T23:00:00Z` (Oct 3 00:00
-   Lagos). Also confirm the bot's "chore: update topics and videos state"
-   commit appears on `main` afterwards.
 B. **Missed-slot recovery is still manual** (Gemini outage longer than ~50 min
    → run fails). The 2-video buffer now absorbs one miss. Idea, not built: a
    skip-if-already-scheduled-ahead guard at the start of a run (skip when the

@@ -184,19 +184,52 @@ def fetch_and_download_background_track(
 
         return None
 
-    results = _query(params)
-    selected_track = _select(results)
+    # Progressively looser search tiers. Each tier is tried in order and the
+    # first one that yields a usable track wins. Every tier logs how many
+    # results Jamendo returned and what _select() did with them, so a future
+    # failure shows WHICH stage came up empty (API returned nothing vs.
+    # everything was blocklisted/too short) instead of one generic error.
+    no_speed = {k: v for k, v in params.items() if k != "speed"}
+    tiers = [
+        (f"topic tags '{tags}' + speed=medium", params),
+        ("'cinematic' + speed=medium", dict(params, tags="cinematic")),
+        (f"topic tags '{tags}', any speed", no_speed),
+        ("'cinematic', any speed", dict(no_speed, tags="cinematic")),
+        (
+            "last resort: 'ambient', instrumental, recent popularity",
+            dict(
+                no_speed,
+                tags="ambient",
+                vocalinstrumental="instrumental",
+                order="popularity_month",
+            ),
+        ),
+    ]
 
-    if not selected_track:
-        # Broader fallback tag search
-        fallback_params = dict(params, tags="cinematic")
-        fallback_results = _query(fallback_params)
-        selected_track = _select(fallback_results)
+    selected_track = None
+    tier_log = []
+    for label, tier_params in tiers:
+        try:
+            tier_results = _query(tier_params)
+        except MusicError as e:
+            print(f"music: tier [{label}] query failed: {e}")
+            tier_log.append(f"[{label}] query error: {e}")
+            continue
+
+        selected_track = _select(tier_results)
+        print(
+            f"music: tier [{label}] returned {len(tier_results)} result(s); "
+            f"{'selected a track' if selected_track else 'nothing usable'}."
+        )
+        tier_log.append(f"[{label}] {len(tier_results)} result(s), none usable"
+                        if not selected_track else f"[{label}] ok")
+        if selected_track:
+            break
 
     if not selected_track:
         raise MusicError(
-            f"No Jamendo track >= {MIN_LOOPABLE_DURATION}s found for tags "
-            f"'{tags}' or fallback 'cinematic' — nothing usable even with looping."
+            f"No Jamendo track >= {MIN_LOOPABLE_DURATION}s found after "
+            f"{len(tiers)} search tiers. Details: " + " | ".join(tier_log)
         )
 
     download_url = selected_track.get("audiodownload") or selected_track.get("audio")
