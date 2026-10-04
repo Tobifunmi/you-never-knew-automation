@@ -961,6 +961,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095109",
       "music_track_name": "Eternal Affection"
+    },
+    {
+      "fact_number": 216,
+      "topic": "Solar Panels",
+      "state": "playlist_added",
+      "youtube_id": "bAYfR15XO0s",
+      "playlist_id": "PLeEZWwkOY5JY",
+      "title": "Fact 216: 5 Facts You Didn't Know About Solar Panels",
+      "category": "Space Facts",
+      "published_at": "2026-10-04T00:31:35.338181+00:00",
+      "scheduled_publish_at": "2026-10-05T23:00:00Z",
+      "narration_duration_seconds": 101.08,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_216_solar_panels/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1639803",
+      "music_track_name": "After being indestructible"
     }
   ],
   "next_fact_number": 191
