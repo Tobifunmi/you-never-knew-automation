@@ -952,7 +952,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1568720",
       "music_track_name": "Entering",
-      "live_published_at": "2026-10-03T23:00:22Z"
+      "live_published_at": "2026-10-03T23:00:22Z",
+      "performance": {
+        "views": 1169,
+        "likes": 39,
+        "comments": 0,
+        "averageViewPercentage": 75.12,
+        "estimatedMinutesWatched": 1217
+      },
+      "performance_captured_at": "2026-10-05T23:02:46.868168+00:00"
     },
     {
       "fact_number": 215,
@@ -985,7 +993,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_216_solar_panels/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1639803",
-      "music_track_name": "After being indestructible"
+      "music_track_name": "After being indestructible",
+      "live_published_at": "2026-10-05T23:00:26Z"
     },
     {
       "fact_number": 217,
@@ -1002,6 +1011,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095110",
       "music_track_name": "Sunshine dreams"
+    },
+    {
+      "fact_number": 218,
+      "topic": "Touchscreens",
+      "state": "playlist_added",
+      "youtube_id": "UcPX9d4F1E4",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 218: 5 Facts You Didn't Know About Touchscreens",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-10-05T23:08:11.144886+00:00",
+      "scheduled_publish_at": "2026-10-07T23:00:00Z",
+      "narration_duration_seconds": 103.75,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_218_touchscreens/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095113",
+      "music_track_name": "Call me Helen"
     }
   ],
   "next_fact_number": 191
