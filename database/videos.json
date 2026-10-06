@@ -977,7 +977,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095109",
       "music_track_name": "Eternal Affection",
-      "live_published_at": "2026-10-04T23:00:11Z"
+      "live_published_at": "2026-10-04T23:00:11Z",
+      "performance": {
+        "views": 62,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 53.6,
+        "estimatedMinutesWatched": 39
+      },
+      "performance_captured_at": "2026-10-06T23:02:36.408854+00:00"
     },
     {
       "fact_number": 216,
@@ -1010,7 +1018,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_217_superglue/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095110",
-      "music_track_name": "Sunshine dreams"
+      "music_track_name": "Sunshine dreams",
+      "live_published_at": "2026-10-06T23:00:29Z"
     },
     {
       "fact_number": 218,
@@ -1027,6 +1036,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095113",
       "music_track_name": "Call me Helen"
+    },
+    {
+      "fact_number": 219,
+      "topic": "Kevlar",
+      "state": "playlist_added",
+      "youtube_id": "E6PiZOwBFzk",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 219: 5 Facts You Didn't Know About Kevlar",
+      "category": "Amazing Facts",
+      "published_at": "2026-10-06T23:14:57.184687+00:00",
+      "scheduled_publish_at": "2026-10-08T23:00:00Z",
+      "narration_duration_seconds": 114.83,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_219_kevlar/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095111",
+      "music_track_name": "Beats of Forest"
     }
   ],
   "next_fact_number": 191
