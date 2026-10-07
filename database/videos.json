@@ -1002,7 +1002,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1639803",
       "music_track_name": "After being indestructible",
-      "live_published_at": "2026-10-05T23:00:26Z"
+      "live_published_at": "2026-10-05T23:00:26Z",
+      "performance": {
+        "views": 79,
+        "likes": 3,
+        "comments": 0,
+        "averageViewPercentage": 57.43000000000001,
+        "estimatedMinutesWatched": 47
+      },
+      "performance_captured_at": "2026-10-07T23:02:25.462845+00:00"
     },
     {
       "fact_number": 217,
@@ -1035,7 +1043,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_218_touchscreens/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095113",
-      "music_track_name": "Call me Helen"
+      "music_track_name": "Call me Helen",
+      "live_published_at": "2026-10-07T23:00:30Z"
     },
     {
       "fact_number": 219,
@@ -1049,6 +1058,22 @@
       "scheduled_publish_at": "2026-10-08T23:00:00Z",
       "narration_duration_seconds": 114.83,
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_219_kevlar/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095111",
+      "music_track_name": "Beats of Forest"
+    },
+    {
+      "fact_number": 220,
+      "topic": "Particle Accelerators",
+      "state": "playlist_added",
+      "youtube_id": "bJeQGarKpu8",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 220: 5 Facts You Didn't Know About Particle Accelerators",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-10-07T23:10:31.090395+00:00",
+      "scheduled_publish_at": "2026-10-09T23:00:00Z",
+      "narration_duration_seconds": 131.78,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_220_particle_accelerators/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095111",
       "music_track_name": "Beats of Forest"
