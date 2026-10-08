@@ -1027,7 +1027,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095110",
       "music_track_name": "Sunshine dreams",
-      "live_published_at": "2026-10-06T23:00:29Z"
+      "live_published_at": "2026-10-06T23:00:29Z",
+      "performance": {
+        "views": 81,
+        "likes": 4,
+        "comments": 0,
+        "averageViewPercentage": 70.51,
+        "estimatedMinutesWatched": 71
+      },
+      "performance_captured_at": "2026-10-08T23:02:52.014050+00:00"
     },
     {
       "fact_number": 218,
@@ -1060,7 +1068,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_219_kevlar/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095111",
-      "music_track_name": "Beats of Forest"
+      "music_track_name": "Beats of Forest",
+      "live_published_at": "2026-10-08T23:00:11Z"
     },
     {
       "fact_number": 220,
@@ -1077,6 +1086,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095111",
       "music_track_name": "Beats of Forest"
+    },
+    {
+      "fact_number": 221,
+      "topic": "Static Electricity",
+      "state": "playlist_added",
+      "youtube_id": "43LkGcN-RnU",
+      "playlist_id": "PLPnVOV06ddu0",
+      "title": "Fact 221: 5 Facts You Didn't Know About Static Electricity",
+      "category": "Science & Technology Facts",
+      "published_at": "2026-10-08T23:08:19.416769+00:00",
+      "scheduled_publish_at": "2026-10-10T23:00:00Z",
+      "narration_duration_seconds": 105.17,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_221_static_electricity/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1073220",
+      "music_track_name": "Dj Rostej - Serenity"
     }
   ],
   "next_fact_number": 191
