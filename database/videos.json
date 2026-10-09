@@ -1052,7 +1052,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095113",
       "music_track_name": "Call me Helen",
-      "live_published_at": "2026-10-07T23:00:30Z"
+      "live_published_at": "2026-10-07T23:00:30Z",
+      "performance": {
+        "views": 22,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 9,
+        "estimatedMinutesWatched": 0
+      },
+      "performance_captured_at": "2026-10-09T23:02:28.700759+00:00"
     },
     {
       "fact_number": 219,
@@ -1085,7 +1093,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_220_particle_accelerators/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095111",
-      "music_track_name": "Beats of Forest"
+      "music_track_name": "Beats of Forest",
+      "live_published_at": "2026-10-09T23:00:36Z"
     },
     {
       "fact_number": 221,
@@ -1102,6 +1111,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1073220",
       "music_track_name": "Dj Rostej - Serenity"
+    },
+    {
+      "fact_number": 222,
+      "topic": "X-rays",
+      "state": "playlist_added",
+      "youtube_id": "-0UXp9iJhWc",
+      "playlist_id": "PLOOM2rEPGwC0",
+      "title": "Fact 222: 5 Facts You Didn't Know About X-rays",
+      "category": "Nature Facts",
+      "published_at": "2026-10-09T23:10:56.329235+00:00",
+      "scheduled_publish_at": "2026-10-11T23:00:00Z",
+      "narration_duration_seconds": 131.2,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_222_x_rays/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:169206",
+      "music_track_name": "Requiem"
     }
   ],
   "next_fact_number": 191
