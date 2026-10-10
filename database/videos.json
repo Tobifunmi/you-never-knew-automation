@@ -1077,7 +1077,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095111",
       "music_track_name": "Beats of Forest",
-      "live_published_at": "2026-10-08T23:00:11Z"
+      "live_published_at": "2026-10-08T23:00:11Z",
+      "performance": {
+        "views": 36,
+        "likes": 1,
+        "comments": 0,
+        "averageViewPercentage": 68.88,
+        "estimatedMinutesWatched": 38
+      },
+      "performance_captured_at": "2026-10-10T23:02:25.099904+00:00"
     },
     {
       "fact_number": 220,
@@ -1110,7 +1118,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_221_static_electricity/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1073220",
-      "music_track_name": "Dj Rostej - Serenity"
+      "music_track_name": "Dj Rostej - Serenity",
+      "live_published_at": "2026-10-10T23:00:20Z"
     },
     {
       "fact_number": 222,
@@ -1127,6 +1136,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:169206",
       "music_track_name": "Requiem"
+    },
+    {
+      "fact_number": 223,
+      "topic": "Graphene",
+      "state": "playlist_added",
+      "youtube_id": "6b_CUQgVvak",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 223: 5 Facts You Didn't Know About Graphene",
+      "category": "Amazing Facts",
+      "published_at": "2026-10-10T23:09:11.884926+00:00",
+      "scheduled_publish_at": "2026-10-12T23:00:00Z",
+      "narration_duration_seconds": 105.4,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_223_graphene/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1568720",
+      "music_track_name": "Entering"
     }
   ],
   "next_fact_number": 191
