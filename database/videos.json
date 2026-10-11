@@ -1102,7 +1102,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095111",
       "music_track_name": "Beats of Forest",
-      "live_published_at": "2026-10-09T23:00:36Z"
+      "live_published_at": "2026-10-09T23:00:36Z",
+      "performance": {
+        "views": 945,
+        "likes": 23,
+        "comments": 0,
+        "averageViewPercentage": 127.86,
+        "estimatedMinutesWatched": 1806
+      },
+      "performance_captured_at": "2026-10-11T23:02:20.877089+00:00"
     },
     {
       "fact_number": 221,
@@ -1135,7 +1143,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_222_x_rays/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:169206",
-      "music_track_name": "Requiem"
+      "music_track_name": "Requiem",
+      "live_published_at": "2026-10-11T23:00:26Z"
     },
     {
       "fact_number": 223,
@@ -1152,6 +1161,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1568720",
       "music_track_name": "Entering"
+    },
+    {
+      "fact_number": 224,
+      "topic": "Magnetic Levitation",
+      "state": "playlist_added",
+      "youtube_id": "Vw-ilm-PIxw",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 224: 5 Facts You Didn't Know About Magnetic Levitation",
+      "category": "Amazing Facts",
+      "published_at": "2026-10-11T23:20:30.900849+00:00",
+      "scheduled_publish_at": "2026-10-13T23:00:00Z",
+      "narration_duration_seconds": 130.68,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_224_magnetic_levitation/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1639803",
+      "music_track_name": "After being indestructible"
     }
   ],
   "next_fact_number": 191
