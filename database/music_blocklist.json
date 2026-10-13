@@ -6,7 +6,8 @@
     "jamendo:1738418",
     "jamendo:1209658",
     "jamendo:1073219",
-    "jamendo:1095109"
+    "jamendo:1095109",
+    "jamendo:1095111"
   ],
   "reasons": {
     "jamendo:1073214": "Audio has copyright claim",
@@ -15,6 +16,7 @@
     "jamendo:1738418": "Copyright audio",
     "jamendo:1209658": "Copyright music",
     "jamendo:1073219": "Copyright music",
-    "jamendo:1095109": "Copyright music"
+    "jamendo:1095109": "Copyright music",
+    "jamendo:1095111": "Copyright music"
   }
 }
