@@ -1202,7 +1202,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1639803",
       "music_track_name": "After being indestructible",
-      "live_published_at": "2026-10-13T23:00:01Z"
+      "live_published_at": "2026-10-13T23:00:01Z",
+      "performance": {
+        "views": 251,
+        "likes": 11,
+        "comments": 0,
+        "averageViewPercentage": 70.89,
+        "estimatedMinutesWatched": 298
+      },
+      "performance_captured_at": "2026-10-15T23:02:43.164902+00:00"
     },
     {
       "fact_number": 225,
@@ -1235,7 +1243,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_226_plasma/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1372263",
-      "music_track_name": "Dj Rostej - Reverie"
+      "music_track_name": "Dj Rostej - Reverie",
+      "live_published_at": "2026-10-15T23:00:28Z"
     },
     {
       "fact_number": 227,
@@ -1249,6 +1258,22 @@
       "scheduled_publish_at": "2026-10-16T23:00:00Z",
       "narration_duration_seconds": 135.43,
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_227_radar/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1426518",
+      "music_track_name": "Incandescent"
+    },
+    {
+      "fact_number": 228,
+      "topic": "Superconductors",
+      "state": "playlist_added",
+      "youtube_id": "Wm8TURk-CvY",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 228: 5 Facts You Didn't Know About Superconductors",
+      "category": "Amazing Facts",
+      "published_at": "2026-10-15T23:10:07.180187+00:00",
+      "scheduled_publish_at": "2026-10-17T23:00:00Z",
+      "narration_duration_seconds": 112.62,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_228_superconductors/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1426518",
       "music_track_name": "Incandescent"
