@@ -1227,7 +1227,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095111",
       "music_track_name": "Beats of Forest",
-      "live_published_at": "2026-10-14T23:00:14Z"
+      "live_published_at": "2026-10-14T23:00:14Z",
+      "performance": {
+        "views": 64,
+        "likes": 1,
+        "comments": 0,
+        "averageViewPercentage": 111.3,
+        "estimatedMinutesWatched": 110
+      },
+      "performance_captured_at": "2026-10-16T23:02:50.469466+00:00"
     },
     {
       "fact_number": 226,
@@ -1260,7 +1268,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_227_radar/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1426518",
-      "music_track_name": "Incandescent"
+      "music_track_name": "Incandescent",
+      "live_published_at": "2026-10-16T23:00:30Z"
     },
     {
       "fact_number": 228,
@@ -1277,6 +1286,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1426518",
       "music_track_name": "Incandescent"
+    },
+    {
+      "fact_number": 229,
+      "topic": "Airbags",
+      "state": "playlist_added",
+      "youtube_id": "BGEbMxCb9xE",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 229: 5 Facts You Didn't Know About Airbags",
+      "category": "Amazing Facts",
+      "published_at": "2026-10-16T23:07:34.730859+00:00",
+      "scheduled_publish_at": "2026-10-18T23:00:00Z",
+      "narration_duration_seconds": 100.97,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_229_airbags/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1154518",
+      "music_track_name": "Epic Action Hero"
     }
   ],
   "next_fact_number": 191
