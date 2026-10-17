@@ -1252,7 +1252,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1372263",
       "music_track_name": "Dj Rostej - Reverie",
-      "live_published_at": "2026-10-15T23:00:28Z"
+      "live_published_at": "2026-10-15T23:00:28Z",
+      "performance": {
+        "views": 326,
+        "likes": 7,
+        "comments": 0,
+        "averageViewPercentage": 62.08,
+        "estimatedMinutesWatched": 267
+      },
+      "performance_captured_at": "2026-10-17T23:02:29.104508+00:00"
     },
     {
       "fact_number": 227,
@@ -1285,7 +1293,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_228_superconductors/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1426518",
-      "music_track_name": "Incandescent"
+      "music_track_name": "Incandescent",
+      "live_published_at": "2026-10-17T23:00:15Z"
     },
     {
       "fact_number": 229,
@@ -1302,6 +1311,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1154518",
       "music_track_name": "Epic Action Hero"
+    },
+    {
+      "fact_number": 230,
+      "topic": "Night Vision",
+      "state": "playlist_added",
+      "youtube_id": "zFAs114kapY",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 230: 5 Facts You Didn't Know About Night Vision",
+      "category": "Amazing Facts",
+      "published_at": "2026-10-17T23:41:31.299076+00:00",
+      "scheduled_publish_at": "2026-10-19T23:00:00Z",
+      "narration_duration_seconds": 123.95,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_230_night_vision/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1568720",
+      "music_track_name": "Entering"
     }
   ],
   "next_fact_number": 191
