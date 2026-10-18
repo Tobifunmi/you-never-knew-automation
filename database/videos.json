@@ -1277,7 +1277,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1426518",
       "music_track_name": "Incandescent",
-      "live_published_at": "2026-10-16T23:00:30Z"
+      "live_published_at": "2026-10-16T23:00:30Z",
+      "performance": {
+        "views": 441,
+        "likes": 11,
+        "comments": 2,
+        "averageViewPercentage": 68.6,
+        "estimatedMinutesWatched": 461
+      },
+      "performance_captured_at": "2026-10-18T23:02:42.827334+00:00"
     },
     {
       "fact_number": 228,
@@ -1310,7 +1318,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_229_airbags/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1154518",
-      "music_track_name": "Epic Action Hero"
+      "music_track_name": "Epic Action Hero",
+      "live_published_at": "2026-10-18T23:00:04Z"
     },
     {
       "fact_number": 230,
@@ -1327,6 +1336,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1568720",
       "music_track_name": "Entering"
+    },
+    {
+      "fact_number": 231,
+      "topic": "Vantablack",
+      "state": "playlist_added",
+      "youtube_id": "aMLlcDTJre4",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 231: 5 Facts You Didn't Know About Vantablack",
+      "category": "Amazing Facts",
+      "published_at": "2026-10-18T23:07:08.135317+00:00",
+      "scheduled_publish_at": "2026-10-20T23:00:00Z",
+      "narration_duration_seconds": 120.62,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_231_vantablack/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1130139",
+      "music_track_name": "Decay III"
     }
   ],
   "next_fact_number": 191
