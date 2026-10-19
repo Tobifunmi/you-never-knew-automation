@@ -1302,7 +1302,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1426518",
       "music_track_name": "Incandescent",
-      "live_published_at": "2026-10-17T23:00:15Z"
+      "live_published_at": "2026-10-17T23:00:15Z",
+      "performance": {
+        "views": 521,
+        "likes": 15,
+        "comments": 0,
+        "averageViewPercentage": 53.949999999999996,
+        "estimatedMinutesWatched": 388
+      },
+      "performance_captured_at": "2026-10-19T23:02:38.507940+00:00"
     },
     {
       "fact_number": 229,
@@ -1335,7 +1343,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_230_night_vision/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1568720",
-      "music_track_name": "Entering"
+      "music_track_name": "Entering",
+      "live_published_at": "2026-10-19T23:00:03Z"
     },
     {
       "fact_number": 231,
@@ -1352,6 +1361,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1130139",
       "music_track_name": "Decay III"
+    },
+    {
+      "fact_number": 232,
+      "topic": "Microchips",
+      "state": "playlist_added",
+      "youtube_id": "1k0q-6R-j8Y",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 232: 5 Facts You Didn't Know About Microchips",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-10-19T23:07:00.950249+00:00",
+      "scheduled_publish_at": "2026-10-21T23:00:00Z",
+      "narration_duration_seconds": 113.47,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_232_microchips/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:843407",
+      "music_track_name": "the end of the innocence"
     }
   ],
   "next_fact_number": 191
