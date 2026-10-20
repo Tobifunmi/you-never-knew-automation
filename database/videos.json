@@ -1327,7 +1327,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1154518",
       "music_track_name": "Epic Action Hero",
-      "live_published_at": "2026-10-18T23:00:04Z"
+      "live_published_at": "2026-10-18T23:00:04Z",
+      "performance": {
+        "views": 60,
+        "likes": 4,
+        "comments": 0,
+        "averageViewPercentage": 37.03,
+        "estimatedMinutesWatched": 27
+      },
+      "performance_captured_at": "2026-10-20T23:02:48.548523+00:00"
     },
     {
       "fact_number": 230,
@@ -1360,7 +1368,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_231_vantablack/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1130139",
-      "music_track_name": "Decay III"
+      "music_track_name": "Decay III",
+      "live_published_at": "2026-10-20T23:00:30Z"
     },
     {
       "fact_number": 232,
@@ -1377,6 +1386,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:843407",
       "music_track_name": "the end of the innocence"
+    },
+    {
+      "fact_number": 233,
+      "topic": "Sonar",
+      "state": "playlist_added",
+      "youtube_id": "tShCOWSU6SM",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 233: 5 Facts You Didn't Know About Sonar",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-10-20T23:09:07.032198+00:00",
+      "scheduled_publish_at": "2026-10-22T23:00:00Z",
+      "narration_duration_seconds": 109.08,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_233_sonar/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1656722",
+      "music_track_name": "Beautiful Piano - full version"
     }
   ],
   "next_fact_number": 191
