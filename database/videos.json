@@ -1352,7 +1352,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1568720",
       "music_track_name": "Entering",
-      "live_published_at": "2026-10-19T23:00:03Z"
+      "live_published_at": "2026-10-19T23:00:03Z",
+      "performance": {
+        "views": 223,
+        "likes": 8,
+        "comments": 0,
+        "averageViewPercentage": 54.449999999999996,
+        "estimatedMinutesWatched": 170
+      },
+      "performance_captured_at": "2026-10-21T23:02:36.760697+00:00"
     },
     {
       "fact_number": 231,
@@ -1385,7 +1393,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_232_microchips/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:843407",
-      "music_track_name": "the end of the innocence"
+      "music_track_name": "the end of the innocence",
+      "live_published_at": "2026-10-21T23:00:03Z"
     },
     {
       "fact_number": 233,
@@ -1402,6 +1411,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1656722",
       "music_track_name": "Beautiful Piano - full version"
+    },
+    {
+      "fact_number": 234,
+      "topic": "Duct Tape",
+      "state": "playlist_added",
+      "youtube_id": "MAM7B6NFLxU",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 234: 5 Facts You Didn't Know About Duct Tape",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-10-21T23:18:43.215488+00:00",
+      "scheduled_publish_at": "2026-10-23T23:00:00Z",
+      "narration_duration_seconds": 114.05,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_234_duct_tape/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1195819",
+      "music_track_name": "The crossroads of change"
     }
   ],
   "next_fact_number": 191
