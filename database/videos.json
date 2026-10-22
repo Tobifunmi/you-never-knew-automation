@@ -1377,7 +1377,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1130139",
       "music_track_name": "Decay III",
-      "live_published_at": "2026-10-20T23:00:30Z"
+      "live_published_at": "2026-10-20T23:00:30Z",
+      "performance": {
+        "views": 628,
+        "likes": 13,
+        "comments": 0,
+        "averageViewPercentage": 95.2,
+        "estimatedMinutesWatched": 799
+      },
+      "performance_captured_at": "2026-10-22T23:17:28.678220+00:00"
     },
     {
       "fact_number": 232,
@@ -1410,7 +1418,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_233_sonar/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1656722",
-      "music_track_name": "Beautiful Piano - full version"
+      "music_track_name": "Beautiful Piano - full version",
+      "live_published_at": "2026-10-22T23:00:05Z"
     },
     {
       "fact_number": 234,
@@ -1424,6 +1433,22 @@
       "scheduled_publish_at": "2026-10-23T23:00:00Z",
       "narration_duration_seconds": 114.05,
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_234_duct_tape/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1195819",
+      "music_track_name": "The crossroads of change"
+    },
+    {
+      "fact_number": 235,
+      "topic": "Atomic Clocks",
+      "state": "playlist_added",
+      "youtube_id": "dtrf6i7WaIE",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 235: 5 Facts You Didn't Know About Atomic Clocks",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-10-22T23:24:19.375657+00:00",
+      "scheduled_publish_at": "2026-10-24T23:00:00Z",
+      "narration_duration_seconds": 125.7,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_235_atomic_clocks/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1195819",
       "music_track_name": "The crossroads of change"
