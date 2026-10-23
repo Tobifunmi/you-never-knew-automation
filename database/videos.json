@@ -1402,7 +1402,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:843407",
       "music_track_name": "the end of the innocence",
-      "live_published_at": "2026-10-21T23:00:03Z"
+      "live_published_at": "2026-10-21T23:00:03Z",
+      "performance": {
+        "views": 383,
+        "likes": 9,
+        "comments": 0,
+        "averageViewPercentage": 59.57,
+        "estimatedMinutesWatched": 289
+      },
+      "performance_captured_at": "2026-10-23T23:09:00.716771+00:00"
     },
     {
       "fact_number": 233,
@@ -1435,7 +1443,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_234_duct_tape/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1195819",
-      "music_track_name": "The crossroads of change"
+      "music_track_name": "The crossroads of change",
+      "live_published_at": "2026-10-23T23:00:05Z"
     },
     {
       "fact_number": 235,
@@ -1452,6 +1461,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1195819",
       "music_track_name": "The crossroads of change"
+    },
+    {
+      "fact_number": 236,
+      "topic": "Wi-Fi",
+      "state": "playlist_added",
+      "youtube_id": "jIX1uXpfOrs",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 236: 5 Facts You Didn't Know About Wi-Fi",
+      "category": "Amazing Facts",
+      "published_at": "2026-10-23T23:13:10.740359+00:00",
+      "scheduled_publish_at": "2026-10-25T23:00:00Z",
+      "narration_duration_seconds": 127.58,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_236_wi_fi/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1426518",
+      "music_track_name": "Incandescent"
     }
   ],
   "next_fact_number": 191
