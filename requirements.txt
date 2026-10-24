@@ -6,5 +6,6 @@ google-genai
 faster-whisper
 nltk
 kokoro>=0.9.4
+preshed<3.0.13
 soundfile
 numpy
