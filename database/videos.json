@@ -1427,7 +1427,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1656722",
       "music_track_name": "Beautiful Piano - full version",
-      "live_published_at": "2026-10-22T23:00:05Z"
+      "live_published_at": "2026-10-22T23:00:05Z",
+      "performance": {
+        "views": 320,
+        "likes": 5,
+        "comments": 1,
+        "averageViewPercentage": 83.04,
+        "estimatedMinutesWatched": 317
+      },
+      "performance_captured_at": "2026-10-24T23:02:31.881181+00:00"
     },
     {
       "fact_number": 234,
@@ -1460,7 +1468,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_235_atomic_clocks/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1195819",
-      "music_track_name": "The crossroads of change"
+      "music_track_name": "The crossroads of change",
+      "live_published_at": "2026-10-24T23:00:10Z"
     },
     {
       "fact_number": 236,

@@ -1,8 +1,8 @@
 {
   "gemini": {
-    "count": 237,
+    "count": 241,
     "since": "2026-08-21",
-    "last_call": "2026-10-23 23:09 UTC",
+    "last_call": "2026-10-24 23:05 UTC",
     "videos": []
   },
   "jamendo": {
@@ -165,16 +165,16 @@
     "last_call": "2026-10-23 23:10 UTC"
   },
   "youtube_analytics": {
-    "count": 61,
+    "count": 62,
     "since": "2026-08-28",
     "videos": [],
-    "last_call": "2026-10-23 23:09 UTC"
+    "last_call": "2026-10-24 23:02 UTC"
   },
   "youtube_data_status": {
-    "count": 258,
+    "count": 261,
     "since": "2026-08-28",
     "videos": [],
-    "last_call": "2026-10-23 23:13 UTC"
+    "last_call": "2026-10-24 23:02 UTC"
   },
   "kokoro": {
     "count": 50,
