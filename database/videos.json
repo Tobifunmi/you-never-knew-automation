@@ -1452,7 +1452,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1195819",
       "music_track_name": "The crossroads of change",
-      "live_published_at": "2026-10-23T23:00:05Z"
+      "live_published_at": "2026-10-23T23:00:05Z",
+      "performance": {
+        "views": 210,
+        "likes": 9,
+        "comments": 0,
+        "averageViewPercentage": 42.23,
+        "estimatedMinutesWatched": 117
+      },
+      "performance_captured_at": "2026-10-25T23:02:35.900960+00:00"
     },
     {
       "fact_number": 235,
@@ -1485,7 +1493,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_236_wi_fi/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1426518",
-      "music_track_name": "Incandescent"
+      "music_track_name": "Incandescent",
+      "live_published_at": "2026-10-25T23:00:06Z"
     },
     {
       "fact_number": 237,
@@ -1502,6 +1511,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1130139",
       "music_track_name": "Decay III"
+    },
+    {
+      "fact_number": 238,
+      "topic": "MRI Machines",
+      "state": "playlist_added",
+      "youtube_id": "jqm5SzeAiLI",
+      "playlist_id": "PLPnVOV06ddu0",
+      "title": "Fact 238: 5 Facts You Didn't Know About MRI Machines",
+      "category": "Science & Technology Facts",
+      "published_at": "2026-10-25T23:06:18.101446+00:00",
+      "scheduled_publish_at": "2026-10-27T23:00:00Z",
+      "narration_duration_seconds": 119.83,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_238_mri_machines/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:843407",
+      "music_track_name": "the end of the innocence"
     }
   ],
   "next_fact_number": 191
