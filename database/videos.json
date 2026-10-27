@@ -1502,7 +1502,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1426518",
       "music_track_name": "Incandescent",
-      "live_published_at": "2026-10-25T23:00:06Z"
+      "live_published_at": "2026-10-25T23:00:06Z",
+      "performance": {
+        "views": 31,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 50.09,
+        "estimatedMinutesWatched": 21
+      },
+      "performance_captured_at": "2026-10-27T23:02:37.542074+00:00"
     },
     {
       "fact_number": 237,
@@ -1535,7 +1543,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_238_mri_machines/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:843407",
-      "music_track_name": "the end of the innocence"
+      "music_track_name": "the end of the innocence",
+      "live_published_at": "2026-10-27T23:00:13Z"
     },
     {
       "fact_number": 239,
@@ -1552,6 +1561,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095114",
       "music_track_name": "Best Route to a Dream"
+    },
+    {
+      "fact_number": 240,
+      "topic": "Superhydrophobic Coatings",
+      "state": "playlist_added",
+      "youtube_id": "nV8uIQ93ejU",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 240: 5 Facts You Didn't Know About Superhydrophobic Coatings",
+      "category": "Amazing Facts",
+      "published_at": "2026-10-27T23:20:08.306111+00:00",
+      "scheduled_publish_at": "2026-10-29T23:00:00Z",
+      "narration_duration_seconds": 107.25,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_240_superhydrophobic_coatings/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1130139",
+      "music_track_name": "Decay III"
     }
   ],
   "next_fact_number": 191
