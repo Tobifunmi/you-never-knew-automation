@@ -1527,7 +1527,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1130139",
       "music_track_name": "Decay III",
-      "live_published_at": "2026-10-26T23:00:25Z"
+      "live_published_at": "2026-10-26T23:00:25Z",
+      "performance": {
+        "views": 32,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 36.59,
+        "estimatedMinutesWatched": 16
+      },
+      "performance_captured_at": "2026-10-28T23:02:36.624024+00:00"
     },
     {
       "fact_number": 238,
@@ -1560,7 +1568,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_239_bluetooth/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095114",
-      "music_track_name": "Best Route to a Dream"
+      "music_track_name": "Best Route to a Dream",
+      "live_published_at": "2026-10-28T23:00:36Z"
     },
     {
       "fact_number": 240,
@@ -1577,6 +1586,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1130139",
       "music_track_name": "Decay III"
+    },
+    {
+      "fact_number": 241,
+      "topic": "Antibiotics",
+      "state": "scheduled",
+      "youtube_id": "qJvw7mRjhnQ",
+      "playlist_id": null,
+      "title": "Fact 241: 5 Facts You Didn't Know About Antibiotics",
+      "category": "Amazing Facts",
+      "published_at": "2026-10-28T23:13:38.559509+00:00",
+      "scheduled_publish_at": "2026-10-30T23:00:00Z",
+      "narration_duration_seconds": 142.38,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_241_antibiotics/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095108",
+      "music_track_name": "Sad sea"
     }
   ],
   "next_fact_number": 191
