@@ -1552,7 +1552,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:843407",
       "music_track_name": "the end of the innocence",
-      "live_published_at": "2026-10-27T23:00:13Z"
+      "live_published_at": "2026-10-27T23:00:13Z",
+      "performance": {
+        "views": 72,
+        "likes": 4,
+        "comments": 0,
+        "averageViewPercentage": 53.79999999999999,
+        "estimatedMinutesWatched": 52
+      },
+      "performance_captured_at": "2026-10-29T23:02:41.748615+00:00"
     },
     {
       "fact_number": 239,
@@ -1585,7 +1593,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_240_superhydrophobic_coatings/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1130139",
-      "music_track_name": "Decay III"
+      "music_track_name": "Decay III",
+      "live_published_at": "2026-10-29T23:00:18Z"
     },
     {
       "fact_number": 241,
@@ -1602,6 +1611,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095108",
       "music_track_name": "Sad sea"
+    },
+    {
+      "fact_number": 242,
+      "topic": "LiDAR",
+      "state": "playlist_added",
+      "youtube_id": "0wPVWA4pCQQ",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 242: 5 Facts You Didn't Know About LiDAR",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-10-29T23:06:50.879864+00:00",
+      "scheduled_publish_at": "2026-10-31T23:00:00Z",
+      "narration_duration_seconds": 116.25,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_242_lidar/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1639803",
+      "music_track_name": "After being indestructible"
     }
   ],
   "next_fact_number": 191

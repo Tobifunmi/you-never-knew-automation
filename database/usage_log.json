@@ -1,26 +1,26 @@
 {
   "gemini": {
-    "count": 258,
+    "count": 260,
     "since": "2026-08-21",
-    "last_call": "2026-10-28 23:02 UTC",
+    "last_call": "2026-10-29 23:02 UTC",
     "videos": []
   },
   "jamendo": {
-    "count": 81,
+    "count": 82,
     "since": "2026-08-21",
-    "last_call": "2026-10-28 23:11 UTC",
+    "last_call": "2026-10-29 23:05 UTC",
     "videos": []
   },
   "youtube_upload": {
-    "count": 59,
+    "count": 60,
     "since": "2026-08-21",
-    "last_call": "2026-10-28 23:13 UTC",
+    "last_call": "2026-10-29 23:06 UTC",
     "videos": []
   },
   "youtube_playlist_list": {
-    "count": 59,
+    "count": 60,
     "since": "2026-08-21",
-    "last_call": "2026-10-28 23:13 UTC",
+    "last_call": "2026-10-29 23:06 UTC",
     "videos": []
   },
   "youtube_playlist_create": {
@@ -30,15 +30,15 @@
     "videos": []
   },
   "youtube_playlist_item_list": {
-    "count": 58,
+    "count": 59,
     "since": "2026-08-21",
-    "last_call": "2026-10-27 23:20 UTC",
+    "last_call": "2026-10-29 23:06 UTC",
     "videos": []
   },
   "youtube_playlist_item_insert": {
-    "count": 58,
+    "count": 59,
     "since": "2026-08-21",
-    "last_call": "2026-10-27 23:20 UTC",
+    "last_call": "2026-10-29 23:06 UTC",
     "videos": []
   },
   "elevenlabs": {
@@ -51,7 +51,7 @@
     "last_call": "2026-08-25 23:14 UTC"
   },
   "pixabay": {
-    "count": 564,
+    "count": 574,
     "since": "2026-08-25",
     "videos": [
       185,
@@ -108,12 +108,13 @@
       238,
       239,
       240,
-      241
+      241,
+      242
     ],
-    "last_call": "2026-10-28 23:10 UTC"
+    "last_call": "2026-10-29 23:04 UTC"
   },
   "pexels": {
-    "count": 343,
+    "count": 348,
     "since": "2026-08-25",
     "videos": [
       185,
@@ -170,24 +171,25 @@
       238,
       239,
       240,
-      241
+      241,
+      242
     ],
-    "last_call": "2026-10-28 23:10 UTC"
+    "last_call": "2026-10-29 23:04 UTC"
   },
   "youtube_analytics": {
-    "count": 66,
+    "count": 67,
     "since": "2026-08-28",
     "videos": [],
-    "last_call": "2026-10-28 23:02 UTC"
+    "last_call": "2026-10-29 23:02 UTC"
   },
   "youtube_data_status": {
-    "count": 280,
+    "count": 284,
     "since": "2026-08-28",
     "videos": [],
-    "last_call": "2026-10-28 23:13 UTC"
+    "last_call": "2026-10-29 23:06 UTC"
   },
   "kokoro": {
-    "count": 55,
+    "count": 56,
     "since": "2026-08-28",
     "videos": [
       189,
@@ -240,8 +242,9 @@
       238,
       239,
       240,
-      241
+      241,
+      242
     ],
-    "last_call": "2026-10-28 23:09 UTC"
+    "last_call": "2026-10-29 23:03 UTC"
   }
 }
