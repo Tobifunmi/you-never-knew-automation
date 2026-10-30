@@ -26,6 +26,7 @@ Monitor Credit Usage Here - https://you-never-knew.netlify.app/
 | Topic engine + fact numbering | ✅ Done |
 | Autonomous topic/script generation (Gemini) | ✅ Done |
 | 48h YouTube Analytics feedback loop (feeds topic selection) | ✅ Done |
+| Playlist assignment (retries on eventual-consistency 404s, non-fatal) | ✅ Done |
 | Real YouTube scheduling (`status.publishAt`, one-video-ahead buffer) | ✅ Done |
 | Scheduling error handling (confirmed-missing vs. status-check-failed distinction) | ✅ Done |
 | API usage dashboard (live quotas, call/video correlation, self-tracked counts) | ✅ Done |
@@ -224,6 +225,44 @@ email already serves that purpose, and Gmail delivery of the pipeline's own
 failure emails has been confirmed working, so the existing "run fails loudly,
 check email" loop is considered sufficient.
 
+## Playlist assignment (Stage I) and eventual consistency
+
+After a video is uploaded and recorded in `database/videos.json`, Stage I
+adds it to its category playlist (`find_or_create_playlist()` →
+`add_to_playlist()` in `engines/youtube.py`). This stage is deliberately
+**isolated and non-fatal**: a failure sends a failure email but never touches
+the already-saved upload record or releases the topic.
+
+**Why it can fail even though nothing is wrong.** The YouTube Data API is
+eventually consistent. A video or playlist created seconds earlier can return
+`404` for a short while:
+
+| Reason code | Seen on | Meaning |
+|---|---|---|
+| `playlistNotFound` | Fact 174 | A just-created playlist isn't visible yet |
+| `videoNotFound` | Fact 241 (28 Oct 2026) | A just-uploaded video isn't visible yet — Studio shows it fine moments later |
+
+The fact 241 failure came from the **"already in the playlist?" check**
+(`playlistItems.list` with a `videoId` filter), which 404s with
+`videoNotFound` while the API can't see the video. It happened *before* any
+insert was attempted.
+
+**How it's handled now:**
+- `playlist_contains_video()` treats a `videoNotFound` 404 as "not in the
+  playlist" instead of raising, so the insert is still attempted.
+- `add_to_playlist()` retries up to 6 attempts with backoff
+  (5s, 10s, 20s, 40s, 60s — about 2m15s of waiting in total) on propagation
+  404s (`playlistNotFound` / `videoNotFound`), transient HTTP statuses
+  (429/5xx) and network-level errors. The "already present?" check runs first
+  on every attempt, so a retry after a lost response can't create a duplicate.
+- Non-retryable errors (403 quota/permission, 400, …) still raise at once.
+
+**If a playlist failure email arrives anyway:** the video is fine and already
+recorded. Run `python backfill_playlist.py` (dry run, lists videos with no
+`playlist_id`), then `python backfill_playlist.py <fact_number>` to add it and
+update `videos.json`. Commit the updated `videos.json` — but not while a
+workflow run is in progress.
+
 ## Analytics feedback loop
 
 Every run starts with **Stage A0**, before topic selection: `engines/analytics.py`
@@ -366,6 +405,13 @@ next run.
   from Hugging Face — needs a working internet connection the first
   time only; cached afterward at `~/.cache/huggingface` (CI caches this
   directory across runs)
+- **Dependency pin: `preshed<3.0.13`** (in `requirements.txt`). On 24 Oct 2026
+  Kokoro narration failed in CI with `OverflowError: Python int too large to
+  convert to C ssize_t` while loading spaCy's `en_core_web_sm`; the fix was
+  pinning `preshed` (commit `de1dda4`). `requirements.txt` is otherwise
+  unpinned, so a new upstream release can break a CI run without any change to
+  this repo — if a run fails at import/model-load time right after a
+  previously good run, suspect a fresh dependency release first
 - `nltk` WordNet corpus (`nltk.download('wordnet')`,
   `nltk.download('omw-1.4')`) — used for free offline playlist
   categorization
@@ -383,7 +429,13 @@ Do not commit:
 - `.env`
 - API keys
 - refresh tokens
-- `storage_state.json` (if/when the Related Video automation lands — see below)
+- `storage_state.json` — a Playwright browser session (live Google/YouTube
+  cookies). **It is currently tracked in this public repo** (added in an early
+  commit by mistake): remove it with `git rm --cached storage_state.json`, add
+  it to `.gitignore`, and sign out of all sessions / change the Google
+  password to invalidate the cookies, because they remain readable in git
+  history even after deletion. The Related Video automation it belongs to is
+  shelved — see below
 - Any GitHub PAT used for the cron-job.org trigger (lives only in
   cron-job.org's job config, never in this repo)
 
@@ -439,6 +491,10 @@ you-never-knew-automation/
 │                                  "slot_utc": "HH:MM", "min_lead_hours": int}
 │                                 block controlling the behavior above
 ├── requirements.txt
+├── backfill_playlist.py       — maintenance helper: adds uploaded videos that
+│                                 have no playlist_id to their category
+│                                 playlist and records it (see Playlist
+│                                 assignment above)
 ├── .env                       — LOCAL ONLY, gitignored
 ├── credentials.json           — Google OAuth desktop app credential
 ├── token.json                 — YouTube OAuth token, gitignored, restored
@@ -608,6 +664,18 @@ you-never-knew-automation/
   extra colon (`Bearer: <token>`) is invalid and produces a `401` from
   GitHub's API even though the token itself is fine. Easy to mistype
   when setting up or rotating the cron-job.org PAT.
+
+- **Stage I (playlist) can still fail after all retries.** The retry window
+  is ~2m15s. If the API still can't see a video after that (or the video was
+  flagged/removed right after upload), the failure email is sent and the
+  record stays `playlist_id: None`. Recovery is `backfill_playlist.py` (see
+  Playlist assignment above). A few old records also have `playlist_id: None`
+  harmlessly (facts 189, 212).
+- **`requirements.txt` is unpinned apart from `preshed<3.0.13`.** A new
+  upstream release of any dependency can break a CI run unannounced (see the
+  24 Oct Kokoro/spaCy failure under Requirements). A lockfile or
+  `pip freeze`-based constraints file would remove this class of failure;
+  not built yet.
 
 ## Future work — Shorts "Related Video" (End Screen)
 

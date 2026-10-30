@@ -1,11 +1,12 @@
 # MASTER CONTINUATION PROMPT — "You Never Knew" Automated YouTube Shorts Factory
 
 Use this as full context in a new conversation. Reflects the verified state of
-the project as of **4 Oct 2026**. This version supersedes the previous
-`MASTER_CONTINUATION_PROMPT.md` (dated 30 Sep 2026, committed in the automation
-repo root) — that document is now out of date in the ways described below
-(new §4m, music-engine changes, §12 changes). Consider re-committing this
-version over it.
+the project as of **29 Oct 2026** (repo read directly via `git clone` of
+`main` at that date). This version supersedes the previous
+`MASTER_CONTINUATION_PROMPT.md` (dated 4 Oct 2026, committed in the automation
+repo root) — that document is out of date in the ways described below
+(new §4n Kokoro/spaCy `OverflowError` + `preshed` pin, new §4o playlist
+`videoNotFound` fix, updated §1/§2/§3/§6/§12). Commit this version over it.
 
 **Hard project constraint (stated by Tobi, 29 Sep): the Gemini API stays on the
 FREE tier — do not suggest enabling billing/paid tier.** Design around the
@@ -77,6 +78,16 @@ scheduled for `2026-10-04T23:00:00Z` (Oct 5 00:00 Lagos). The Oct 3 23:00 UTC
 run for **fact 216 ("LEDs") failed** at the music stage (§4m), so the buffer
 currently holds one scheduled video (215). `videos.json` has 43 records.
 
+**Latest state (from `database/videos.json`, 29 Oct 2026):** the daily cadence
+has kept running unattended for 25 more days. `videos.json` now has **69
+records**. Fact 240 ("Superhydrophobic Coatings") is scheduled for
+`2026-10-29T23:00:00Z`; fact 241 ("Antibiotics", youtube_id `qJvw7mRjhnQ`) was
+uploaded by the 28 Oct 23:13 UTC run and is scheduled for
+`2026-10-30T23:00:00Z` — its **Stage I playlist step failed non-fatally** (§4o)
+so its record had `state: scheduled`, `playlist_id: None` until backfilled.
+Fact 216 appears in `videos.json` as "Solar Panels" (the original "LEDs" topic
+from the 3 Oct failure was evidently replaced, not recovered as-is).
+
 The full history of facts 189–194 (the transition documented in the 12 Sep
 version of this file) is unchanged from that document. `database/videos.json`
 and `usage_log.json` in the repo remain the source of truth for anything
@@ -110,6 +121,10 @@ beyond what's summarized here.
 | YouTube OAuth token stability | ✅ Fixed this session — app moved from "Testing" to "In production" in Google Auth Platform, eliminating the 7-day forced refresh-token expiry (§4e) |
 | Secret leak in local git history | ✅ Resolved this session, `.gitignore` hardened (§4f) |
 | Email failure notifications (Gmail SMTP) | ✅ Confirmed working this session — the original Stage H `SchedulingDriftError` failure email is what alerted Tobi to the fact 201 incident (§4h) in the first place. Prior `WinError 10060` concern appears resolved/moot. |
+| Playlist step (Stage I): propagation-aware retry (`videoNotFound` / `playlistNotFound` / 5xx / network), non-fatal | ✅ Patched 29 Oct (§4o) — **verify pushed to `main`; not yet exercised by a live run** |
+| Playlist backfill helper (`backfill_playlist.py`) | ✅ Delivered 29 Oct; dry run verified against the real `videos.json`, not run against YouTube |
+| Kokoro/spaCy `OverflowError` (fact 237, 24 Oct) | ✅ Fixed by pinning `preshed<3.0.13` (commit `de1dda4`, 25 Oct); facts 237–241 produced afterwards (§4n) |
+| **`storage_state.json` committed to the public repo** (Playwright session cookies) | ⚠️ **OPEN, security** — see §4p / §12 item K |
 | Shorts "Related video" End Screen | 🔜 Deliberately deferred |
 | Playlist/record ordering bug | ✅ Fixed (historical) |
 
@@ -172,7 +187,10 @@ Verified directly from the live `main.py` this session.
     by `scheduling.py` on the next run).
 11. **Stage I — Playlist.** Isolated `try/except`, never re-raises — a
     playlist failure sends its own failure email but never touches the
-    already-saved upload record.
+    already-saved upload record. `add_to_playlist()` now retries (6 attempts,
+    5/10/20/40/60s backoff) on propagation 404s (`playlistNotFound`,
+    `videoNotFound`), 429/5xx and network errors, and
+    `playlist_contains_video()` treats `videoNotFound` as "not present" (§4o).
 12. **Failure path** — outer `except Exception`. Sends a failure email
     (Gmail SMTP — currently unreliable, see §6 item 21), releases the topic
     reservation only if it was actually reserved.
@@ -680,6 +698,81 @@ likeliest explanation is that the track was blocklisted after 215 was made.
 
 ---
 
+### 4n. Kokoro / spaCy `OverflowError` on fact 237 + `preshed` pin (24–25 Oct 2026)
+
+**Incident**: Actions run `40140895676` (24 Oct, 23:06 UTC) failed at Stage C
+(Kokoro narration) for fact 237 with `OverflowError: Python int too large to
+convert to C ssize_t`, raised while spaCy's `en_core_web_sm` model loaded.
+`requirements.txt` was unpinned (no lockfile), so CI resolved whatever versions
+were newest that day.
+
+**Fix (pushed 25 Oct, commit `de1dda4` "Added preshed to fix kokoro error")**:
+`requirements.txt` now contains `preshed<3.0.13`. The inference that a newer
+`preshed` release was the trigger comes from the fix that worked, not from a
+reproduced failure in this session. Facts 237 onward were produced
+successfully after the pin (237 "Electron Microscopes", 238 "MRI Machines",
+239 "Bluetooth", 240, 241).
+
+**Lesson**: a failure at import/model-load time, right after previously good
+runs and with no repo change, usually means a fresh dependency release. A
+lockfile or constraints file is still not built (§12).
+
+### 4o. Stage I playlist `videoNotFound` on fact 241 + retry hardening (28–29 Oct 2026)
+
+**Incident**: Actions run `40784155432` (28 Oct, 23:13 UTC, production) —
+fact 241 ("Antibiotics", `qJvw7mRjhnQ`) uploaded and was recorded, then Stage I
+failed (non-fatal) with `HttpError 404 ... "Video not found."` / reason
+`videoNotFound`, raised from `playlist_contains_video()` →
+`playlistItems().list(playlistId=..., videoId=...)`. Tobi confirmed the video
+itself was fine in YouTube Studio. The playlist (`PLUA2Lnfg4FRI`, the same one
+facts 236/239/240 had been added to) was valid.
+
+**Diagnosis**: the `videoId` filter on `playlistItems.list` returns
+`videoNotFound` while the API cannot yet see a just-uploaded video — the same
+eventual-consistency family as the fact 174 `playlistNotFound` bug. The old
+`add_to_playlist()` retry loop only matched the string `playlistNotFound`, and
+the failing call was the *existence check*, not the insert, so nothing retried
+and the first 404 propagated. (Cause was inferred from the error and the code;
+a flagged/removed video was ruled out only because Tobi confirmed the video is
+fine.)
+
+**Fix (full replacement `engines/youtube.py`; only the playlist methods
+changed)**:
+- `_error_text()` / `_is_propagation_error()` — match `playlistNotFound` /
+  `videoNotFound` against both `str(error)` and the raw response body.
+- `playlist_contains_video()` — a 404 `videoNotFound` returns `False` rather
+  than raising; other errors still raise.
+- `add_to_playlist(max_retries=6)` — retries on propagation 404s, existing
+  `TRANSIENT_HTTP_STATUSES` (429/5xx) and `TRANSIENT_NET_ERRORS`, backoff
+  5/10/20/40/60s (~2m15s). The "already present?" check runs first on each
+  attempt so a retry can't duplicate. 403/400 etc. raise immediately.
+- Tested with mocked `googleapiclient` errors (recovers after 2 lagging
+  list+insert 404s; list-404 then insert succeeds; 403 raises immediately;
+  exhausted retries raise). Not run against the real API.
+
+**Backfill**: new `backfill_playlist.py` (dry run lists videos with
+`youtube_id` but no `playlist_id`: currently facts 189, 212, 241). Running
+`python backfill_playlist.py 241` adds fact 241 to its category playlist
+("Amazing Facts") and records `state: playlist_added` + `playlist_id`, keeping
+`scheduled_publish_at`. Not yet run.
+
+**Status**: delivered as files for Tobi to commit; push not confirmed. Do not
+push to `main` while a run is in progress (§4l).
+
+### 4p. `storage_state.json` is tracked in the public repo (found 29 Oct 2026)
+
+While cloning the repo, `storage_state.json` (1.4 KB) was present at the repo
+root, introduced in commit `2108389`. It is a Playwright browser-session file
+containing cookie names/values (e.g. a `__Secure-YNID` cookie), left over from
+the shelved Related Video prototype (`playwright_login.py`). It is **not** in
+`.gitignore`. The README already says never to commit it. Whether the cookies
+are still live is unknown, but they remain readable in history even after
+deletion. Recommended (not yet done): `git rm --cached storage_state.json`, add
+to `.gitignore`, sign out of other sessions / change the Google password to
+invalidate the cookies; history rewriting is optional once the cookies are dead.
+
+---
+
 ## 5. Repo structure — `you-never-knew-automation`
 
 Reflects the live repo as read directly during the 12 Sep session (`main.py`,
@@ -921,6 +1014,16 @@ this session.)*
     distinguish an empty API response from everything being filtered out.
     Mitigated with a 5-tier search and per-tier logging; root cause not
     confirmed. Full detail §4m.
+30. **NEW, 24–25 Oct** — Fact 237 Kokoro narration failed in CI with
+    `OverflowError` loading spaCy `en_core_web_sm`; fixed by pinning
+    `preshed<3.0.13` (commit `de1dda4`). Full detail §4n.
+31. **NEW, 28–29 Oct** — Fact 241 Stage I playlist step failed non-fatally
+    with 404 `videoNotFound` from the `playlistItems.list(videoId=...)`
+    existence check right after upload; the old retry only handled
+    `playlistNotFound`. Fixed with propagation-aware retry + a
+    `backfill_playlist.py` helper. Full detail §4o.
+32. **NEW, 29 Oct** — `storage_state.json` (browser cookies) found tracked in
+    the public repo. Open. Full detail §4p.
 
 ---
 
@@ -1063,6 +1166,28 @@ Carried forward, reinforced again this session:
 
 ## 12. Open items for the next session
 
+**New (29 Oct) — do these first:**
+
+K. **Security: remove `storage_state.json` from the public repo** (§4p):
+   `git rm --cached storage_state.json`, add to `.gitignore`, then sign out of
+   other Google sessions / change the Google password so the cookies in history
+   are dead.
+L. **Push the patched `engines/youtube.py` and `backfill_playlist.py`** (§4o),
+   plus this MASTER prompt and the README — not while a run is in progress.
+M. **Backfill fact 241**: `python backfill_playlist.py 241`, then commit the
+   updated `database/videos.json` (record currently `state: scheduled`,
+   `playlist_id: None`). Optionally check facts 189/212 (cosmetic).
+N. **Confirm the next live run exercises the new playlist retry** — look for
+   `Playlist add not ready (attempt ...)` lines in the Stage I log. If a
+   playlist failure email still arrives after the ~2m15s window, check for a
+   flagged/removed video before assuming lag (§4h).
+O. **Dependency pinning**: only `preshed<3.0.13` is pinned (§4n). Consider a
+   `pip freeze`-derived constraints file so a new upstream release can't break
+   a run unannounced. Not built.
+P. Item E below is now partly done: `playlistItems.list`/`insert` have
+   network retry via `add_to_playlist()`; `list_playlists()` and
+   `create_playlist()` `.execute()` calls still have none.
+
 **Carried over, still open:**
 
 1. **cron-job.org PAT expiry** — still no expiration date recorded; check it
@@ -1111,7 +1236,7 @@ H. **Recover from the failed fact 216 run.** Buffer holds only fact 215
    the "LEDs" topic is not stuck in `topics.json` `reserved`, check the AI
    Studio Rate Limit page, and push the new `engines/music.py` only when no
    run is in progress.
-I. **Confirm `engines/music.py` landed on `main` and read the tier log lines
+I. **(Landed on `main` — verified in the 29 Oct clone: `engines/music.py` contains the tiered search.)** Still worth reading the tier log lines
    in the next run** (§4m). If tier logs show 0 results at every tier, the
    cause is Jamendo/credentials (e.g. `JAMENDO_CLIENT_ID`), not tag choice.
 

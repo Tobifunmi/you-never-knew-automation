@@ -291,26 +291,70 @@ class YouTubePublisher:
 
         return response["id"]
 
+    @staticmethod
+    def _error_text(error: HttpError) -> str:
+        """str(error) plus the raw response body, so reason codes are matched
+        regardless of how googleapiclient chooses to format the message."""
+        content = getattr(error, "content", b"") or b""
+        if isinstance(content, bytes):
+            content = content.decode("utf-8", errors="replace")
+        return f"{error} {content}"
+
+    @staticmethod
+    def _is_propagation_error(error: HttpError) -> bool:
+        """
+        True for the 404s YouTube returns when a just-uploaded (or just-created)
+        resource isn't visible to the API yet — an eventual-consistency delay,
+        not a real "missing" signal:
+          - playlistNotFound: a playlist created seconds ago (Fact 174).
+          - videoNotFound:    a video uploaded seconds ago (Fact 241), even
+                              though Studio shows it fine moments later.
+        """
+        if getattr(error.resp, "status", None) != 404:
+            return False
+        text = YouTubePublisher._error_text(error)
+        return "playlistNotFound" in text or "videoNotFound" in text
+
     def playlist_contains_video(self, playlist_id: str, video_id: str) -> bool:
         if self.youtube is None:
             self.authenticate()
 
-        response = self.youtube.playlistItems().list(
-            part="snippet",
-            playlistId=playlist_id,
-            videoId=video_id,
-            maxResults=1,
-        ).execute()
+        try:
+            response = self.youtube.playlistItems().list(
+                part="snippet",
+                playlistId=playlist_id,
+                videoId=video_id,
+                maxResults=1,
+            ).execute()
+        except HttpError as e:
+            # The videoId filter 404s with videoNotFound when the API can't see
+            # the video yet. That is not "already in the playlist", so answer
+            # False and let add_to_playlist's insert + retry loop decide.
+            if getattr(e.resp, "status", None) == 404 and "videoNotFound" in self._error_text(e):
+                usage_tracker.log_call("youtube_playlist_item_list")
+                return False
+            raise
 
         usage_tracker.log_call("youtube_playlist_item_list")  # playlistItems.list: 1 quota unit
 
         return bool(response.get("items"))
 
-    def add_to_playlist(self, playlist_id: str, video_id: str, max_retries: int = 5) -> None:
+    def add_to_playlist(self, playlist_id: str, video_id: str, max_retries: int = 6) -> None:
+        """
+        Adds video_id to playlist_id (idempotent: skips if already present).
+
+        Retries with backoff (5s, 10s, 20s, 40s, 60s ≈ 2m15s total) on:
+          - propagation 404s (playlistNotFound / videoNotFound) — brand-new
+            uploads and playlists take a little while to become visible;
+          - transient HTTP statuses (429/5xx) and network-level errors.
+        Anything else (403 quota/permission, 400, etc.) raises immediately.
+        """
         if self.youtube is None:
             self.authenticate()
 
-        last_error = None
+        delays = (5, 10, 20, 40, 60, 90, 120)
+        last_error: Optional[Exception] = None
+
         for attempt in range(max_retries):
             try:
                 if self.playlist_contains_video(playlist_id, video_id):
@@ -331,15 +375,34 @@ class YouTubePublisher:
                 usage_tracker.log_call("youtube_playlist_item_insert")  # playlistItems.insert: 50 quota units
                 return
             except HttpError as e:
-                if "playlistNotFound" in str(e) and attempt < max_retries - 1:
-                    wait = 2 ** attempt  # 1, 2, 4, 8, 16 seconds
-                    print(f"Playlist not yet available (attempt {attempt + 1}/{max_retries}), retrying in {wait}s...")
+                retryable = (
+                    self._is_propagation_error(e)
+                    or getattr(e.resp, "status", None) in TRANSIENT_HTTP_STATUSES
+                )
+                last_error = e
+                if retryable and attempt < max_retries - 1:
+                    wait = delays[min(attempt, len(delays) - 1)]
+                    print(
+                        f"Playlist add not ready (attempt {attempt + 1}/{max_retries}, "
+                        f"HTTP {e.resp.status}), retrying in {wait}s..."
+                    )
                     time.sleep(wait)
-                    last_error = e
+                    continue
+                raise
+            except TRANSIENT_NET_ERRORS as e:
+                last_error = e
+                if attempt < max_retries - 1:
+                    wait = delays[min(attempt, len(delays) - 1)]
+                    print(
+                        f"Playlist add network error (attempt {attempt + 1}/{max_retries}): "
+                        f"{e!r}, retrying in {wait}s..."
+                    )
+                    time.sleep(wait)
                     continue
                 raise
 
-        raise last_error
+        if last_error is not None:
+            raise last_error
 
     def find_or_create_playlist(
         self,
