@@ -1577,7 +1577,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095114",
       "music_track_name": "Best Route to a Dream",
-      "live_published_at": "2026-10-28T23:00:36Z"
+      "live_published_at": "2026-10-28T23:00:36Z",
+      "performance": {
+        "views": 13,
+        "likes": 1,
+        "comments": 1,
+        "averageViewPercentage": 39.62,
+        "estimatedMinutesWatched": 9
+      },
+      "performance_captured_at": "2026-10-30T23:03:05.882759+00:00"
     },
     {
       "fact_number": 240,
@@ -1610,7 +1618,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_241_antibiotics/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095108",
-      "music_track_name": "Sad sea"
+      "music_track_name": "Sad sea",
+      "live_published_at": "2026-10-30T23:00:23Z"
     },
     {
       "fact_number": 242,
@@ -1627,6 +1636,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1639803",
       "music_track_name": "After being indestructible"
+    },
+    {
+      "fact_number": 243,
+      "topic": "Piezoelectricity",
+      "state": "playlist_added",
+      "youtube_id": "p3Y9_bwLMCI",
+      "playlist_id": "PLPnVOV06ddu0",
+      "title": "Fact 243: 5 Facts You Didn't Know About Piezoelectricity",
+      "category": "Science & Technology Facts",
+      "published_at": "2026-10-30T23:08:59.507217+00:00",
+      "scheduled_publish_at": "2026-11-01T23:00:00Z",
+      "narration_duration_seconds": 100.9,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_243_piezoelectricity/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1062583",
+      "music_track_name": "Dj Rostej - Like a Dream"
     }
   ],
   "next_fact_number": 191
