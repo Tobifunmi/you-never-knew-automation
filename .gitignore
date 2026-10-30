@@ -3,6 +3,7 @@ credentials.json
 token.json
 token.json.bak
 .env
+storage_state.json
 
 # Python
 __pycache__/
