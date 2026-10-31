@@ -1602,7 +1602,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1130139",
       "music_track_name": "Decay III",
-      "live_published_at": "2026-10-29T23:00:18Z"
+      "live_published_at": "2026-10-29T23:00:18Z",
+      "performance": {
+        "views": 113,
+        "likes": 5,
+        "comments": 0,
+        "averageViewPercentage": 53.92,
+        "estimatedMinutesWatched": 83
+      },
+      "performance_captured_at": "2026-10-31T23:02:38.888540+00:00"
     },
     {
       "fact_number": 241,
@@ -1635,7 +1643,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_242_lidar/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1639803",
-      "music_track_name": "After being indestructible"
+      "music_track_name": "After being indestructible",
+      "live_published_at": "2026-10-31T23:00:20Z"
     },
     {
       "fact_number": 243,
@@ -1652,6 +1661,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1062583",
       "music_track_name": "Dj Rostej - Like a Dream"
+    },
+    {
+      "fact_number": 244,
+      "topic": "Smoke Detectors",
+      "state": "playlist_added",
+      "youtube_id": "yVARyRkoHs4",
+      "playlist_id": "PLOOM2rEPGwC0",
+      "title": "Fact 244: 5 Facts You Didn't Know About Smoke Detectors",
+      "category": "Nature Facts",
+      "published_at": "2026-10-31T23:08:32.685589+00:00",
+      "scheduled_publish_at": "2026-11-02T23:00:00Z",
+      "narration_duration_seconds": 117.8,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_244_smoke_detectors/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095104",
+      "music_track_name": "Beats of Heaven"
     }
   ],
   "next_fact_number": 191
