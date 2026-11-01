@@ -1627,7 +1627,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095108",
       "music_track_name": "Sad sea",
-      "live_published_at": "2026-10-30T23:00:23Z"
+      "live_published_at": "2026-10-30T23:00:23Z",
+      "performance": {
+        "views": 43,
+        "likes": 4,
+        "comments": 0,
+        "averageViewPercentage": 53.620000000000005,
+        "estimatedMinutesWatched": 38
+      },
+      "performance_captured_at": "2026-11-01T23:02:48.664237+00:00"
     },
     {
       "fact_number": 242,
@@ -1660,7 +1668,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_243_piezoelectricity/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1062583",
-      "music_track_name": "Dj Rostej - Like a Dream"
+      "music_track_name": "Dj Rostej - Like a Dream",
+      "live_published_at": "2026-11-01T23:00:32Z"
     },
     {
       "fact_number": 244,
@@ -1674,6 +1683,22 @@
       "scheduled_publish_at": "2026-11-02T23:00:00Z",
       "narration_duration_seconds": 117.8,
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_244_smoke_detectors/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095104",
+      "music_track_name": "Beats of Heaven"
+    },
+    {
+      "fact_number": 245,
+      "topic": "Cloud Seeding",
+      "state": "playlist_added",
+      "youtube_id": "8OiE0Z0YtjE",
+      "playlist_id": "PLOOM2rEPGwC0",
+      "title": "Fact 245: 5 Facts You Didn't Know About Cloud Seeding",
+      "category": "Nature Facts",
+      "published_at": "2026-11-01T23:10:28.317853+00:00",
+      "scheduled_publish_at": "2026-11-03T23:00:00Z",
+      "narration_duration_seconds": 141.65,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_245_cloud_seeding/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095104",
       "music_track_name": "Beats of Heaven"
