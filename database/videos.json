@@ -1652,7 +1652,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1639803",
       "music_track_name": "After being indestructible",
-      "live_published_at": "2026-10-31T23:00:20Z"
+      "live_published_at": "2026-10-31T23:00:20Z",
+      "performance": {
+        "views": 13,
+        "likes": 1,
+        "comments": 0,
+        "averageViewPercentage": 53.16,
+        "estimatedMinutesWatched": 9
+      },
+      "performance_captured_at": "2026-11-02T23:03:20.149882+00:00"
     },
     {
       "fact_number": 243,
@@ -1685,7 +1693,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_244_smoke_detectors/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095104",
-      "music_track_name": "Beats of Heaven"
+      "music_track_name": "Beats of Heaven",
+      "live_published_at": "2026-11-02T23:00:18Z"
     },
     {
       "fact_number": 245,
@@ -1702,6 +1711,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095104",
       "music_track_name": "Beats of Heaven"
+    },
+    {
+      "fact_number": 246,
+      "topic": "Noise-Canceling Headphones",
+      "state": "playlist_added",
+      "youtube_id": "9zLL9_v-4EQ",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 246: 5 Facts You Didn't Know About Noise-Canceling Headphones",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-11-02T23:10:02.952323+00:00",
+      "scheduled_publish_at": "2026-11-04T23:00:00Z",
+      "narration_duration_seconds": 154.55,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_246_noise_canceling_headphones/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095108",
+      "music_track_name": "Sad sea"
     }
   ],
   "next_fact_number": 191
