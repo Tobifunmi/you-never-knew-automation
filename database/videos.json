@@ -1702,7 +1702,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095104",
       "music_track_name": "Beats of Heaven",
-      "live_published_at": "2026-11-02T23:00:18Z"
+      "live_published_at": "2026-11-02T23:00:18Z",
+      "performance": {
+        "views": 11,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 66.84,
+        "estimatedMinutesWatched": 10
+      },
+      "performance_captured_at": "2026-11-04T23:03:04.961129+00:00"
     },
     {
       "fact_number": 245,
@@ -1735,7 +1743,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_246_noise_canceling_headphones/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095108",
-      "music_track_name": "Sad sea"
+      "music_track_name": "Sad sea",
+      "live_published_at": "2026-11-04T23:00:34Z"
     },
     {
       "fact_number": 247,
@@ -1752,6 +1761,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1568720",
       "music_track_name": "Entering"
+    },
+    {
+      "fact_number": 248,
+      "topic": "Bacteriophages",
+      "state": "playlist_added",
+      "youtube_id": "WuaFBrGboek",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 248: 5 Facts You Didn't Know About Bacteriophages",
+      "category": "Amazing Facts",
+      "published_at": "2026-11-04T23:13:56.231316+00:00",
+      "scheduled_publish_at": "2026-11-06T23:00:00Z",
+      "narration_duration_seconds": 113.95,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_248_bacteriophages/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1372263",
+      "music_track_name": "Dj Rostej - Reverie"
     }
   ],
   "next_fact_number": 191
