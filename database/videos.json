@@ -1727,7 +1727,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095104",
       "music_track_name": "Beats of Heaven",
-      "live_published_at": "2026-11-03T23:00:04Z"
+      "live_published_at": "2026-11-03T23:00:04Z",
+      "performance": {
+        "views": 15,
+        "likes": 2,
+        "comments": 0,
+        "averageViewPercentage": 72.46,
+        "estimatedMinutesWatched": 13
+      },
+      "performance_captured_at": "2026-11-05T23:02:40.559193+00:00"
     },
     {
       "fact_number": 246,
@@ -1760,7 +1768,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_247_prince_ruperts_drops/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1568720",
-      "music_track_name": "Entering"
+      "music_track_name": "Entering",
+      "live_published_at": "2026-11-05T23:00:03Z"
     },
     {
       "fact_number": 248,
@@ -1777,6 +1786,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1372263",
       "music_track_name": "Dj Rostej - Reverie"
+    },
+    {
+      "fact_number": 249,
+      "topic": "Non-Newtonian Fluids",
+      "state": "playlist_added",
+      "youtube_id": "5sU8xu8XNEc",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 249: 5 Facts You Didn't Know About Non-Newtonian Fluids",
+      "category": "Amazing Facts",
+      "published_at": "2026-11-05T23:20:01.345997+00:00",
+      "scheduled_publish_at": "2026-11-07T23:00:00Z",
+      "narration_duration_seconds": 125.8,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_249_non_newtonian_fluids/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1395588",
+      "music_track_name": "Epic Cinematic Trailer"
     }
   ],
   "next_fact_number": 191
