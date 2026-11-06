@@ -1752,7 +1752,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095108",
       "music_track_name": "Sad sea",
-      "live_published_at": "2026-11-04T23:00:34Z"
+      "live_published_at": "2026-11-04T23:00:34Z",
+      "performance": {
+        "views": 3,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 29.26,
+        "estimatedMinutesWatched": 2
+      },
+      "performance_captured_at": "2026-11-06T23:02:33.821766+00:00"
     },
     {
       "fact_number": 247,
@@ -1785,7 +1793,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_248_bacteriophages/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1372263",
-      "music_track_name": "Dj Rostej - Reverie"
+      "music_track_name": "Dj Rostej - Reverie",
+      "live_published_at": "2026-11-06T23:00:37Z"
     },
     {
       "fact_number": 249,
@@ -1802,6 +1811,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1395588",
       "music_track_name": "Epic Cinematic Trailer"
+    },
+    {
+      "fact_number": 250,
+      "topic": "Slime Mold",
+      "state": "playlist_added",
+      "youtube_id": "SbmEy2IiAKU",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 250: 5 Facts You Didn't Know About Slime Mold",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-11-06T23:06:39.306152+00:00",
+      "scheduled_publish_at": "2026-11-08T23:00:00Z",
+      "narration_duration_seconds": 114.97,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_250_slime_mold/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095108",
+      "music_track_name": "Sad sea"
     }
   ],
   "next_fact_number": 191
