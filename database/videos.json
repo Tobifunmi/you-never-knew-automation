@@ -1802,7 +1802,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1372263",
       "music_track_name": "Dj Rostej - Reverie",
-      "live_published_at": "2026-11-06T23:00:37Z"
+      "live_published_at": "2026-11-06T23:00:37Z",
+      "performance": {
+        "views": 4,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 9.47,
+        "estimatedMinutesWatched": 0
+      },
+      "performance_captured_at": "2026-11-08T23:02:23.903706+00:00"
     },
     {
       "fact_number": 249,
@@ -1835,7 +1843,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_250_slime_mold/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095108",
-      "music_track_name": "Sad sea"
+      "music_track_name": "Sad sea",
+      "live_published_at": "2026-11-08T23:00:22Z"
     },
     {
       "fact_number": 251,
@@ -1852,6 +1861,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1576193",
       "music_track_name": "Slow"
+    },
+    {
+      "fact_number": 252,
+      "topic": "Geiger Counters",
+      "state": "playlist_added",
+      "youtube_id": "GOkMJfuxUeU",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 252: 5 Facts You Didn't Know About Geiger Counters",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-11-08T23:12:42.014088+00:00",
+      "scheduled_publish_at": "2026-11-10T23:00:00Z",
+      "narration_duration_seconds": 126.55,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_252_geiger_counters/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1318712",
+      "music_track_name": "Epic Movie"
     }
   ],
   "next_fact_number": 191
