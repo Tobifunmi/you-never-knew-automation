@@ -1827,7 +1827,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1395588",
       "music_track_name": "Epic Cinematic Trailer",
-      "live_published_at": "2026-11-07T23:00:15Z"
+      "live_published_at": "2026-11-07T23:00:15Z",
+      "performance": {
+        "views": 11,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 43.56,
+        "estimatedMinutesWatched": 7
+      },
+      "performance_captured_at": "2026-11-09T23:02:29.809777+00:00"
     },
     {
       "fact_number": 250,
@@ -1860,7 +1868,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_251_giant_squid/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1576193",
-      "music_track_name": "Slow"
+      "music_track_name": "Slow",
+      "live_published_at": "2026-11-09T23:00:24Z"
     },
     {
       "fact_number": 252,
@@ -1877,6 +1886,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1318712",
       "music_track_name": "Epic Movie"
+    },
+    {
+      "fact_number": 253,
+      "topic": "Lithium-Ion Batteries",
+      "state": "playlist_added",
+      "youtube_id": "R6_yh6ZO_mY",
+      "playlist_id": "PLPnVOV06ddu0",
+      "title": "Fact 253: 5 Facts You Didn't Know About Lithium-Ion Batteries",
+      "category": "Science & Technology Facts",
+      "published_at": "2026-11-09T23:07:20.331431+00:00",
+      "scheduled_publish_at": "2026-11-11T23:00:00Z",
+      "narration_duration_seconds": 112.88,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_253_lithium_ion_batteries/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1062583",
+      "music_track_name": "Dj Rostej - Like a Dream"
     }
   ],
   "next_fact_number": 191
