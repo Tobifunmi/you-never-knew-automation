@@ -1877,7 +1877,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1576193",
       "music_track_name": "Slow",
-      "live_published_at": "2026-11-09T23:00:24Z"
+      "live_published_at": "2026-11-09T23:00:24Z",
+      "performance": {
+        "views": 37,
+        "likes": 1,
+        "comments": 0,
+        "averageViewPercentage": 138.38,
+        "estimatedMinutesWatched": 68
+      },
+      "performance_captured_at": "2026-11-11T23:02:26.650576+00:00"
     },
     {
       "fact_number": 252,
@@ -1910,7 +1918,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_253_lithium_ion_batteries/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1062583",
-      "music_track_name": "Dj Rostej - Like a Dream"
+      "music_track_name": "Dj Rostej - Like a Dream",
+      "live_published_at": "2026-11-11T23:00:24Z"
     },
     {
       "fact_number": 254,
@@ -1927,6 +1936,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:402055",
       "music_track_name": "Virtue Lost"
+    },
+    {
+      "fact_number": 255,
+      "topic": "Tesla Coils",
+      "state": "playlist_added",
+      "youtube_id": "IYg9o5PEpIs",
+      "playlist_id": "PLLqZuMBCXU5g",
+      "title": "Fact 255: 5 Facts You Didn't Know About Tesla Coils",
+      "category": "Architecture & Structures Facts",
+      "published_at": "2026-11-11T23:10:19.077377+00:00",
+      "scheduled_publish_at": "2026-11-13T23:00:00Z",
+      "narration_duration_seconds": 113.05,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_255_tesla_coils/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1372263",
+      "music_track_name": "Dj Rostej - Reverie"
     }
   ],
   "next_fact_number": 191
