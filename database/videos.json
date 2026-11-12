@@ -1902,7 +1902,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1318712",
       "music_track_name": "Epic Movie",
-      "live_published_at": "2026-11-10T23:00:27Z"
+      "live_published_at": "2026-11-10T23:00:27Z",
+      "performance": {
+        "views": 0,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 0,
+        "estimatedMinutesWatched": 0
+      },
+      "performance_captured_at": "2026-11-12T23:02:52.833542+00:00"
     },
     {
       "fact_number": 253,
@@ -1935,7 +1943,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_254_morse_code/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:402055",
-      "music_track_name": "Virtue Lost"
+      "music_track_name": "Virtue Lost",
+      "live_published_at": "2026-11-12T23:00:35Z"
     },
     {
       "fact_number": 255,
@@ -1952,6 +1961,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1372263",
       "music_track_name": "Dj Rostej - Reverie"
+    },
+    {
+      "fact_number": 256,
+      "topic": "Ball Lightning",
+      "state": "playlist_added",
+      "youtube_id": "UTkFVW0q62k",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 256: 5 Facts You Didn't Know About Ball Lightning",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-11-12T23:12:26.281302+00:00",
+      "scheduled_publish_at": "2026-11-14T23:00:00Z",
+      "narration_duration_seconds": 115.9,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_256_ball_lightning/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1170916",
+      "music_track_name": "Never Wanted"
     }
   ],
   "next_fact_number": 191
