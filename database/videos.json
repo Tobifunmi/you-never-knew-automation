@@ -1927,7 +1927,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1062583",
       "music_track_name": "Dj Rostej - Like a Dream",
-      "live_published_at": "2026-11-11T23:00:24Z"
+      "live_published_at": "2026-11-11T23:00:24Z",
+      "performance": {
+        "views": 3,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 48.39,
+        "estimatedMinutesWatched": 0
+      },
+      "performance_captured_at": "2026-11-13T23:02:26.820748+00:00"
     },
     {
       "fact_number": 254,
@@ -1960,7 +1968,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_255_tesla_coils/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1372263",
-      "music_track_name": "Dj Rostej - Reverie"
+      "music_track_name": "Dj Rostej - Reverie",
+      "live_published_at": "2026-11-13T23:00:25Z"
     },
     {
       "fact_number": 256,
@@ -1977,6 +1986,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1170916",
       "music_track_name": "Never Wanted"
+    },
+    {
+      "fact_number": 257,
+      "topic": "Cold Welding",
+      "state": "playlist_added",
+      "youtube_id": "qZOPVTT5ZWw",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 257: 5 Facts You Didn't Know About Cold Welding",
+      "category": "Amazing Facts",
+      "published_at": "2026-11-13T23:16:57.145555+00:00",
+      "scheduled_publish_at": "2026-11-15T23:00:00Z",
+      "narration_duration_seconds": 129.6,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_257_cold_welding/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1576193",
+      "music_track_name": "Slow"
     }
   ],
   "next_fact_number": 191
