@@ -1952,7 +1952,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:402055",
       "music_track_name": "Virtue Lost",
-      "live_published_at": "2026-11-12T23:00:35Z"
+      "live_published_at": "2026-11-12T23:00:35Z",
+      "performance": {
+        "views": 113,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 55.91,
+        "estimatedMinutesWatched": 62
+      },
+      "performance_captured_at": "2026-11-14T23:02:15.753346+00:00"
     },
     {
       "fact_number": 255,
@@ -1985,7 +1993,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_256_ball_lightning/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1170916",
-      "music_track_name": "Never Wanted"
+      "music_track_name": "Never Wanted",
+      "live_published_at": "2026-11-14T23:00:36Z"
     },
     {
       "fact_number": 257,
@@ -2002,6 +2011,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1576193",
       "music_track_name": "Slow"
+    },
+    {
+      "fact_number": 258,
+      "topic": "St. Elmo's Fire",
+      "state": "playlist_added",
+      "youtube_id": "RuWnFzVJyMk",
+      "playlist_id": "PLPnVOV06ddu0",
+      "title": "Fact 258: 5 Facts You Didn't Know About St. Elmo's Fire",
+      "category": "Science & Technology Facts",
+      "published_at": "2026-11-14T23:08:58.682784+00:00",
+      "scheduled_publish_at": "2026-11-16T23:00:00Z",
+      "narration_duration_seconds": 112.85,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_258_st_elmos_fire/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1095108",
+      "music_track_name": "Sad sea"
     }
   ],
   "next_fact_number": 191
