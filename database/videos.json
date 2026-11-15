@@ -1977,7 +1977,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1372263",
       "music_track_name": "Dj Rostej - Reverie",
-      "live_published_at": "2026-11-13T23:00:25Z"
+      "live_published_at": "2026-11-13T23:00:25Z",
+      "performance": {
+        "views": 168,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 78.86,
+        "estimatedMinutesWatched": 16
+      },
+      "performance_captured_at": "2026-11-15T23:02:21.937317+00:00"
     },
     {
       "fact_number": 256,
@@ -2010,7 +2018,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_257_cold_welding/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1576193",
-      "music_track_name": "Slow"
+      "music_track_name": "Slow",
+      "live_published_at": "2026-11-15T23:00:06Z"
     },
     {
       "fact_number": 258,
@@ -2027,6 +2036,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095108",
       "music_track_name": "Sad sea"
+    },
+    {
+      "fact_number": 259,
+      "topic": "Cloud Chambers",
+      "state": "playlist_added",
+      "youtube_id": "kKTeWu47XYc",
+      "playlist_id": "PLOOM2rEPGwC0",
+      "title": "Fact 259: 5 Facts You Didn't Know About Cloud Chambers",
+      "category": "Nature Facts",
+      "published_at": "2026-11-15T23:06:35.839375+00:00",
+      "scheduled_publish_at": "2026-11-17T23:00:00Z",
+      "narration_duration_seconds": 123.6,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_259_cloud_chambers/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:14024",
+      "music_track_name": "Legends"
     }
   ],
   "next_fact_number": 191
