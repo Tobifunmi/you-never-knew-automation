@@ -2027,7 +2027,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1576193",
       "music_track_name": "Slow",
-      "live_published_at": "2026-11-15T23:00:06Z"
+      "live_published_at": "2026-11-15T23:00:06Z",
+      "performance": {
+        "views": 19,
+        "likes": 0,
+        "comments": 0,
+        "averageViewPercentage": 20.35,
+        "estimatedMinutesWatched": 3
+      },
+      "performance_captured_at": "2026-11-17T23:02:30.758495+00:00"
     },
     {
       "fact_number": 258,
@@ -2060,7 +2068,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_259_cloud_chambers/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:14024",
-      "music_track_name": "Legends"
+      "music_track_name": "Legends",
+      "live_published_at": "2026-11-17T23:00:34Z"
     },
     {
       "fact_number": 260,
@@ -2077,6 +2086,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095104",
       "music_track_name": "Beats of Heaven"
+    },
+    {
+      "fact_number": 261,
+      "topic": "Wind Tunnels",
+      "state": "playlist_added",
+      "youtube_id": "Hhkg_Zc0kv4",
+      "playlist_id": "PLOOM2rEPGwC0",
+      "title": "Fact 261: 5 Facts You Didn't Know About Wind Tunnels",
+      "category": "Nature Facts",
+      "published_at": "2026-11-18T00:01:23.008443+00:00",
+      "scheduled_publish_at": "2026-11-19T23:00:00Z",
+      "narration_duration_seconds": 144.25,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_261_wind_tunnels/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:843407",
+      "music_track_name": "the end of the innocence"
     }
   ],
   "next_fact_number": 191
