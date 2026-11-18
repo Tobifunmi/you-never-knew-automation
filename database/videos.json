@@ -2052,7 +2052,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1095108",
       "music_track_name": "Sad sea",
-      "live_published_at": "2026-11-16T23:00:03Z"
+      "live_published_at": "2026-11-16T23:00:03Z",
+      "performance": {
+        "views": 10,
+        "likes": 1,
+        "comments": 0,
+        "averageViewPercentage": 30.709999999999997,
+        "estimatedMinutesWatched": 3
+      },
+      "performance_captured_at": "2026-11-18T23:02:42.920416+00:00"
     },
     {
       "fact_number": 259,
@@ -2085,7 +2093,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_260_waterjet_cutters/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1095104",
-      "music_track_name": "Beats of Heaven"
+      "music_track_name": "Beats of Heaven",
+      "live_published_at": "2026-11-18T23:00:05Z"
     },
     {
       "fact_number": 261,
@@ -2102,6 +2111,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:843407",
       "music_track_name": "the end of the innocence"
+    },
+    {
+      "fact_number": 262,
+      "topic": "Electric Eels",
+      "state": "playlist_added",
+      "youtube_id": "RKMTcnF1OIo",
+      "playlist_id": "PLEHAlD_hPg1c",
+      "title": "Fact 262: 5 Facts You Didn't Know About Electric Eels",
+      "category": "Everyday Objects Facts",
+      "published_at": "2026-11-18T23:08:43.656695+00:00",
+      "scheduled_publish_at": "2026-11-20T23:00:00Z",
+      "narration_duration_seconds": 91.97,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_262_electric_eels/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1130139",
+      "music_track_name": "Decay III"
     }
   ],
   "next_fact_number": 191
