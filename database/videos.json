@@ -2077,7 +2077,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:14024",
       "music_track_name": "Legends",
-      "live_published_at": "2026-11-17T23:00:34Z"
+      "live_published_at": "2026-11-17T23:00:34Z",
+      "performance": {
+        "views": 5,
+        "likes": 1,
+        "comments": 0,
+        "averageViewPercentage": 40.45,
+        "estimatedMinutesWatched": 1
+      },
+      "performance_captured_at": "2026-11-19T23:02:34.082659+00:00"
     },
     {
       "fact_number": 260,
@@ -2110,7 +2118,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_261_wind_tunnels/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:843407",
-      "music_track_name": "the end of the innocence"
+      "music_track_name": "the end of the innocence",
+      "live_published_at": "2026-11-19T23:00:11Z"
     },
     {
       "fact_number": 262,
@@ -2127,6 +2136,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1130139",
       "music_track_name": "Decay III"
+    },
+    {
+      "fact_number": 263,
+      "topic": "Brinicles",
+      "state": "playlist_added",
+      "youtube_id": "vstvKdXVcXE",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 263: 5 Facts You Didn't Know About Brinicles",
+      "category": "Amazing Facts",
+      "published_at": "2026-11-19T23:08:35.547002+00:00",
+      "scheduled_publish_at": "2026-11-21T23:00:00Z",
+      "narration_duration_seconds": 109.58,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_263_brinicles/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1170916",
+      "music_track_name": "Never Wanted"
     }
   ],
   "next_fact_number": 191
