@@ -2227,7 +2227,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1568720",
       "music_track_name": "Entering",
-      "live_published_at": "2026-11-23T23:00:34Z"
+      "live_published_at": "2026-11-23T23:00:34Z",
+      "performance": {
+        "views": 114,
+        "likes": 5,
+        "comments": 0,
+        "averageViewPercentage": 63.29,
+        "estimatedMinutesWatched": 66
+      },
+      "performance_captured_at": "2026-11-25T23:02:38.264080+00:00"
     },
     {
       "fact_number": 266,
@@ -2260,7 +2268,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_267_corpse_flower/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:640123",
-      "music_track_name": "Coral Reef"
+      "music_track_name": "Coral Reef",
+      "live_published_at": "2026-11-25T23:00:27Z"
     },
     {
       "fact_number": 268,
@@ -2277,6 +2286,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1195819",
       "music_track_name": "The crossroads of change"
+    },
+    {
+      "fact_number": 269,
+      "topic": "Mirages",
+      "state": "playlist_added",
+      "youtube_id": "5_icPdFhMeA",
+      "playlist_id": "PLOOM2rEPGwC0",
+      "title": "Fact 269: 5 Facts You Didn't Know About Mirages",
+      "category": "Nature Facts",
+      "published_at": "2026-11-25T23:12:59.784838+00:00",
+      "scheduled_publish_at": "2026-11-27T23:00:00Z",
+      "narration_duration_seconds": 118.53,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_269_mirages/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:1576193",
+      "music_track_name": "Slow"
     }
   ],
   "next_fact_number": 191
