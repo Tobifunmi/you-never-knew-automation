@@ -2252,7 +2252,15 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1195819",
       "music_track_name": "The crossroads of change",
-      "live_published_at": "2026-11-24T23:00:30Z"
+      "live_published_at": "2026-11-24T23:00:30Z",
+      "performance": {
+        "views": 964,
+        "likes": 43,
+        "comments": 1,
+        "averageViewPercentage": 90.85,
+        "estimatedMinutesWatched": 1037
+      },
+      "performance_captured_at": "2026-11-26T23:02:25.282510+00:00"
     },
     {
       "fact_number": 267,
@@ -2285,7 +2293,8 @@
       "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_268_hydroelectric_dams/narration.wav",
       "related_video_id": null,
       "music_track_id": "jamendo:1195819",
-      "music_track_name": "The crossroads of change"
+      "music_track_name": "The crossroads of change",
+      "live_published_at": "2026-11-26T23:00:29Z"
     },
     {
       "fact_number": 269,
@@ -2302,6 +2311,22 @@
       "related_video_id": null,
       "music_track_id": "jamendo:1576193",
       "music_track_name": "Slow"
+    },
+    {
+      "fact_number": 270,
+      "topic": "Cenotes",
+      "state": "playlist_added",
+      "youtube_id": "nefg4lbpMxg",
+      "playlist_id": "PLUA2Lnfg4FRI",
+      "title": "Fact 270: 5 Facts You Didn't Know About Cenotes",
+      "category": "Amazing Facts",
+      "published_at": "2026-11-26T23:16:25.435383+00:00",
+      "scheduled_publish_at": "2026-11-28T23:00:00Z",
+      "narration_duration_seconds": 106.58,
+      "narration_path": "/home/runner/work/you-never-knew-automation/you-never-knew-automation/work/Fact_270_cenotes/narration.wav",
+      "related_video_id": null,
+      "music_track_id": "jamendo:169206",
+      "music_track_name": "Requiem"
     }
   ],
   "next_fact_number": 191
